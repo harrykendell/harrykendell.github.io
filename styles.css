@@ -254,10 +254,6 @@ main {
     border-radius: var(--radius-md);
   }
 
-  .page-title {
-    font-size: 1.4rem;
-  }
-
   .section-content {
     padding: 18px 14px;
   }
@@ -287,7 +283,7 @@ header.page-header {
 
 .page-title {
   margin: 0;
-  font-size: 1.7rem;
+  font-size: 2.5rem;
   letter-spacing: .01em;
   color: var(--bristol-green);
 }
