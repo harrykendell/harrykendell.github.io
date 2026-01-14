@@ -17,17 +17,24 @@ function setupMobileMenu() {
   if (!menuToggle || !sidebar) return;
 
   menuToggle.addEventListener("click", () => {
+    const isOpening = !menuToggle.classList.contains("active");
     menuToggle.classList.toggle("active");
     sidebar.classList.toggle("active");
-  });
 
-  // Close menu when a link is clicked
-  const sidebarLinks = sidebar.querySelectorAll("a");
-  sidebarLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      menuToggle.classList.remove("active");
-      sidebar.classList.remove("active");
-    });
+    // Prevent body scroll when mobile menu is open
+    if (isOpening) {
+      // Store scroll position before fixing body
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      document.body.classList.add("mobile-menu-open");
+      expandAllSections();
+    } else {
+      document.body.classList.remove("mobile-menu-open");
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.top = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
+    }
   });
 
   // Close menu when clicking outside
@@ -35,7 +42,49 @@ function setupMobileMenu() {
     if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
       menuToggle.classList.remove("active");
       sidebar.classList.remove("active");
+      document.body.classList.remove("mobile-menu-open");
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.top = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
     }
+  });
+}
+
+// Expand all sections (for mobile menu)
+function expandAllSections() {
+  const sections = document.querySelectorAll(".section");
+  sections.forEach((section) => {
+    section.classList.remove("collapsed");
+  });
+
+  const subLists = document.querySelectorAll(".sidebar .sub-list");
+  subLists.forEach((subList) => {
+    subList.classList.remove("collapsed");
+  });
+
+  const sidebarLinks = document.querySelectorAll(".sidebar a[data-section]");
+  sidebarLinks.forEach((link) => {
+    link.classList.remove("collapsed");
+  });
+}
+
+// Close mobile menu when sidebar link is clicked
+function closeMobileMenuOnLinkClick() {
+  const menuToggle = document.getElementById("menuToggle");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarLinks = sidebar.querySelectorAll("a");
+
+  sidebarLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      menuToggle.classList.remove("active");
+      sidebar.classList.remove("active");
+      document.body.classList.remove("mobile-menu-open");
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.top = "";
+      window.scrollTo(0, parseInt(scrollY || "0") * -1);
+    });
   });
 }
 
@@ -65,6 +114,7 @@ async function loadSections() {
   setupSectionToggle();
   generateSidebar();
   setupSidebarLinks();
+  closeMobileMenuOnLinkClick();
   setupActiveTracking();
 
   // Restore scroll position after sections are loaded

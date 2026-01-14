@@ -235,6 +235,13 @@ main {
   width: 860px;
 }
 
+  body.mobile-menu-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+  }
+
   .layout {
     flex-direction: column;
     padding: 16px 10px 28px;
@@ -262,6 +269,12 @@ main {
 
   .sidebar.active {
     transform: translateX(0);
+  }
+
+  /* Always show all subsections expanded in mobile */
+  .sidebar .sub-list {
+    max-height: none !important;
+    opacity: 1 !important;
   }
 }
 
