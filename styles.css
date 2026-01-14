@@ -477,6 +477,7 @@ tbody tr:nth-child(even) {
 .subtle {
   color: var(--text-soft);
   font-size: 0.88rem;
+  text-align: center;
 }
 
 code {
