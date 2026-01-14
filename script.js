@@ -9,6 +9,37 @@ const sectionFiles = [
   "test",
 ];
 
+// Mobile menu toggle
+function setupMobileMenu() {
+  const menuToggle = document.getElementById("menuToggle");
+  const sidebar = document.getElementById("sidebar");
+  const layout = document.getElementById("layout");
+
+  if (!menuToggle || !sidebar) return;
+
+  menuToggle.addEventListener("click", () => {
+    menuToggle.classList.toggle("active");
+    sidebar.classList.toggle("active");
+  });
+
+  // Close menu when a link is clicked
+  const sidebarLinks = sidebar.querySelectorAll("a");
+  sidebarLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      menuToggle.classList.remove("active");
+      sidebar.classList.remove("active");
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      menuToggle.classList.remove("active");
+      sidebar.classList.remove("active");
+    }
+  });
+}
+
 async function loadSections() {
   const container = document.getElementById("sections-container");
 
@@ -159,7 +190,10 @@ function setupSidebarLinks() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", loadSections);
+document.addEventListener("DOMContentLoaded", () => {
+  setupMobileMenu();
+  loadSections();
+});
 
 // Save scroll position before unload
 window.addEventListener("beforeunload", () => {
