@@ -1,0 +1,158 @@
+<!-- Test Section -->
+<section id="test" class="section">
+  <div class="section-header">
+    <span class="section-toggle">▼</span>
+    <h2>Style Test</h2>
+  </div>
+  <div class="section-content">
+    <p>
+      This section demonstrates all available styles and components. It includes examples of typography,
+      callouts, figures, tables, and other elements.
+    </p>
+
+    <p>Two levels of headings are available within sections:</p>
+    <h3>H3: Major Subsection</h3>
+    <p>This is the largest heading within a section, used for major topics.</p>
+    
+    <h4>H4: Minor Subsection</h4>
+    <p>This is a smaller heading for sub-topics within major sections.</p>
+
+    <h3 id="test-callouts">Callouts</h3>
+    
+    <div class="callout callout--ok">
+      <div class="callout-icon">✔️</div>
+      <div class="callout-body">
+        <div class="callout-title">Success / OK Callout</div>
+        <p>Use this for positive information, best practices, or recommendations.</p>
+      </div>
+    </div>
+
+    <div class="callout callout--warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Warning Callout</div>
+        <p>Use this for important warnings or things to be careful about.</p>
+      </div>
+    </div>
+
+    <div class="callout callout--danger">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <div class="callout-title">Danger Callout</div>
+        <p>Use this for critical warnings or things that must be avoided.</p>
+      </div>
+    </div>
+
+    <h3 id="test-text">Text Styles</h3>
+    <p>
+      Regular paragraph text with <strong>bold text</strong> and <em>italic text</em>.
+      You can also include <a href="#test">links to other sections</a> and
+      <code>inline code snippets</code>.
+    </p>
+
+    <h4>Lists</h4>
+    <p>Unordered list:</p>
+    <ul>
+      <li>First item</li>
+      <li>Second item with a longer description that wraps to multiple lines</li>
+      <li>
+        Third item with nested list:
+        <ul>
+          <li>Nested item one</li>
+          <li>Nested item two</li>
+        </ul>
+      </li>
+    </ul>
+
+    <p>Ordered list:</p>
+    <ol>
+      <li>First step</li>
+      <li>Second step</li>
+      <li>Third step</li>
+    </ol>
+
+    <h3 id="test-figures">Figures</h3>
+    
+    <h4>Standard Figure (wide)</h4>
+    <figure class="figure figure--wide">
+      <img src="imgs/gate.jpg" alt="Example image" />
+      <div class="figure-body">
+        <p class="figure-title">Figure Title</p>
+        <p class="figure-caption">
+          This is a caption explaining the figure. Standard wide figures take up the full content width.
+        </p>
+      </div>
+    </figure>
+
+    <h4>Float Right Figure</h4>
+    <figure class="figure figure--float-right">
+      <img src="imgs/coxbox_plug.jpg" alt="Example image" />
+      <div class="figure-body">
+        <p class="figure-title">Floated Figure</p>
+        <p class="figure-caption">
+          This figure floats to the right at 50% width with text wrapping around it.
+        </p>
+      </div>
+    </figure>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. The figure to the right demonstrates
+      how images can be floated to allow text to wrap around them. This is useful for inline
+      reference images that don't need the full width.
+    </p>
+    <p>
+      More text continues to wrap around the floated figure. This creates a nice layout for
+      documentation where images complement the text without interrupting the flow too much.
+    </p>
+    <p style="clear: both;">This paragraph clears the float.</p>
+
+    <h4>Figure Grid</h4>
+    <div class="figure-grid">
+      <figure class="figure-grid-item">
+        <img src="imgs/hull_damage_example.jpg" alt="Grid item 1" />
+        <div class="figure-body">
+          <p class="figure-caption">First grid item with caption</p>
+        </div>
+      </figure>
+      <figure class="figure-grid-item">
+        <img src="imgs/hull_repair_scarf.jpg" alt="Grid item 2" />
+        <div class="figure-body">
+          <p class="figure-caption">Second grid item with caption</p>
+        </div>
+      </figure>
+    </div>
+
+    <h3 id="test-tables">Tables</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Header 1</th>
+          <th>Header 2</th>
+          <th>Header 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Row 1, Cell 1</td>
+          <td>Row 1, Cell 2</td>
+          <td>Row 1, Cell 3</td>
+        </tr>
+        <tr>
+          <td>Row 2, Cell 1</td>
+          <td>Row 2, Cell 2</td>
+          <td>Row 2, Cell 3</td>
+        </tr>
+        <tr>
+          <td>Row 3, Cell 1</td>
+          <td>Row 3, Cell 2</td>
+          <td>Row 3, Cell 3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 id="test-subtle">Subtle Text</h3>
+    <p class="subtle">
+      This is subtle text, used for secondary information or notes that are less important
+      than the main content.
+    </p>
+  </div>
+</section>
