@@ -6,7 +6,6 @@ const sectionFiles = [
   "footplates",
   "seats",
   "coxbox-wiring",
-  "test",
 ];
 
 // Mobile menu toggle
@@ -64,11 +63,123 @@ async function loadSections() {
 
   // Setup click handlers after all sections are loaded
   setupSectionToggle();
+  generateSidebar();
   setupSidebarLinks();
   updateSidebarArrows();
+  setupActiveTracking();
 
   // Restore scroll position after sections are loaded
   restoreScrollPosition();
+}
+
+function generateSidebar() {
+  const sections = document.querySelectorAll(".section");
+  const sidebarList = document.querySelector(".sidebar ul");
+
+  // Clear existing sidebar content
+  sidebarList.innerHTML = "";
+
+  sections.forEach((section) => {
+    const sectionId = section.id;
+    if (!sectionId) return;
+
+    // Get section title from h2
+    const titleElement = section.querySelector("h2");
+    if (!titleElement) return;
+    const sectionTitle = titleElement.textContent;
+
+    // Create main list item
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = `#${sectionId}`;
+    a.setAttribute("data-section", sectionId);
+
+    // Add arrow for all sections
+    const arrow = document.createElement("span");
+    arrow.className = "nav-arrow";
+    arrow.textContent = "▼";
+    a.appendChild(arrow);
+
+    a.appendChild(document.createTextNode(sectionTitle));
+    li.appendChild(a);
+
+    // Create sub-list for h3 headings if any exist
+    const headings = section.querySelectorAll("h3[id]");
+    if (headings.length > 0) {
+      const subList = document.createElement("ul");
+      subList.className = "sub-list";
+      subList.setAttribute("data-parent-section", sectionId);
+
+      headings.forEach((heading) => {
+        const headingId = heading.id;
+        const headingText = heading.textContent;
+
+        const subLi = document.createElement("li");
+        subLi.className = "sub";
+        const subA = document.createElement("a");
+        subA.href = `#${headingId}`;
+        subA.textContent = headingText;
+        subA.setAttribute("data-parent", sectionId);
+        subLi.appendChild(subA);
+        subList.appendChild(subLi);
+      });
+
+      li.appendChild(subList);
+    }
+
+    sidebarList.appendChild(li);
+  });
+}
+
+function generateTableOfContents() {
+  // This function is no longer needed - generateSidebar() handles everything
+}
+
+function setupActiveTracking() {
+  const sidebarLinks = document.querySelectorAll(".sidebar a[href^='#']");
+  const headings = document.querySelectorAll(".section[id], .section h3[id]");
+  const ACTIVATION_OFFSET = 120;
+
+  function updateActiveLink() {
+    const targetLine = window.scrollY + ACTIVATION_OFFSET;
+    let activeElement = null;
+    let nearestTop = -Infinity;
+
+    headings.forEach((heading) => {
+      const rect = heading.getBoundingClientRect();
+      const absoluteTop = window.scrollY + rect.top;
+
+      if (absoluteTop <= targetLine && absoluteTop > nearestTop) {
+        activeElement = heading;
+        nearestTop = absoluteTop;
+      }
+    });
+
+    if (!activeElement && headings.length) {
+      activeElement = headings[0];
+    }
+
+    sidebarLinks.forEach((link) => link.classList.remove("active"));
+
+    if (activeElement) {
+      let activeLink;
+      if (activeElement.tagName === "H3") {
+        activeLink = document.querySelector(
+          `.sidebar a[href="#${activeElement.id}"]`
+        );
+      } else {
+        activeLink = document.querySelector(
+          `.sidebar a[data-section="${activeElement.id}"]`
+        );
+      }
+      if (activeLink) {
+        activeLink.classList.add("active");
+      }
+    }
+  }
+
+  window.addEventListener("scroll", updateActiveLink, { passive: true });
+  updateActiveLink();
 }
 
 function setInitialSectionState(section) {
@@ -203,7 +314,10 @@ window.addEventListener("beforeunload", () => {
 // Restore scroll position
 function restoreScrollPosition() {
   const scrollPosition = sessionStorage.getItem("scrollPosition");
+
+  document.documentElement.style.scrollBehavior = "auto";
   if (scrollPosition !== null) {
     window.scrollTo(0, parseInt(scrollPosition));
   }
+    document.documentElement.style.scrollBehavior = "";
 }

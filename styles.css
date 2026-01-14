@@ -27,6 +27,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -48,7 +52,7 @@ body {
 .layout {
   display: flex;
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 24px 16px 40px;
   gap: 24px;
@@ -114,7 +118,8 @@ body {
   position: sticky;
   top: 16px;
   align-self: flex-start;
-  flex: 0 0 240px;
+  flex: 0 0 min(240px, 20vw);
+  min-width: 200px;
   background: var(--bg-elevated);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-subtle);
@@ -156,6 +161,12 @@ body {
   transform: translateX(2px);
 }
 
+.sidebar a.active {
+  background: var(--info-soft);
+  color: var(--info-strong);
+  font-weight: 600;
+}
+
 .nav-arrow {
   display: inline-block;
   font-size: 10px;
@@ -192,8 +203,7 @@ body {
 
 /* Main content */
 main {
-  flex: 1 1 auto;
-  max-width: 780px;
+  min-width: 0px;
   margin: 0 auto;
 }
 
@@ -232,48 +242,15 @@ main {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 70px 18px 18px;
+    flex: none;
   }
 
   .sidebar.active {
     transform: translateX(0);
   }
-
-  .page {
-    padding: 22px 18px 22px;
-  }
 }
 
-@media (max-width: 480px) {
-  .layout {
-    padding: 16px 8px 28px;
-    padding-top: 70px;
-  }
 
-  .page {
-    padding: 16px 12px 16px;
-    border-radius: var(--radius-md);
-  }
-
-  .section-content {
-    padding: 18px 14px;
-  }
-
-  .figure--float-right {
-    float: none;
-    max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 16px;
-  }
-
-  table {
-    font-size: 0.8rem;
-  }
-
-  th, td {
-    padding: 4px 6px;
-  }
-}
 
 header.page-header {
   border-bottom: 1px solid var(--border-subtle);
@@ -295,10 +272,12 @@ header.page-header {
 }
 
 .section {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
+  max-width: 100%;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 .section-header {
@@ -504,6 +483,7 @@ hr {
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--border-subtle);
+  max-width: 100%;
   box-shadow: var(--shadow-soft);
   background: #fff;
 }
@@ -563,4 +543,20 @@ hr {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 16px;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
 }
