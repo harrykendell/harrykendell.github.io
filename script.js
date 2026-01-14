@@ -6,6 +6,7 @@ const sectionFiles = [
     "footplates",
     "seats",
     "coxbox-wiring",
+    "maintenance-requests",
 ];
 
 async function loadSections() {
