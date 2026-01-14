@@ -65,7 +65,6 @@ async function loadSections() {
   setupSectionToggle();
   generateSidebar();
   setupSidebarLinks();
-  updateSidebarArrows();
   setupActiveTracking();
 
   // Restore scroll position after sections are loaded
@@ -76,16 +75,31 @@ function generateSidebar() {
   const sections = document.querySelectorAll(".section");
   const sidebarList = document.querySelector(".sidebar ul");
 
+  // Debugging helpers to trace sidebar generation
+  console.groupCollapsed("Sidebar: generate");
+  console.debug("Sidebar: sections found", sections.length);
+  if (!sidebarList) {
+    console.error("Sidebar: sidebar list element not found");
+    console.groupEnd();
+    return;
+  }
+
   // Clear existing sidebar content
   sidebarList.innerHTML = "";
 
   sections.forEach((section) => {
     const sectionId = section.id;
-    if (!sectionId) return;
+    if (!sectionId) {
+      console.warn("Sidebar: section missing id", section);
+      return;
+    }
 
     // Get section title from h2
     const titleElement = section.querySelector("h2");
-    if (!titleElement) return;
+    if (!titleElement) {
+      console.warn("Sidebar: section missing h2", sectionId);
+      return;
+    }
     const sectionTitle = titleElement.textContent;
 
     // Create main list item
@@ -129,10 +143,9 @@ function generateSidebar() {
 
     sidebarList.appendChild(li);
   });
-}
 
-function generateTableOfContents() {
-  // This function is no longer needed - generateSidebar() handles everything
+  console.debug("Sidebar: items rendered", sidebarList.children.length);
+  console.groupEnd();
 }
 
 function setupActiveTracking() {
@@ -248,15 +261,6 @@ function updateSidebarArrow(sectionId, isCollapsed) {
   }
 }
 
-function updateSidebarArrows() {
-  const sections = document.querySelectorAll(".section");
-  sections.forEach((section) => {
-    const sectionId = section.id;
-    const isCollapsed = section.classList.contains("collapsed");
-    updateSidebarArrow(sectionId, isCollapsed);
-  });
-}
-
 function setupSidebarLinks() {
   const sidebarLinks = document.querySelectorAll(".sidebar a");
 
@@ -299,6 +303,13 @@ function setupSidebarLinks() {
       }
     });
   });
+
+  const sections = document.querySelectorAll(".section");
+  sections.forEach((section) => {
+    const sectionId = section.id;
+    const isCollapsed = section.classList.contains("collapsed");
+    updateSidebarArrow(sectionId, isCollapsed);
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -319,5 +330,5 @@ function restoreScrollPosition() {
   if (scrollPosition !== null) {
     window.scrollTo(0, parseInt(scrollPosition));
   }
-    document.documentElement.style.scrollBehavior = "";
+  document.documentElement.style.scrollBehavior = "";
 }
