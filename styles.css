@@ -111,7 +111,7 @@ body {
     border-radius: 999px;
     text-decoration: none;
     color: var(--text-muted);
-    transition: background 0.15s, color 0.15s, transform 0.08s;
+    transition: background 0.1s, color 0.1s, transform 0.08s;
     line-height: 1.2;
 }
 
@@ -128,7 +128,7 @@ body {
 .nav-arrow {
     display: inline-block;
     margin-right: 10px;
-    transition: transform 0.2s;
+    transition: transform 0.1s;
     width: 12px;
 }
 
@@ -149,7 +149,7 @@ body {
     padding: 0 0 0 32px;
     max-height: 500px;
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.1s ease, opacity 0.1s ease;
     opacity: 1;
 }
 
@@ -194,15 +194,15 @@ main {
 
     .sidebar {
         position: fixed;
-        top: 52px;
+        top: 16px;
         left: 10px;
         right: 10px;
         width: auto;
-        max-height: calc(100vh - 64px);
+        max-height: calc(100vh - 32px);
         opacity: 0;
         pointer-events: none;
         transform: translateY(-6px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        transition: opacity 0.1s ease, transform 0.1s ease;
     }
 
     .sidebar.is-open {
@@ -218,7 +218,7 @@ main {
         background: var(--bg);
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.1s ease;
         z-index: 10;
     }
 
@@ -232,18 +232,40 @@ main {
         align-items: center;
         justify-content: center;
         position: fixed;
-        top: 12px;
+        top: 16px;
         right: 10px;
         z-index: 30;
-        padding: 8px 12px;
-        border-radius: 999px;
+        padding: 10px 14px;
+        border-radius: var(--radius-lg);
         border: 1px solid var(--border-subtle);
         background: var(--bg-elevated);
         color: var(--text-main);
         box-shadow: var(--shadow-soft);
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1;
         cursor: pointer;
+    }
+
+    .sidebar a {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+    }
+
+    .sidebar .nav-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        margin-right: 6px;
+        border-radius: 999px;
+        flex: 0 0 28px;
+    }
+
+    .sidebar .sub-list {
+        padding-left: 36px;
     }
 }
 
@@ -290,7 +312,7 @@ header.page-header {
     background: var(--bg);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    transition: background 0.1s;
     border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -305,7 +327,7 @@ header.page-header {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    transition: transform 0.2s;
+    transition: transform 0.1s;
     font-size: 14px;
 }
 
@@ -323,7 +345,7 @@ header.page-header {
     padding: 28px 26px;
     background: var(--bg-elevated);
     max-height: 10000px;
-    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.1s ease, padding 0.1s ease, opacity 0.1s ease;
     opacity: 1;
 }
 
@@ -358,6 +380,7 @@ header.page-header {
 p {
     margin: 0 0 10px;
     color: var(--text-main);
+    text-align: justify;
 }
 
 strong {
