@@ -7,6 +7,7 @@ const sectionFiles = [
   "seats",
   "coxbox-wiring",
   "maintenance-requests",
+  "test",
 ];
 
 async function loadSections() {
