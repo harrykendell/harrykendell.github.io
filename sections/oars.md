@@ -8,8 +8,7 @@ The main maintenance tasks are replacing handles (including dealing with end cap
 
 Replacing handles is relatively easy for modern C2 ones, although we have some older handles that are directly epoxied on. Suede grips are epoxied on; the suede should be removed, not the entire handle.
 
-> [!NOTE]
-> **Handle types**
+> [!NOTE] Handle Types
 >
 > There are two incompatible types of handle. Old Ultralights use the [larger handle][c2-large], while new oars or Skinnies / sculls need the [standard handle][c2-standard].
 

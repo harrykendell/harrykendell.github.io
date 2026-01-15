@@ -8,16 +8,12 @@ We typically use a wide variety of hardware, most of which we can buy from a gen
 [Oarsport]: https://oarsport.co.uk/
 [Eurow]: https://www.eurow.eu/en/parts-rowing-boats.html
 
-> [!TIP]
-> Use marine-appropriate stainless
-> 
+> [!TIP] Use Marine-Appropriate Stainless
 > Hardware should be at least A2 stainless. A4 is best for marine environments, but A2 can work.
 
 Washers should always be used on bolts to help spread the load and protect the boat. Washers should sit closest to the boat. We then use a split washer to lock against vibration. The only time a washer is not needed is when there is an in-built washer or a flanged bolt. When tightening bolts onto split washers don't crush the split washer or it loses its locking ability.
 
-> [!WARNING]
-> **Split washers will damage the hull**
-> 
+> [!WARNING] Split Washers Will Damage The Hull
 > Never put a split washer directly on a boat. Always use a flat washer for it to dig into: `Bolt → Flat → Surface → Flat → Split → Nut`.
 
 ## Parts list
