@@ -6,7 +6,6 @@ const sectionFiles = [
     "footplates",
     "seats",
     "coxbox-wiring",
-    "maintenance-requests",
     // "test",
 ];
 
@@ -44,6 +43,7 @@ async function loadSections() {
 function setupTocToggle() {
     const toggleButton = document.getElementById("toc-toggle");
     const sidebar = document.getElementById("sidebar");
+    const mainContent = document.querySelector("main");
 
     if (!toggleButton || !sidebar) {
         return;
@@ -54,6 +54,10 @@ function setupTocToggle() {
     const setExpanded = (expanded) => {
         toggleButton.setAttribute("aria-expanded", expanded ? "true" : "false");
         sidebar.classList.toggle("is-open", expanded);
+        if (mainContent) {
+            const shouldDim = expanded && isMobile();
+            mainContent.classList.toggle("toc-dim", shouldDim);
+        }
     };
 
     window.setTocOpen = setExpanded;

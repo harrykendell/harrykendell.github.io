@@ -46,7 +46,6 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    min-height: 100vh;
     position: relative;
 }
 
@@ -166,6 +165,11 @@ main {
     width: 100%;
     max-width: 820px;
     margin: 0;
+    transition: opacity 0.3s ease;
+}
+
+main.toc-dim {
+    opacity: 0.2;
 }
 
 .page {
