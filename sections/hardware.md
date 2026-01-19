@@ -15,7 +15,7 @@ Washers should always be used on bolts to help spread the load and protect the b
 
 > [!WARNING] Split Washers Will Damage The Hull
 > Never put a split washer directly on a boat. Always use a flat washer for it to dig into:  
->`Bolt → Flat → Surface → Flat → Split → Nut`
+> `Bolt → Flat → Surface → Flat → Split → Nut`
 
 ## Parts list
 
@@ -31,6 +31,7 @@ Example supplier reference: [Westfield Fasteners example order (PDF)][fasteners-
 | Other |  |  |  | Wing nut (feet), 60mm coach bolts (3 stays) |  |  |
 
 **Other commonly used items:**
+
 - Cable clamps / blocks
 - String for hatch covers
 - Hose clamps

@@ -9,6 +9,14 @@ const sectionFiles = [
     // "test",
 ];
 
+const DEFAULT_TOC_DEPTH = 4;
+let tocDepth = DEFAULT_TOC_DEPTH;
+let sidebarLinksCache = [];
+
+function getEffectiveTocLevel() {
+    return Math.min(6, tocDepth + 1);
+}
+
 async function loadSections() {
     const container = document.getElementById("sections-container");
 
@@ -31,13 +39,56 @@ async function loadSections() {
 
     // Setup click handlers after all sections are loaded
     setupSectionToggle();
+    initTocDepth();
     generateSidebar();
     setupSidebarLinks();
+    setupTocDepthControl();
     setupTocToggle();
     setupActiveTracking();
 
     // Restore scroll position after sections are loaded
     restoreScrollPosition();
+}
+
+function initTocDepth() {
+    const stored = parseInt(localStorage.getItem("toc-depth"), 10);
+    if (!Number.isNaN(stored) && stored >= 1 && stored <= 6) {
+        tocDepth = stored;
+    } else {
+        tocDepth = DEFAULT_TOC_DEPTH;
+    }
+}
+
+function setTocDepth(depth) {
+    tocDepth = depth;
+    localStorage.setItem("toc-depth", String(depth));
+}
+
+function refreshSidebarLinksCache() {
+    sidebarLinksCache = Array.from(
+        document.querySelectorAll(".sidebar a[href^='#']")
+    );
+}
+
+function setupTocDepthControl() {
+    const control = document.getElementById("toc-depth");
+    if (!control) {
+        return;
+    }
+
+    control.value = String(tocDepth);
+
+    control.addEventListener("change", () => {
+        const nextDepth = parseInt(control.value, 10);
+        if (!Number.isNaN(nextDepth) && nextDepth >= 1 && nextDepth <= 6) {
+            setTocDepth(nextDepth);
+            generateSidebar();
+            setupSidebarLinks();
+            if (typeof window.updateActiveLink === "function") {
+                window.updateActiveLink();
+            }
+        }
+    });
 }
 
 function setupTocToggle() {
@@ -137,31 +188,50 @@ function generateSidebar() {
 
         // Create main list item
         const li = document.createElement("li");
+        const navRow = document.createElement("div");
+        navRow.className = "nav-row";
+
+        const arrow = document.createElement("button");
+        arrow.className = "nav-arrow";
+        arrow.type = "button";
+        arrow.setAttribute("data-section", sectionId);
+        arrow.setAttribute("aria-label", "Toggle section");
+
         const a = document.createElement("a");
         a.href = `#${sectionId}`;
         a.setAttribute("data-section", sectionId);
 
-        // Create sub-list for h3 headings if any exist
-        const headings = section.querySelectorAll("h3[id]");
-        if (headings.length > 0) {
-            const arrow = document.createElement("span");
-            arrow.className = "nav-arrow";
-            arrow.textContent = "▼";
-            a.appendChild(arrow);
+        // Create sub-list for content headings if any exist
+        const headings = section.querySelectorAll(
+            ".section-content h2[id], .section-content h3[id], .section-content h4[id], .section-content h5[id], .section-content h6[id]"
+        );
+        const effectiveDepth = getEffectiveTocLevel();
+        const visibleHeadings = Array.from(headings).filter((heading) => {
+            const level = parseInt(heading.tagName.slice(1), 10);
+            return !Number.isNaN(level) && level <= effectiveDepth;
+        });
 
+        if (visibleHeadings.length > 0) {
+            arrow.textContent = "▼";
+            navRow.appendChild(arrow);
             a.appendChild(document.createTextNode(sectionTitle));
-            li.appendChild(a);
+            navRow.appendChild(a);
+            li.appendChild(navRow);
 
             const subList = document.createElement("ul");
             subList.className = "sub-list";
             subList.setAttribute("data-parent-section", sectionId);
 
-            headings.forEach((heading) => {
+            visibleHeadings.forEach((heading) => {
                 const headingId = heading.id;
                 const headingText = heading.textContent;
+                const level = parseInt(heading.tagName.slice(1), 10);
 
                 const subLi = document.createElement("li");
                 subLi.className = "sub";
+                if (!Number.isNaN(level)) {
+                    subLi.classList.add(`toc-level-${level}`);
+                }
                 const subA = document.createElement("a");
                 subA.href = `#${headingId}`;
                 subA.textContent = headingText;
@@ -172,25 +242,30 @@ function generateSidebar() {
 
             li.appendChild(subList);
         } else {
-            const arrow = document.createElement("span");
-            arrow.className = "nav-arrow";
-            arrow.textContent = " ";
-            a.appendChild(arrow);
-
+            arrow.textContent = "⚫︎";
+            arrow.setAttribute("aria-hidden", "true");
+            arrow.disabled = true;
+            navRow.appendChild(arrow);
             a.appendChild(document.createTextNode(sectionTitle));
-            li.appendChild(a);
+            navRow.appendChild(a);
+            li.appendChild(navRow);
         }
 
         sidebarList.appendChild(li);
     });
 
-    console.debug("Sidebar: items rendered", sidebarList.children.length);
+    console.debug(
+        "Sidebar: items rendered",
+        sidebarList.querySelectorAll("li").length
+    );
     console.groupEnd();
+    refreshSidebarLinksCache();
 }
 
 function setupActiveTracking() {
-    const sidebarLinks = document.querySelectorAll(".sidebar a[href^='#']");
-    const headings = document.querySelectorAll(".section[id], .section h3[id]");
+    const headings = document.querySelectorAll(
+        ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]"
+    );
     const ACTIVATION_OFFSET = 120;
 
     function isCollapsedHeading(heading) {
@@ -205,13 +280,24 @@ function setupActiveTracking() {
     }
 
     function updateActiveLink() {
+        const sidebarLinks = sidebarLinksCache;
         const targetLine = window.scrollY + ACTIVATION_OFFSET;
         let activeElement = null;
         let nearestTop = -Infinity;
 
+        const effectiveDepth = getEffectiveTocLevel();
+
         headings.forEach((heading) => {
             if (isCollapsedHeading(heading)) {
                 return;
+            }
+
+            const tagName = heading.tagName || "";
+            if (/^H[2-6]$/.test(tagName)) {
+                const level = parseInt(tagName.slice(1), 10);
+                if (!Number.isNaN(level) && level > effectiveDepth) {
+                    return;
+                }
             }
 
             const rect = heading.getBoundingClientRect();
@@ -226,9 +312,14 @@ function setupActiveTracking() {
         sidebarLinks.forEach((link) => link.classList.remove("active"));
 
         if (activeElement) {
-            console.log("Active heading:", activeElement.id);
             let activeLink;
-            if (activeElement.tagName === "H3") {
+            if (
+                activeElement.tagName === "H2" ||
+                activeElement.tagName === "H3" ||
+                activeElement.tagName === "H4" ||
+                activeElement.tagName === "H5" ||
+                activeElement.tagName === "H6"
+            ) {
                 activeLink = document.querySelector(
                     `.sidebar a[href="#${activeElement.id}"]`
                 );
@@ -239,6 +330,13 @@ function setupActiveTracking() {
             }
             if (activeLink) {
                 activeLink.classList.add("active");
+            }
+        } else {
+            const contentsLink = document.querySelector(
+                '.sidebar a[href="#top"]'
+            );
+            if (contentsLink) {
+                contentsLink.classList.add("active");
             }
         }
     }
@@ -297,17 +395,20 @@ function updateSidebarArrow(sectionId, isCollapsed) {
     const link = document.querySelector(
         `.sidebar a[data-section="${sectionId}"]`
     );
+    const arrow = document.querySelector(
+        `.sidebar .nav-arrow[data-section="${sectionId}"]`
+    );
 
     // Also update the sublist visibility
     const sublist = document.querySelector(
         `.sidebar .sub-list[data-parent-section="${sectionId}"]`
     );
     if (sublist) {
-        if (link) {
+        if (arrow) {
             if (isCollapsed) {
-                link.classList.add("collapsed");
+                arrow.classList.add("is-collapsed");
             } else {
-                link.classList.remove("collapsed");
+                arrow.classList.remove("is-collapsed");
             }
         }
         if (isCollapsed) {
@@ -320,47 +421,41 @@ function updateSidebarArrow(sectionId, isCollapsed) {
 
 function setupSidebarLinks() {
     const sidebarLinks = document.querySelectorAll(".sidebar a");
+    const sidebarArrows = document.querySelectorAll(".sidebar .nav-arrow");
+
+    sidebarArrows.forEach((arrow) => {
+        arrow.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const sectionId = arrow.getAttribute("data-section");
+            const section = document.getElementById(sectionId);
+
+            if (section && section.classList.contains("section")) {
+                const isCurrentlyCollapsed =
+                    section.classList.contains("collapsed");
+
+                if (isCurrentlyCollapsed) {
+                    section.classList.remove("collapsed");
+                    localStorage.setItem(`section-${sectionId}`, "expanded");
+                    updateSidebarArrow(sectionId, false);
+                    if (typeof window.updateActiveLink === "function") {
+                        window.updateActiveLink();
+                    }
+                } else {
+                    section.classList.add("collapsed");
+                    localStorage.setItem(`section-${sectionId}`, "collapsed");
+                    updateSidebarArrow(sectionId, true);
+                    if (typeof window.updateActiveLink === "function") {
+                        window.updateActiveLink();
+                    }
+                }
+            }
+        });
+    });
 
     sidebarLinks.forEach((link) => {
         link.addEventListener("click", (e) => {
-            const arrowClick = e.target.closest(".nav-arrow");
-            if (arrowClick) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const sectionId = link.getAttribute("data-section");
-                const section = document.getElementById(sectionId);
-
-                if (section && section.classList.contains("section")) {
-                    const isCurrentlyCollapsed =
-                        section.classList.contains("collapsed");
-
-                    if (isCurrentlyCollapsed) {
-                        section.classList.remove("collapsed");
-                        localStorage.setItem(
-                            `section-${sectionId}`,
-                            "expanded"
-                        );
-                        updateSidebarArrow(sectionId, false);
-                        if (typeof window.updateActiveLink === "function") {
-                            window.updateActiveLink();
-                        }
-                    } else {
-                        section.classList.add("collapsed");
-                        localStorage.setItem(
-                            `section-${sectionId}`,
-                            "collapsed"
-                        );
-                        updateSidebarArrow(sectionId, true);
-                        if (typeof window.updateActiveLink === "function") {
-                            window.updateActiveLink();
-                        }
-                    }
-                }
-
-                return;
-            }
-
             const href = link.getAttribute("href");
             if (href && href.startsWith("#")) {
                 // Check if this is a subheading

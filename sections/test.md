@@ -2,14 +2,15 @@
 
 This page demonstrates all the styles and formatting available on the site.
 
-## Headings
+## Headings (1)
 
-# Heading 1
-## Heading 2
-### Heading 3
-#### Heading 4
-##### Heading 5
-###### Heading 6
+### Heading 2
+
+#### Heading 3
+
+##### Heading 4
+
+###### Heading 5
 
 ## Text Formatting
 
@@ -28,6 +29,7 @@ And here's a [link with a reference][ref-link].
 ## Lists
 
 ### Unordered List
+
 - First item
 - Second item
   - Nested item 1
@@ -35,6 +37,7 @@ And here's a [link with a reference][ref-link].
 - Third item
 
 ### Ordered List
+
 1. First step
 2. Second step
    1. Sub-step A
@@ -68,6 +71,7 @@ greet('World')
 ## Images
 
 ### Single Image
+
 ![Sample image alt text](../imgs/sample-image.jpg)
 
 ### Figure Grid
@@ -97,6 +101,7 @@ greet('World')
 
 ## Horizontal Rule
 
+This is a standalone rule below text
 ---
 
 ## Callouts
@@ -119,9 +124,11 @@ greet('World')
 ## Special HTML Elements
 
 ### Highlighted Text
+
 <mark>This text is highlighted.</mark>
 
 ### Custom Divs
+
 <div class="subtle">
 This is a custom div with a &ltsubtle> class.
 </div>
@@ -133,13 +140,17 @@ You can mix **different** *formatting* with [links](https://example.com) and `co
 ### Nested Lists with Code
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
+
 2. Run the development server:
+
    ```bash
    npm run dev
    ```
+
 3. Build for production:
    - Run the build command
    - Check the output

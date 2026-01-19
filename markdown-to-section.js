@@ -12,9 +12,7 @@ function slugify(text) {
         .replace(/-+/g, "-");
 }
 
-function preprocessCallouts(markdown) {
-    // Convert GitHub-style callouts into our .callout HTML blocks
-    // Format: > [!TYPE] Title content...
+function transformCallouts(rootEl) {
     const classMap = {
         INFO: "callout callout--info",
         DANGER: "callout callout--danger",
@@ -27,44 +25,36 @@ function preprocessCallouts(markdown) {
         DANGER: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>',
     };
 
-    const lines = markdown.split(/\r?\n/);
-    const result = [];
-    let i = 0;
+    const blockquotes = Array.from(rootEl.querySelectorAll("blockquote"));
+    console.log("Transforming callouts:", blockquotes.length);
+    blockquotes.forEach((blockquote) => {
+        console.log("Processing blockquote:", blockquote.innerHTML);
 
-    while (i < lines.length) {
-        const match = /^>\s*\[!(INFO|WARNING|DANGER)\]\s*(.*)$/.exec(lines[i]);
+        // Ensure all paragraphs are wrapped in <p> tags
+        blockquote.innerHTML = blockquote.innerHTML
+            .trim()
+            .replace(/\n/g, "</p><p>");
+
+        const firstParagraph = blockquote.querySelector("p");
+        if (!firstParagraph) {
+            return;
+        }
+
+        const titleText = (firstParagraph.textContent || "").trim();
+        const match = /^\[!(INFO|WARNING|DANGER)\]\s*(.*)$/.exec(titleText);
+        console.log("Callout match:", match, "from", titleText);
         if (!match) {
-            result.push(lines[i]);
-            i++;
-            continue;
+            return;
         }
 
         const kind = match[1];
         const title = match[2].trim();
-        const bodyLines = [];
-        i++;
 
-        // Collect body lines starting with ">"
-        while (i < lines.length && /^>\s*/.test(lines[i])) {
-            bodyLines.push(lines[i].replace(/^>\s*/, ""));
-            i++;
-        }
-
-        const calloutHtml = [
-            `<div class="${classMap[kind]}">`,
-            title
-                ? `<div class="callout-title">${svgMap[kind]} ${title}</div>`
-                : "",
-            `<div class="callout-body">`,
-            marked.parse(bodyLines.join("\n")),
-            `</div>`,
-            `</div>`,
-        ].join("");
-
-        result.push(calloutHtml);
-    }
-
-    return result.join("\n");
+        blockquote.className =
+            `${blockquote.className} ${classMap[kind]}`.trim();
+        firstParagraph.className = "callout-title";
+        firstParagraph.innerHTML = `${svgMap[kind]} ${title}`.trim();
+    });
 }
 
 function extractTitleAndContentFromMarkdown(md) {
@@ -83,10 +73,14 @@ function extractTitleAndContentFromMarkdown(md) {
     return { title, content };
 }
 
-function retagHeadingsToH3WithIds(rootEl, sectionId) {
-    const headings = rootEl.querySelectorAll("h2, h3");
+function addHeadingIds(rootEl, sectionId) {
+    const headings = rootEl.querySelectorAll("h2, h3, h4, h5, h6");
     const seenIds = new Set();
     headings.forEach((h) => {
+        if (h.id) {
+            seenIds.add(h.id);
+            return;
+        }
         const text = h.textContent || "";
         const baseId = slugify(text);
         const prefix = sectionId ? `${sectionId}-` : "";
@@ -97,10 +91,27 @@ function retagHeadingsToH3WithIds(rootEl, sectionId) {
             counter += 1;
         }
         seenIds.add(id);
-        const newH = document.createElement("h3");
-        newH.id = id;
-        newH.innerHTML = h.innerHTML;
-        h.replaceWith(newH);
+        h.id = id;
+    });
+}
+
+function downgradeHeadings(rootEl) {
+    const headings = rootEl.querySelectorAll("h1, h2, h3, h4, h5");
+    headings.forEach((heading) => {
+        const currentLevel = parseInt(heading.tagName.slice(1), 10);
+        if (Number.isNaN(currentLevel) || currentLevel >= 6) {
+            return;
+        }
+
+        const nextLevel = currentLevel + 1;
+        const newHeading = document.createElement(`h${nextLevel}`);
+
+        Array.from(heading.attributes).forEach((attr) => {
+            newHeading.setAttribute(attr.name, attr.value);
+        });
+
+        newHeading.innerHTML = heading.innerHTML;
+        heading.replaceWith(newHeading);
     });
 }
 
@@ -127,10 +138,7 @@ function wrapTables(rootEl) {
  * @returns {HTMLElement} The section element
  */
 function markdownToSection(markdown, sectionId) {
-    // Preprocess custom callouts
-    let md = preprocessCallouts(markdown);
-
-    const { title, content } = extractTitleAndContentFromMarkdown(md);
+    const { title, content } = extractTitleAndContentFromMarkdown(markdown);
     const html = marked.parse(content);
 
     const sectionEl = document.createElement("section");
@@ -151,14 +159,19 @@ function markdownToSection(markdown, sectionId) {
     contentEl.className = "section-content";
     contentEl.innerHTML = html;
 
+    // Ensure section content doesn't include h1
+    downgradeHeadings(contentEl);
+
+    transformCallouts(contentEl);
+
     // Wrap tables for mobile horizontal scrolling
     wrapTables(contentEl);
 
     sectionEl.appendChild(headerEl);
     sectionEl.appendChild(contentEl);
 
-    // Retag headings to h3 and set ids for sidebar linking
-    retagHeadingsToH3WithIds(contentEl, sectionId);
+    // Set ids for sidebar linking without changing heading levels
+    addHeadingIds(contentEl, sectionId);
 
     return sectionEl;
 }
