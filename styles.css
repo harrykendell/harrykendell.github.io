@@ -7,6 +7,9 @@
     --radius: 10px;
     --shadow-soft: 0 14px 30px rgba(15, 23, 42, 0.06);
 
+    --gap: 24px;
+    --gap-small: 14px;
+
     --text-main: #111827;
     --text-muted: #4b5563;
     --text-soft: #6b7280;
@@ -62,8 +65,8 @@ body {
     width: 100%;
     max-width: 1080px;
     margin: 0 auto;
-    padding: 14px;
-    gap: 14px;
+    padding: var(--gap);
+    gap: var(--gap);
     flex: 1;
     align-items: flex-start;
 }
@@ -71,15 +74,15 @@ body {
 /* Sidebar nav */
 .sidebar {
     position: sticky;
-    top: 16px;
+    top: var(--gap);
     align-self: flex-start;
-    width: min(300px, calc(100vw - 20px));
-    max-height: calc(100dvh - 32px);
+    width: min(300px, calc(100vw - 2 * var(--gap)));
+    max-height: calc(100dvh - 2 * var(--gap));
     background: var(--bg-elevated);
     border-radius: var(--radius);
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-soft);
-    padding: 18px 18px 14px;
+    padding: var(--gap);
     font-size: 0.9rem;
     z-index: 20;
     overflow-y: auto;
@@ -216,15 +219,6 @@ body {
     opacity: 1;
     position: relative;
 }
-/* .sidebar .sub-list::before {
-    content: "";
-    position: absolute;
-    left: 25px;
-    top: 0.5rem;
-    bottom: 0.5rem;
-    width: 1px;
-    background: var(--text-muted);
-} */
 
 .sidebar .sub-list.collapsed {
     max-height: 0;
@@ -249,8 +243,9 @@ main.toc-dim {
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
     border: 1px solid var(--border-subtle);
-    padding: 28px 26px 28px;
+    padding: var(--gap);
 }
+
 .table-scroll {
     width: 100%;
     overflow-x: auto;
@@ -292,8 +287,8 @@ header.page-header {
 #sections-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin: 20px 0 22px;
+    gap: var(--gap);
+    margin: var(--gap) 0;
 }
 
 .section-header {
@@ -334,7 +329,7 @@ header.page-header {
 }
 
 .section-content {
-    padding: 28px 26px;
+    padding: var(--gap);
     background: var(--bg-elevated);
     max-height: 10000px;
     transition:
@@ -410,7 +405,7 @@ li {
 
 /* Callouts */
 blockquote {
-    padding: 12px 14px;
+    padding: var(--gap-small);
     border-left: 4px solid var(--border-subtle);
     font-size: 0.9rem;
     margin: 8px 0 12px;
@@ -543,7 +538,7 @@ code {
 hr {
     border: none;
     border-top: 1px dashed var(--border-subtle);
-    margin: 20px 0 16px;
+    margin: var(--gap) 0;
 }
 
 .themed-iframe {
@@ -666,12 +661,20 @@ hr {
     pointer-events: auto;
 }
 @media (max-width: 860px) {
+    :root {
+        --gap: 14px;
+    }
+    .layout {
+        padding: calc(0.7 * var(--gap));
+    }
+
     .table-scroll table {
         width: 860px;
     }
 
     .sidebar {
         position: fixed;
+        top: calc(0.7 * var(--gap));
         left: calc(-1 * var(--radius));
         right: auto;
         opacity: 0;
