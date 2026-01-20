@@ -28,8 +28,6 @@ function transformCallouts(rootEl) {
     const blockquotes = Array.from(rootEl.querySelectorAll("blockquote"));
     console.log("Transforming callouts:", blockquotes.length);
     blockquotes.forEach((blockquote) => {
-        console.log("Processing blockquote:", blockquote.innerHTML);
-
         // Ensure all paragraphs are wrapped in <p> tags
         blockquote.innerHTML = blockquote.innerHTML
             .trim()
@@ -42,7 +40,6 @@ function transformCallouts(rootEl) {
 
         const titleText = (firstParagraph.textContent || "").trim();
         const match = /^\[!(INFO|WARNING|DANGER)\]\s*(.*)$/.exec(titleText);
-        console.log("Callout match:", match, "from", titleText);
         if (!match) {
             return;
         }
@@ -131,6 +128,104 @@ function wrapTables(rootEl) {
     });
 }
 
+function extractYouTubeId(src) {
+    try {
+        const url = new URL(src);
+        if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
+            return null;
+        }
+        const match = url.pathname.match(/\/embed\/([^/?]+)/);
+        return match ? match[1] : null;
+    } catch (error) {
+        const fallback = /youtube(?:-nocookie)?\.com\/embed\/([^?&]+)/.exec(
+            src
+        );
+        return fallback ? fallback[1] : null;
+    }
+}
+
+function buildYouTubeEmbed(iframe, videoId) {
+    const title = iframe.getAttribute("title") || "YouTube video";
+
+    let dataSrc = iframe.getAttribute("src") || "";
+    try {
+        dataSrc = new URL(dataSrc).searchParams.set("autoplay", "1").toString();
+    } catch (error) {
+        dataSrc += dataSrc.includes("?") ? "&autoplay=1" : "?autoplay=1";
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "youtube-embed";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "youtube-embed__button";
+    button.title = `Play video: ${title}`;
+    button.setAttribute("aria-label", `Play video: ${title}`);
+
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("class", "youtube-embed__icon");
+    icon.setAttribute("viewBox", "0 0 68 48");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
+
+    const iconPath = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+    );
+    iconPath.setAttribute(
+        "d",
+        "M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z"
+    );
+    iconPath.setAttribute("fill", "#ff0000");
+    const iconTriangle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+    );
+    iconTriangle.setAttribute("d", "M45 24 27 14v20z");
+    iconTriangle.setAttribute("fill", "#ffffff");
+    icon.appendChild(iconPath);
+    icon.appendChild(iconTriangle);
+
+    const thumbnail = document.createElement("img");
+    thumbnail.loading = "lazy";
+    thumbnail.decoding = "async";
+    thumbnail.alt = title;
+    thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+
+    button.appendChild(icon);
+    button.appendChild(thumbnail);
+
+    const lazyIframe = document.createElement("iframe");
+    lazyIframe.title = title;
+    lazyIframe.src = "about:blank";
+    lazyIframe.setAttribute("data-src", dataSrc);
+    lazyIframe.setAttribute("frameborder", "0");
+    lazyIframe.setAttribute("allowfullscreen", "");
+    lazyIframe.setAttribute("allow", "autoplay; encrypted-media");
+    lazyIframe.loading = "lazy";
+
+    wrapper.appendChild(button);
+    wrapper.appendChild(lazyIframe);
+
+    return wrapper;
+}
+
+function transformYouTubeEmbeds(rootEl) {
+    const iframes = Array.from(rootEl.querySelectorAll("iframe"));
+    console.log("Transforming YouTube embeds", iframes.length);
+    iframes.forEach((iframe) => {
+        const src = iframe.getAttribute("src") || "";
+        const videoId = extractYouTubeId(src);
+        if (!videoId) {
+            return;
+        }
+
+        const wrapper = buildYouTubeEmbed(iframe, videoId);
+        iframe.replaceWith(wrapper);
+    });
+}
+
 /**
  * Converts Markdown content to a section element.
  * @param {string} markdown - The Markdown content
@@ -163,6 +258,8 @@ function markdownToSection(markdown, sectionId) {
     downgradeHeadings(contentEl);
 
     transformCallouts(contentEl);
+
+    transformYouTubeEmbeds(contentEl);
 
     // Wrap tables for mobile horizontal scrolling
     wrapTables(contentEl);

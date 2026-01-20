@@ -20,9 +20,7 @@ Replacing handles is relatively easy for modern C2 ones, although we have some o
 <div class="video-wrapper">
   <iframe
     src="https://www.youtube.com/embed/BxoXXjtqYGc"
-    title="Suede replacement"
-    frameborder="0"
-    allowfullscreen>
+    title="Suede replacement">
   </iframe>
 </div>
 
@@ -37,9 +35,7 @@ Suede squares need to be fitted so that the seam does not cause blisters, and sh
 <div class="video-wrapper">
   <iframe
     src="https://www.youtube.com/embed/wTvUfytJGFY"
-    title="Green rubber replacement"
-    frameborder="0"
-    allowfullscreen>
+    title="Green rubber replacement">
   </iframe>
 </div>
 Green grips must be unscrewed and fully replaced. If the end cap of the oar comes off with the grip, epoxy it back in place with Araldite, taking care with rotational alignment.
@@ -49,9 +45,7 @@ Green grips must be unscrewed and fully replaced. If the end cap of the oar come
 <div class="video-wrapper">
   <iframe
     src="https://www.youtube.com/embed/OvrIL5SpyT4"
-    title="Fixed handle replacement"
-    frameborder="0"
-    allowfullscreen>
+    title="Fixed handle replacement">
   </iframe>
 </div>
 Fixed-handle blades and inner green grips can be replaced similarly: remove the old grip, clean, and epoxy the new one in place.
@@ -61,9 +55,7 @@ Fixed-handle blades and inner green grips can be replaced similarly: remove the 
 <div class="video-wrapper">
   <iframe
     src="https://www.youtube.com/embed/VKEmhbisczM"
-    title="Sleeves"
-    frameborder="0"
-    allowfullscreen>
+    title="Sleeves">
   </iframe>
 </div>
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
@@ -75,8 +67,6 @@ For delamination or breakage, stabilise with epoxy:
 <div class="video-wrapper">
   <iframe
     src="https://www.youtube.com/embed/Z5Vee-V-pO8"
-    title="Spoon repair"
-    frameborder="0"
-    allowfullscreen>
+    title="Spoon repair">
   </iframe>
 </div>

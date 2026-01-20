@@ -45,6 +45,7 @@ async function loadSections() {
     setupTocDepthControl();
     setupTocToggle();
     setupActiveTracking();
+    initLazyYouTubeEmbeds();
 
     // Restore scroll position after sections are loaded
     restoreScrollPosition();
@@ -154,6 +155,38 @@ function setupTocToggle() {
 document.addEventListener("DOMContentLoaded", () => {
     loadSections();
 });
+
+function initLazyYouTubeEmbeds() {
+    const buttons = document.querySelectorAll(".youtube-embed__button");
+    buttons.forEach((button) => {
+        if (button.dataset.bound === "true") {
+            return;
+        }
+
+        button.dataset.bound = "true";
+        button.addEventListener("click", () => {
+            const wrapper = button.closest(".youtube-embed");
+            if (!wrapper) {
+                return;
+            }
+
+            const iframe = wrapper.querySelector("iframe");
+            if (!iframe) {
+                return;
+            }
+
+            const src = iframe.getAttribute("data-src");
+            if (!src) {
+                return;
+            }
+
+            iframe.setAttribute("src", src);
+            wrapper.classList.add("is-playing");
+            button.setAttribute("aria-hidden", "true");
+            button.disabled = true;
+        });
+    });
+}
 
 function generateSidebar() {
     const sections = document.querySelectorAll(".section");
