@@ -71,10 +71,10 @@ The Amphenol 44 series is designed for 14-18 AWG conductors. Suitable cable type
 <figure class="figure figure--float-right">
   <img src="imgs/coxbox_plug.jpg" alt="Close-up of a coxbox plug showing pin layout" />
   <div class="figure-body">
-    <p class="figure-title">Reference photo of a coxbox plug</p>
-    <p class="figure-caption">
+    <p class="figure-title">Pin allocation of a coxbox plug</p>
+    <!-- <p class="figure-caption">
       Match the pin numbering and keyway orientation shown here when assembling new harnesses or replacing plugs.
-    </p>
+    </p> -->
   </div>
 </figure>
 
@@ -86,18 +86,19 @@ Refer to this document for detailed troubleshooting:
 
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
-**Procedure: Quick electrical diagnosis (multimeter)**
-
-- **Skill level:** Intermediate
-- **When to do it:** when rate/speakers/charging do not work
-- **Tools & materials:** multimeter, contact cleaner
-- **Safety:** do not test wet connectors
-- **Steps:**
-  1. Dry connector; inspect for corrosion.
-  2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
-  3. **Speakers:** C–B should read as a load/short when speakers are wired.
-  4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
-- **Checks:** values consistent; if not, locate break by testing each segment
+> [!PROCEDURE]
+> **Title:** Quick electrical diagnosis (multimeter)
+> **Skill level:** Intermediate
+> **Warnings:** Do not test wet connectors
+> **Required tools/materials:** Multimeter, contact cleaner
+> **Description:** Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
+> **Steps:**
+>
+> 1. Dry connector; inspect for corrosion.
+> 2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
+> 3. **Speakers:** C–B should read as a load/short when speakers are wired.
+> 4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
+> **Notes:** Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
 
 ## Parts and sourcing
 
@@ -149,20 +150,21 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 
 ## Harness build/repair procedure
 
-**Procedure: Build or repair a harness segment**
-
-- **Skill level:** Professional
-- **When to do it:** broken connectors, water ingress, intermittent wiring
-- **Tools & materials:** correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
-- **Safety:** ensure correct keying and pinout; poor strain relief causes repeat failures
-- **Steps:**
-  1. Cut back to clean, undamaged cable.
-  2. Strip jacket and conductors to specified length.
-  3. Crimp contacts (pull test each).
-  4. Insert into housing following pinout and keyway orientation.
-  5. Add adhesive-lined heatshrink for strain relief and sealing.
-  6. Continuity test end-to-end; then functional test with coxbox/speakers.
-- **Checks:** correct pinout; no shorts between pins; mechanical strain relief effective
+> [!PROCEDURE]
+> **Title:** Build or repair a harness segment
+> **Skill level:** Advanced
+> **Warnings:** Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins = stop-use
+> **Required tools/materials:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
+> **Description:** Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress.
+> **Steps:**
+>
+> 1. Cut back to clean, undamaged cable.
+> 2. Strip jacket and conductors to specified length.
+> 3. Crimp contacts (pull test each).
+> 4. Insert into housing following pinout and keyway orientation.
+> 5. Add adhesive-lined heatshrink for strain relief and sealing.
+> 6. Continuity test end-to-end; then functional test with coxbox/speakers.
+> **Notes:** Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
 
 > [!WARNING] Stop-use criteria (electronics)
 >

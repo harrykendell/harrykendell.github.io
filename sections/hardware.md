@@ -86,38 +86,37 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 
 ## Hardware audit and reassembly
 
-**Procedure: Hardware audit (riggers + critical fittings)**
+> [!PROCEDURE]
+> **Title:** Hardware audit (riggers + critical fittings)
+> **Skill level:** Intermediate
+> **Warnings:** Spinning insert/stripped thread = stop and escalate. Avoid over-tightening and crushing hull
+> **Required tools/materials:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
+> **Description:** Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage.
+> **Steps:**
+>
+> 1. Pick a boat and work systematically: bow to stern.
+> 2. For each critical fastener (rigger bolts, pins, stretcher mounts):
+>    - Check tightness.
+>    - Check correct washer stack.
+>    - Replace any corroded or stripped nuts (nyloc that spins freely is done).
+> 3. If disassembling: bag and label washers/spacers per location.
+> 4. Reassemble using the standard washer rule.
+> **Notes:** No missing washers; no loose fittings; riggers not rocking. Watch for mixed washer stacks and crushing split washers. Do monthly and after transport.
 
-- **Skill level:** Intermediate
-- **When to do it:** Monthly, and after transport
-- **Tools & materials:** spanners/Allen keys, spare washers/nuts, marker, bags for hardware
-- **Safety:** avoid over-tightening and crushing hull
-- **Steps:**
-  1. Pick a boat and work systematically: bow to stern.
-  2. For each critical fastener (rigger bolts, pins, stretcher mounts):
-     - check tightness;
-     - check correct washer stack;
-     - replace any corroded or stripped nuts (nyloc that spins freely is done).
-  3. If disassembling: bag and label washers/spacers per location.
-  4. Reassemble using the standard washer rule.
-- **Checks:** no missing washers; no loose fittings; riggers not rocking
-- **Common failure modes:** mixing washer stacks between sides; crushing split washers flat
-- **Escalation:** spinning insert/stripped thread → stop and escalate
-
-**Procedure: Freeing a seized stainless fastener (basic)**
-
-- **Skill level:** Intermediate
-- **When to do it:** When a nut/bolt will not turn
-- **Tools & materials:** penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
-- **Safety:** do not apply heat near composite without understanding risk
-- **Steps:**
-  1. Clean exposed threads. Apply penetrating oil. Wait.
-  2. Use correctly sized tools; avoid rounding.
-  3. Try tightening slightly then loosening.
-  4. If still stuck: consider controlled heat on the nut only (last resort).
-  5. Replace hardware after removal.
-- **Checks:** threads intact; mating surfaces undamaged
-- **Escalation:** if applying force risks ripping an insert from the hull → stop and escalate
+> [!PROCEDURE]
+> **Title:** Freeing a seized stainless fastener (basic)
+> **Skill level:** Intermediate
+> **Warnings:** Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull = stop and escalate
+> **Required tools/materials:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
+> **Description:** Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
+> **Steps:**
+>
+> 1. Clean exposed threads. Apply penetrating oil. Wait.
+> 2. Use correctly sized tools; avoid rounding.
+> 3. Try tightening slightly then loosening.
+> 4. If still stuck: consider controlled heat on the nut only (last resort).
+> 5. Replace hardware after removal.
+> **Notes:** Threads intact; mating surfaces undamaged. Do when a nut/bolt will not turn.
 
 ## Preventing galling and seizure (stainless hardware)
 
@@ -137,17 +136,3 @@ Where you must keep threads clean (e.g., bonding inserts nearby), keep lubricant
 > - Any cracked/bent rigger, pin, or pin mount.
 > - Any stripped/loose fastener on steering or footplate safety components.
 
-> [!PROCEDURE]
-> **Title:** Example Maintenance Task
-> **Skill level:** Advanced
-> **Description:** This procedure demonstrates the proper format for documenting maintenance tasks in a clear, structured way.
-> **Warnings:** Sharp edges on metal parts; avoid over-tightening to prevent hull damage
-> **Required tools/materials:** Adjustable wrench, Allen keys (3mm, 5mm), WD-40, clean cloth
-> **Steps:**
->
-> 1. Gather all required tools and materials before beginning work.
-> 2. Inspect the area to be worked on for any existing damage or issues.
-> 3. Apply WD-40 to any stuck fasteners and wait 5 minutes.
-> 4. Use the correct size tool to loosen fasteners, working systematically.
-> 5. Clean and inspect all parts before reassembly.
-> **Notes:** Always check torque specifications in the manufacturer's manual when available. Store removed hardware in labeled bags to prevent loss.

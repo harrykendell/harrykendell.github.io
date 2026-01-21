@@ -95,43 +95,54 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > [!INFO] Handle Types
 > There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
-**Procedure: Replace suede patch**
-
-- **Skill level:** Intermediate
-- **When to do it:** when suede is worn, torn, or lifting
-- **Tools & materials:** heat gun, IPA, replacement patches
-- **Safety:** do not overheat carbon; avoid fumes
-- **Steps:**
-  1. Warm suede gently and peel off.
-  2. Clean adhesive residue with IPA.
-  3. Fit correct patch size: [sculls](https://www.concept2.co.uk/product/448) or sweep [inside](https://www.concept2.co.uk/product/174) / [outside](https://www.concept2.co.uk/product/173).
-  4. Place seam away from pressure points to prevent blisters.
-- **Checks:** patch fully bonded; seam placement acceptable
+> [!PROCEDURE]
+> **Title:** Replace suede patch
+> **Skill level:** Intermediate
+> **Warnings:** Do not overheat carbon; avoid fumes
+> **Required tools/materials:** Heat gun, IPA, replacement patches
+> **Description:** Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
+> **Steps:**
+>
+> 1. Warm suede gently and peel off.
+> 2. Clean adhesive residue with IPA.
+> 3. Fit correct patch size: sculls or sweep inside/outside.
+> 4. Place seam away from pressure points to prevent blisters.
+> **Notes:** Patch fully bonded; seam placement acceptable. Do when suede is worn, torn, or lifting.
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
 </div>
 
-**Procedure: Replace green rubber grip**
-
-- **Skill level:** Intermediate
-- **When to do it:** grip is torn, slippery, or loose
-- **Tools & materials:** replacement grip, epoxy (e.g., Araldite) for end cap if needed
-- **Steps:**
-  1. Unscrew and remove old grip.
-  2. If end cap comes off: epoxy it back with correct rotational alignment.
-  3. Fit new grip; ensure secure.
-- **Checks:** no rotation under load
+> [!PROCEDURE]
+> **Title:** Replace green rubber grip
+> **Skill level:** Intermediate
+> **Warnings:** If end cap comes off, epoxy it back with correct rotational alignment
+> **Required tools/materials:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
+> **Description:** Replace a torn, slippery, or loose green grip to restore comfort and control.
+> **Steps:**
+>
+> 1. Unscrew and remove old grip.
+> 2. If end cap comes off: epoxy it back with correct rotational alignment.
+> 3. Fit new grip; ensure secure.
+> **Notes:** No rotation under load. Do when grip is torn, slippery, or loose.
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
 </div>
 
-**Procedure: Fixed handle replacement (legacy)**
-
-- **Skill level:** Intermediate → Professional
-- **When to do it:** fixed handle or inner grip damaged
-- **Notes:** higher risk of damaging shaft; follow manufacturer guidance where possible.
+> [!PROCEDURE]
+> **Title:** Fixed handle replacement (legacy)
+> **Skill level:** Intermediate
+> **Warnings:** Higher risk of damaging shaft; follow manufacturer guidance where possible
+> **Required tools/materials:** New fixed handle, epoxy, heat tools as needed
+> **Description:** Replace a fixed handle or inner grip on legacy oar models. This is higher risk than screw-on handles.
+> **Steps:**
+>
+> 1. Remove old handle carefully (avoid damaging shaft).
+> 2. Clean and prepare shaft surface.
+> 3. Install new handle with proper alignment.
+> 4. Ensure cure per manufacturer specs.
+> **Notes:** Do when fixed handle or inner grip is damaged. This is professional work - follow manufacturer guidance.
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
@@ -139,19 +150,20 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 
 ### Sleeves
 
-**Procedure: Sleeve replacement and pitch alignment**
-
-- **Skill level:** Professional
-- **When to do it:** sleeve worn, rotated, cracked
-- **Tools & materials:** sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
-- **Safety:** alignment is critical; incorrect pitch ruins rigging
-- **Steps:**
-  1. Mark current orientation relative to blade.
-  2. Remove sleeve carefully (avoid cutting into shaft).
-  3. Clean shaft; dry fit new sleeve at correct distance.
-  4. Apply adhesive; align pitch (back face of blade aligns with P/S marking).
-  5. Hold alignment until cure.
-- **Checks:** pitch correct; sleeve secure; distance correct for gearing
+> [!PROCEDURE]
+> **Title:** Sleeve replacement and pitch alignment
+> **Skill level:** Advanced
+> **Warnings:** Alignment is critical; incorrect pitch ruins rigging. Cannot restore shape/alignment = stop and send to manufacturer
+> **Required tools/materials:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
+> **Description:** Replace a worn, rotated, or cracked sleeve and ensure correct pitch alignment for consistent rigging.
+> **Steps:**
+>
+> 1. Mark current orientation relative to blade.
+> 2. Remove sleeve carefully (avoid cutting into shaft).
+> 3. Clean shaft; dry fit new sleeve at correct distance.
+> 4. Apply adhesive; align pitch (back face of blade aligns with P/S marking).
+> 5. Hold alignment until cure.
+> **Notes:** Pitch correct; sleeve secure; distance correct for gearing. Refer to Concept2 documentation for exact specs.
 
 > [!INFO] Concept2 sleeve/pitch references (use these for exact specs)
 > - [Sleeve & pitch instruction booklet](https://www.concept2.ch/files/pdf/us/oars/Oar_SleevePitchBooklet.pdf)
@@ -167,34 +179,37 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 
 Collars define **inboard** and directly affect gearing and blade work. Small collar problems create persistent rigging issues.
 
-**Procedure: Collar inspection and re-set**
-
-- **Skill level:** Intermediate
-- **When to do it:** Monthly; when swapping oars between boats; after any sleeve work
-- **Tools & materials:** marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
-- **Steps:**
-  1. Check collar tightness and condition (cracks, slipping, deformed wear surfaces).
-  2. Measure inboard and confirm both oars/sculls in a pair match.
-  3. Mark a witness line across collar → shaft so any slip is obvious.
-  4. If using quick-adjust systems (e.g. CLAM), confirm they seat fully and don’t rock.
-- **Checks:** inboard matched; collars do not slip; witness lines stable
+> [!PROCEDURE]
+> **Title:** Collar inspection and re-set
+> **Skill level:** Intermediate
+> **Warnings:** None
+> **Required tools/materials:** Marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
+> **Description:** Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
+> **Steps:**
+>
+> 1. Check collar tightness and condition (cracks, slipping, deformed wear surfaces).
+> 2. Measure inboard and confirm both oars/sculls in a pair match.
+> 3. Mark a witness line across collar → shaft so any slip is obvious.
+> 4. If using quick-adjust systems (e.g. CLAM), confirm they seat fully and don't rock.
+> **Notes:** Inboard matched; collars do not slip; witness lines stable. Do monthly, when swapping oars between boats, and after any sleeve work.
 
 
 
 ### Spoons
 
-**Procedure: Stabilise spoon delamination (inject epoxy)**
-
-- **Skill level:** Intermediate
-- **When to do it:** early delamination or edge damage
-- **Tools & materials:** epoxy, syringe, clamps/weights, release film
-- **Steps:**
-  1. Clean and dry.
-  2. Inject epoxy into delam.
-  3. Clamp to restore shape; cure.
-  4. Sand/fair lightly if needed.
-- **Checks:** no flex; sealed edges
-- **Escalation:** large delam or structural cracks → arrange manufacturer repair
+> [!PROCEDURE]
+> **Title:** Stabilise spoon delamination (inject epoxy)
+> **Skill level:** Intermediate
+> **Warnings:** Large delam or structural cracks = arrange manufacturer repair
+> **Required tools/materials:** Epoxy, syringe, clamps/weights, release film
+> **Description:** Early intervention on spoon delamination to prevent blade failure and structural damage.
+> **Steps:**
+>
+> 1. Clean and dry.
+> 2. Inject epoxy into delam.
+> 3. Clamp to restore shape; cure.
+> 4. Sand/fair lightly if needed.
+> **Notes:** No flex; sealed edges. Do when early delamination or edge damage is observed.
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/Z5Vee-V-pO8" title="Spoon repair"></iframe>

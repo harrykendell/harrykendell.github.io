@@ -14,16 +14,18 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 
 ## Footplate adjustment and inspection
 
-**Procedure: Footplate set-up (athlete adjustment)**
-
-- **Skill level:** Beginner
-- **When to do it:** Before rowing
-- **Tools & materials:** none or wing nuts (depending on system)
-- **Steps:**
-  1. Set stretcher position to athlete’s number.
-  2. Confirm left/right are symmetric (count holes/marks).
-  3. Confirm all clamps/nuts are tight.
-- **Checks:** no wobble; symmetric placement
+> [!PROCEDURE]
+> **Title:** Footplate set-up (athlete adjustment)
+> **Skill level:** Beginner
+> **Warnings:** None
+> **Required tools/materials:** None or wing nuts (depending on system)
+> **Description:** Quick pre-rowing adjustment of stretcher position to the athlete's preferred height.
+> **Steps:**
+>
+> 1. Set stretcher position to athlete's number.
+> 2. Confirm left/right are symmetric (count holes/marks).
+> 3. Confirm all clamps/nuts are tight.
+> **Notes:** No wobble; symmetric placement.
 
 ## Heel restraints (safety-critical)
 
@@ -38,16 +40,18 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 > - [British Rowing safety alert (heel restraints)](https://www.britishrowing.org/wp-content/uploads/2022/05/Safety-Alert-Heel-Restraints.pdf)
 
 
-**Procedure: Heel restraint inspection and replacement**
-
-- **Skill level:** Beginner → Intermediate
-- **When to do it:** Before every outing; replace immediately if worn
-- **Tools & materials:** suitable cord/strap, scissors, lighter/heat to seal ends
-- **Steps:**
-  1. Inspect both heel ties for fraying, knots, looseness.
-  2. Measure heel lift: the heel must not rise more than **7 cm** from the footplate.
-  3. Replace using durable cord/strap; secure knots and seal ends.
-- **Checks:** cannot lift heel beyond limit; both shoes secured
+> [!PROCEDURE]
+> **Title:** Heel restraint inspection and replacement
+> **Skill level:** Beginner
+> **Warnings:** Broken or missing heel restraint = stop-use; never use laces or cable ties as heel restraints; heel must not rise more than 7 cm from footplate
+> **Required tools/materials:** Suitable cord/strap, scissors, lighter/heat to seal ends
+> **Description:** Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize.
+> **Steps:**
+>
+> 1. Inspect both heel ties for fraying, knots, looseness.
+> 2. Measure heel lift: the heel must not rise more than 7 cm from the footplate.
+> 3. Replace using durable cord/strap; secure knots and seal ends.
+> **Notes:** Cannot lift heel beyond limit; both shoes secured. Do before every outing and replace immediately if worn.
 
 ## Steering wire
 
@@ -55,31 +59,34 @@ They can generally all use the same wire: **2 mm high-grade PVC-coated stainless
 
 Reference product: [PVC-coated stainless steel wire rope 7x7](https://www.wireropeshop.co.uk/clear-coated-pvc-stainless-steel-wire-rope-7x7/)
 
-**Procedure: Steering functional check**
+> [!PROCEDURE]
+> **Title:** Steering functional check
+> **Skill level:** Beginner
+> **Warnings:** Binding, slack, or off-centre = maintenance required
+> **Required tools/materials:** None
+> **Description:** Quick pre-outing check that steering is centered and responsive.
+> **Steps:**
+>
+> 1. Centre toe steering.
+> 2. Confirm rudder aligns with fin.
+> 3. Move toe left/right; confirm smooth rudder travel.
+> **Notes:** Smooth, responsive, centered.
 
-- **Skill level:** Beginner
-- **When to do it:** Before outings in steered boats
-- **Steps:**
-  1. Centre toe steering.
-  2. Confirm rudder aligns with fin.
-  3. Move toe left/right; confirm smooth rudder travel.
-- **Escalation:** binding, slack, or off-centre → maintenance
-
-**Procedure: Replace steering cable**
-
-- **Skill level:** Intermediate → Professional
-- **When to do it:** fraying, snapped cable, repeated centring drift
-- **Tools & materials:** cable, cutters, clamps/stops, crimping tool (if using ferrules), tape
-- **Safety:** cut cable ends are sharp; gloves and eye protection
-- **Steps:**
-  1. Document routing and attachment points (photos).
-  2. Remove old cable; use it to pull new cable through if possible.
-  3. Attach at toe mechanism.
-  4. Centre rudder and toe; attach at yoke.
-  5. Tension evenly and verify full travel.
-  6. Secure ends (ferrules/tape/heatshrink).
-- **Checks:** rudder centred when toe centred; smooth travel; no snagging
-- **Escalation:** if cable routing is inaccessible or tubes are blocked → escalate
+> [!PROCEDURE]
+> **Title:** Replace steering cable
+> **Skill level:** Intermediate
+> **Warnings:** Cut cable ends are sharp; use gloves and eye protection; if cable routing is inaccessible or tubes are blocked = escalate
+> **Required tools/materials:** Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape
+> **Description:** Replace a frayed or snapped steering cable to restore full steering responsiveness.
+> **Steps:**
+>
+> 1. Document routing and attachment points (photos).
+> 2. Remove old cable; use it to pull new cable through if possible.
+> 3. Attach at toe mechanism.
+> 4. Centre rudder and toe; attach at yoke.
+> 5. Tension evenly and verify full travel.
+> 6. Secure ends (ferrules/tape/heatshrink).
+> **Notes:** Rudder centred when toe centred; smooth travel; no snagging. Do when fraying, snapped cable, or repeated centring drift is observed.
 
 > [!WARNING] Stop-use criteria (footplate/steering)
 >
