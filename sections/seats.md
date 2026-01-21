@@ -6,12 +6,17 @@ Seat maintenance details can be expanded here (bearings, wheels, rails, fastener
 ## Routine cleaning
 
 > [!PROCEDURE]
-> **Title:** Track and wheel wipe-down
-> **Skill level:** Beginner
-> **Warnings:** None
-> **Required tools/materials:** Damp cloth, microfibre
-> **Description:** Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
-> **Steps:**
+> [!TITLE]
+> Track and wheel wipe-down
+> [!SKILL]
+> Beginner
+> [!WARNINGS]
+> None
+> [!TOOLS]
+> Damp cloth, microfibre
+> [!DESCRIPTION]
+> Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
+> [!STEPS]
 >
 > 1. Wipe tracks to remove grit.
 > 2. Wipe wheel tread surfaces.
@@ -21,22 +26,32 @@ Seat maintenance details can be expanded here (bearings, wheels, rails, fastener
 ## Inspection and service
 
 > [!PROCEDURE]
-> **Title:** Seat inspection (remove + check)
-> **Skill level:** Intermediate
-> **Warnings:** None
-> **Required tools/materials:** Allen keys/spanners for axle hardware
-> **Description:** Weekly inspection of wheel condition and track integrity by removing the seat and spinning wheels by hand.
-> **Steps:**
+> [!TITLE]
+> Seat inspection (remove + check)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> None
+> [!TOOLS]
+> Allen keys/spanners for axle hardware
+> [!DESCRIPTION]
+> Weekly inspection of wheel condition and track integrity by removing the seat and spinning wheels by hand.
+> [!STEPS]
 >
 > 1. Remove seat; place on clean bench.
 > 2. Spin each wheel: should run freely with no grinding.
 > 3. Check for flat spots, wobble, cracks.
-> 4. Inspect track fasteners and alignment.
-> 5. Reinstall and confirm smooth travel.
-> **Notes:** No bumping; no lateral binding. Do weekly/biweekly.
-
-> [!PROCEDURE]
-> **Title:** Replace seat wheels (as a set)
+> [!TITLE]
+> Replace seat wheels (as a set)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Avoid mixing worn and new wheels
+> [!TOOLS]
+> Replacement wheels, correct fasteners
+> [!DESCRIPTION]
+> Annual or wear-based replacement of seat wheels to maintain smooth rolling. Replace all wheels in a seat together.
+> [!STEPS] Replace seat wheels (as a set)
 > **Skill level:** Intermediate
 > **Warnings:** Avoid mixing worn and new wheels
 > **Required tools/materials:** Replacement wheels, correct fasteners
@@ -49,22 +64,32 @@ Seat maintenance details can be expanded here (bearings, wheels, rails, fastener
 > 4. Reinstall and test.
 > **Notes:** Smooth travel; no wobble. Do annual or when wheels show wear.
 
-### Track alignment and fasteners
-
-Seat problems are often track problems.
-
-> [!PROCEDURE]
-> **Title:** Track alignment check
+##[!TITLE]
+> Track alignment check
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not over-tighten: you will strip inserts and crush laminate
+> [!TOOLS]
+> Straight edge or taut string line, tape measure, marker
+> [!DESCRIPTION]
+> Monthly check that seat tracks are straight and parallel to catch misalignment before it causes binding or uneven wear.
+> [!STEPS] Track alignment check
 > **Skill level:** Intermediate
 > **Warnings:** Do not over-tighten: you will strip inserts and crush laminate
 > **Required tools/materials:** Straight edge or taut string line, tape measure, marker
 > **Description:** Monthly check that seat tracks are straight and parallel to catch misalignment before it causes binding or uneven wear.
-> **Steps:**
->
-> 1. Clean tracks thoroughly first (grit can mimic misalignment).
-> 2. Check each track is straight (no kinks) and firmly fixed along its length.
-> 3. Measure track spacing at the front/middle/back: values should match within a small tolerance (aim for consistency rather than a specific number).
-> 4. If misaligned: loosen fasteners slightly, re-set spacing, then re-tighten evenly.
+> [!TITLE]
+> Fix loose/spinning track fasteners
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not over-tighten: you will strip inserts and crush laminate; if insert spins or is pulled = stop and escalate (often requires bonded insert repair)
+> [!TOOLS]
+> Correct fasteners, suitable threadlocker, washer stack per manufacturer, insert repair kit if required
+> [!DESCRIPTION]
+> Immediately address any track fasteners that are loose or spinning to prevent track movement relative to the hull.
+> [!STEPS]ligned: loosen fasteners slightly, re-set spacing, then re-tighten evenly.
 > 5. Confirm end-stops are fitted and secure (prevents seat leaving tracks).
 > **Notes:** Seats roll freely end-to-end; no binding; end-stops present. Do monthly, after transport, and if seats bind or run tight.
 

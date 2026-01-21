@@ -15,12 +15,17 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 ## Footplate adjustment and inspection
 
 > [!PROCEDURE]
-> **Title:** Footplate set-up (athlete adjustment)
-> **Skill level:** Beginner
-> **Warnings:** None
-> **Required tools/materials:** None or wing nuts (depending on system)
-> **Description:** Quick pre-rowing adjustment of stretcher position to the athlete's preferred height.
-> **Steps:**
+> [!TITLE]
+> Footplate set-up (athlete adjustment)
+> [!SKILL]
+> Beginner
+> [!WARNINGS]
+> None
+> [!TOOLS]
+> None or wing nuts (depending on system)
+> [!DESCRIPTION]
+> Quick pre-rowing adjustment of stretcher position to the athlete's preferred height.
+> [!STEPS]
 >
 > 1. Set stretcher position to athlete's number.
 > 2. Confirm left/right are symmetric (count holes/marks).
@@ -41,12 +46,17 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 
 
 > [!PROCEDURE]
-> **Title:** Heel restraint inspection and replacement
-> **Skill level:** Beginner
-> **Warnings:** Broken or missing heel restraint = stop-use; never use laces or cable ties as heel restraints; heel must not rise more than 7 cm from footplate
-> **Required tools/materials:** Suitable cord/strap, scissors, lighter/heat to seal ends
-> **Description:** Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize.
-> **Steps:**
+> [!TITLE]
+> Heel restraint inspection and replacement
+> [!SKILL]
+> Beginner
+> [!WARNINGS]
+> Broken or missing heel restraint = stop-use; never use laces or cable ties as heel restraints; heel must not rise more than 7 cm from footplate
+> [!TOOLS]
+> Suitable cord/strap, scissors, lighter/heat to seal ends
+> [!DESCRIPTION]
+> Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize.
+> [!STEPS]
 >
 > 1. Inspect both heel ties for fraying, knots, looseness.
 > 2. Measure heel lift: the heel must not rise more than 7 cm from the footplate.
@@ -55,12 +65,17 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 
 ## Steering wire
 
-They can generally all use the same wire: **2 mm high-grade PVC-coated stainless rope (7x7)**.
-
-Reference product: [PVC-coated stainless steel wire rope 7x7](https://www.wireropeshop.co.uk/clear-coated-pvc-stainless-steel-wire-rope-7x7/)
-
-> [!PROCEDURE]
-> **Title:** Steering functional check
+Th[!TITLE]
+> Steering functional check
+> [!SKILL]
+> Beginner
+> [!WARNINGS]
+> Binding, slack, or off-centre = maintenance required
+> [!TOOLS]
+> None
+> [!DESCRIPTION]
+> Quick pre-outing check that steering is centered and responsive.
+> [!STEPS] Steering functional check
 > **Skill level:** Beginner
 > **Warnings:** Binding, slack, or off-centre = maintenance required
 > **Required tools/materials:** None
@@ -68,12 +83,17 @@ Reference product: [PVC-coated stainless steel wire rope 7x7](https://www.wirero
 > **Steps:**
 >
 > 1. Centre toe steering.
-> 2. Confirm rudder aligns with fin.
-> 3. Move toe left/right; confirm smooth rudder travel.
-> **Notes:** Smooth, responsive, centered.
-
-> [!PROCEDURE]
-> **Title:** Replace steering cable
+> [!TITLE]
+> Replace steering cable
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Cut cable ends are sharp; use gloves and eye protection; if cable routing is inaccessible or tubes are blocked = escalate
+> [!TOOLS]
+> Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape
+> [!DESCRIPTION]
+> Replace a frayed or snapped steering cable to restore full steering responsiveness.
+> [!STEPS] Replace steering cable
 > **Skill level:** Intermediate
 > **Warnings:** Cut cable ends are sharp; use gloves and eye protection; if cable routing is inaccessible or tubes are blocked = escalate
 > **Required tools/materials:** Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape

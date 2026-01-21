@@ -87,18 +87,24 @@ Refer to this document for detailed troubleshooting:
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
 > [!PROCEDURE]
-> **Title:** Quick electrical diagnosis (multimeter)
-> **Skill level:** Intermediate
-> **Warnings:** Do not test wet connectors
-> **Required tools/materials:** Multimeter, contact cleaner
-> **Description:** Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
-> **Steps:**
+> [!TITLE]
+> Quick electrical diagnosis (multimeter)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not test wet connectors
+> [!TOOLS]
+> Multimeter, contact cleaner
+> [!DESCRIPTION]
+> Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
+> [!STEPS]
 >
 > 1. Dry connector; inspect for corrosion.
 > 2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
 > 3. **Speakers:** C–B should read as a load/short when speakers are wired.
 > 4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
-> **Notes:** Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
+> [!NOTES]
+> Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
 
 ## Parts and sourcing
 
@@ -151,12 +157,17 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 ## Harness build/repair procedure
 
 > [!PROCEDURE]
-> **Title:** Build or repair a harness segment
-> **Skill level:** Advanced
-> **Warnings:** Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins = stop-use
-> **Required tools/materials:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
-> **Description:** Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress.
-> **Steps:**
+> [!TITLE]
+> Build or repair a harness segment
+> [!SKILL]
+> Advanced
+> [!WARNINGS]
+> Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins = stop-use
+> [!TOOLS]
+> Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
+> [!DESCRIPTION]
+> Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress.
+> [!STEPS]
 >
 > 1. Cut back to clean, undamaged cable.
 > 2. Strip jacket and conductors to specified length.
@@ -164,7 +175,8 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 > 4. Insert into housing following pinout and keyway orientation.
 > 5. Add adhesive-lined heatshrink for strain relief and sealing.
 > 6. Continuity test end-to-end; then functional test with coxbox/speakers.
-> **Notes:** Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
+> [!NOTES]
+> Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
 
 > [!WARNING] Stop-use criteria (electronics)
 >

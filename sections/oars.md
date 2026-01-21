@@ -96,12 +96,17 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
 > [!PROCEDURE]
-> **Title:** Replace suede patch
-> **Skill level:** Intermediate
-> **Warnings:** Do not overheat carbon; avoid fumes
-> **Required tools/materials:** Heat gun, IPA, replacement patches
-> **Description:** Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
-> **Steps:**
+> [!TITLE]
+> Replace suede patch
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not overheat carbon; avoid fumes
+> [!TOOLS]
+> Heat gun, IPA, replacement patches
+> [!DESCRIPTION]
+> Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
+> [!STEPS]
 >
 > 1. Warm suede gently and peel off.
 > 2. Clean adhesive residue with IPA.
@@ -114,24 +119,34 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 </div>
 
 > [!PROCEDURE]
-> **Title:** Replace green rubber grip
-> **Skill level:** Intermediate
-> **Warnings:** If end cap comes off, epoxy it back with correct rotational alignment
-> **Required tools/materials:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
-> **Description:** Replace a torn, slippery, or loose green grip to restore comfort and control.
-> **Steps:**
+> [!TITLE]
+> Replace green rubber grip
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> If end cap comes off, epoxy it back with correct rotational alignment
+> [!TOOLS]
+> Replacement grip, epoxy (e.g., Araldite) for end cap if needed
+> [!DESCRIPTION]
+> Replace a torn, slippery, or loose green grip to restore comfort and control.
+> [!STEPS]
 >
 > 1. Unscrew and remove old grip.
 > 2. If end cap comes off: epoxy it back with correct rotational alignment.
 > 3. Fit new grip; ensure secure.
 > **Notes:** No rotation under load. Do when grip is torn, slippery, or loose.
 
-<div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
-</div>
-
-> [!PROCEDURE]
-> **Title:** Fixed handle replacement (legacy)
+<d[!TITLE]
+> Fixed handle replacement (legacy)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Higher risk of damaging shaft; follow manufacturer guidance where possible
+> [!TOOLS]
+> New fixed handle, epoxy, heat tools as needed
+> [!DESCRIPTION]
+> Replace a fixed handle or inner grip on legacy oar models. This is higher risk than screw-on handles.
+> [!STEPS] Fixed handle replacement (legacy)
 > **Skill level:** Intermediate
 > **Warnings:** Higher risk of damaging shaft; follow manufacturer guidance where possible
 > **Required tools/materials:** New fixed handle, epoxy, heat tools as needed
@@ -146,12 +161,17 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
-</div>
-
-### Sleeves
-
-> [!PROCEDURE]
-> **Title:** Sleeve replacement and pitch alignment
+</[!TITLE]
+> Sleeve replacement and pitch alignment
+> [!SKILL]
+> Advanced
+> [!WARNINGS]
+> Alignment is critical; incorrect pitch ruins rigging. Cannot restore shape/alignment = stop and send to manufacturer
+> [!TOOLS]
+> Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
+> [!DESCRIPTION]
+> Replace a worn, rotated, or cracked sleeve and ensure correct pitch alignment for consistent rigging.
+> [!STEPS] Sleeve replacement and pitch alignment
 > **Skill level:** Advanced
 > **Warnings:** Alignment is critical; incorrect pitch ruins rigging. Cannot restore shape/alignment = stop and send to manufacturer
 > **Required tools/materials:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
@@ -175,12 +195,17 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
   <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
 </div>
 
-### Collars (buttons) and inboard consistency
-
-Collars define **inboard** and directly affect gearing and blade work. Small collar problems create persistent rigging issues.
-
-> [!PROCEDURE]
-> **Title:** Collar inspection and re-set
+##[!TITLE]
+> Collar inspection and re-set
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> None
+> [!TOOLS]
+> Marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
+> [!DESCRIPTION]
+> Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
+> [!STEPS] Collar inspection and re-set
 > **Skill level:** Intermediate
 > **Warnings:** None
 > **Required tools/materials:** Marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
@@ -188,12 +213,17 @@ Collars define **inboard** and directly affect gearing and blade work. Small col
 > **Steps:**
 >
 > 1. Check collar tightness and condition (cracks, slipping, deformed wear surfaces).
-> 2. Measure inboard and confirm both oars/sculls in a pair match.
-> 3. Mark a witness line across collar → shaft so any slip is obvious.
-> 4. If using quick-adjust systems (e.g. CLAM), confirm they seat fully and don't rock.
-> **Notes:** Inboard matched; collars do not slip; witness lines stable. Do monthly, when swapping oars between boats, and after any sleeve work.
-
-
+> [!TITLE]
+> Stabilise spoon delamination (inject epoxy)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Large delam or structural cracks = arrange manufacturer repair
+> [!TOOLS]
+> Epoxy, syringe, clamps/weights, release film
+> [!DESCRIPTION]
+> Early intervention on spoon delamination to prevent blade failure and structural damage.
+> [!STEPS]
 
 ### Spoons
 

@@ -13,6 +13,33 @@ function slugify(text)
         .replace(/-+/g, "-");
 }
 
+function extractProcedureSection(innerHTML, marker, preserveFormatting = false)
+{
+    const regex = new RegExp(`\\[!${marker}\\][\\s\\S]*?(?=\\[![A-Z]|$)`, "i");
+    const match = innerHTML.match(regex);
+    if (!match)
+        return "";
+
+    let content = match[0]
+                      .replace(new RegExp(`\\[!${marker}\\]\\s*`, "i"), "")
+                      .trim();
+
+    // Clean up trailing HTML tags that shouldn't be there
+    content = content
+                  .replace(/<\/li>\s*<\/ol>\s*$/i, "")
+                  .replace(/<\/p>\s*$/i, "")
+                  .trim();
+
+    // Only strip formatting tags if not preserving
+    if (!preserveFormatting) {
+        content = content
+                      .replace(/<\/?strong>/g, "")
+                      .replace(/<\/?em>/g, "");
+    }
+
+    return content;
+}
+
 function transformProcedures(rootEl)
 {
     const blockquotes = Array.from(rootEl.querySelectorAll("blockquote"));
@@ -23,52 +50,35 @@ function transformProcedures(rootEl)
             return;
         }
 
-        const fields = {
-            title : "",
-            skillLevel : "",
-            warnings : "",
-            tools : "",
-            description : "",
-            steps : [],
-            notes : "",
-        };
-
-        // Get all text content and parse line by line
         const innerHTML = blockquote.innerHTML;
-
-        // Extract fields by looking for strong tags in the HTML
-        const extractField = (label) => {
-            const regex = new RegExp(`<strong>${label}:</strong>\\s*([^<\\n]+)`, "i");
-            const match = innerHTML.match(regex);
-            return match ? match[1].trim() : "";
+        console.log("Transforming procedure:", innerHTML);
+        const fields = {
+            title : extractProcedureSection(innerHTML, "TITLE").split("\n")[0].trim(),
+            skillLevel : extractProcedureSection(innerHTML, "SKILL").split("\n")[0].trim(),
+            warnings : extractProcedureSection(innerHTML, "WARNINGS").trim(),
+            tools : extractProcedureSection(innerHTML, "TOOLS").trim(),
+            description : extractProcedureSection(innerHTML, "DESCRIPTION").trim(),
+            steps : [],
+            notes : extractProcedureSection(innerHTML, "NOTES").trim(),
         };
-
-        fields.title = extractField("Title");
-        fields.skillLevel = extractField("Skill level");
-        fields.warnings = extractField("Warnings");
-        fields.tools = extractField("Required tools/materials");
-        fields.description = extractField("Description");
-
-        // Extract notes - might span multiple lines
-        const notesMatch = innerHTML.match(
-            /<strong>Notes:<\/strong>\s*([^<]+(?:<[^>]+>[^<]*)*)/i);
-        if (notesMatch) {
-            fields.notes = notesMatch[1].replace(/<[^>]+>/g, "").trim();
-        }
-
-        // Handle steps separately - they might be in an ordered list
-        const orderedLists = blockquote.querySelectorAll("ol");
+        console.log("Extracted fields:", fields);
+        // Extract steps from ordered list within the [!STEPS] section (preserve formatting)
+        const stepsHtml = extractProcedureSection(innerHTML, "STEPS", true);
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = stepsHtml;
+        // Clean up any trailing closing tags
+        const orderedLists = tempDiv.querySelectorAll("ol");
         orderedLists.forEach((ol) => {
             const items = ol.querySelectorAll("li");
             items.forEach((li) => {
-                const stepText = li.textContent.trim();
-                if (!stepText.match(/^\[Step \d+\]$/)) {
-                    fields.steps.push(stepText);
-                } else {
-                    fields.steps.push(stepText);
+                // Preserve inner HTML to keep <strong> and <em> tags
+                const stepContent = li.innerHTML.trim();
+                if (stepContent) {
+                    fields.steps.push(stepContent);
                 }
             });
         });
+        console.log("Extracted steps:", fields.steps);
 
         // Build the HTML structure
         const procedureDiv = document.createElement("div");
@@ -145,7 +155,8 @@ function transformProcedures(rootEl)
             const stepsList = document.createElement("ol");
             fields.steps.forEach((step) => {
                 const li = document.createElement("li");
-                li.textContent = step;
+                // Use innerHTML to preserve formatting tags like <strong>
+                li.innerHTML = step;
                 stepsList.appendChild(li);
             });
             stepsDiv.appendChild(stepsList);
@@ -168,7 +179,7 @@ function transformProcedures(rootEl)
         blockquote.replaceWith(procedureDiv);
 
         // Initialize procedure as collapsed
-        // procedureDiv.classList.add("collapsed");
+        procedureDiv.classList.add("collapsed");
 
         // Add click handler for collapse/expand
         headerDiv.addEventListener("click", () => {

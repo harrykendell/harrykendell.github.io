@@ -30,12 +30,17 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 ## Daily checks
 
 > [!PROCEDURE]
-> **Title:** Gate safety check
-> **Skill level:** Beginner
-> **Warnings:** Latch failure, cracked gate, or loose pin = stop-use
-> **Required tools/materials:** None (or gate nut tool if something is loose)
-> **Description:** Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load.
-> **Steps:**
+> [!TITLE]
+> Gate safety check
+> [!SKILL]
+> Beginner
+> [!WARNINGS]
+> Latch failure, cracked gate, or loose pin = stop-use
+> [!TOOLS]
+> None (or gate nut tool if something is loose)
+> [!DESCRIPTION]
+> Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load.
+> [!STEPS]
 >
 > 1. Close each gate and confirm latch fully engages.
 > 2. Lift the oar handle firmly to confirm the oar cannot pop out.
@@ -46,12 +51,17 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 ## Clean and rebuild
 
 > [!PROCEDURE]
-> **Title:** Disassemble, clean, rebuild gate stack
-> **Skill level:** Intermediate
-> **Warnings:** Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body = replace parts/escalate
-> **Required tools/materials:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
-> **Description:** Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking.
-> **Steps:**
+> [!TITLE]
+> Disassemble, clean, rebuild gate stack
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body = replace parts/escalate
+> [!TOOLS]
+> Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
+> [!DESCRIPTION]
+> Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking.
+> [!STEPS]
 >
 > 1. Remove top nut/retainer and lift off gate.
 > 2. Keep washer stacks grouped (bottom vs top). Photograph if needed.
@@ -59,12 +69,17 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 > 4. Inspect pitch bushings for cracks/ovalisation; replace if worn.
 > 5. Reassemble: washers arranged to eliminate vertical play while allowing free rotation.
 > 6. Tighten top nut and re-check closure.
-> **Notes:** Free rotation; no rattle; pitch unchanged. Do on maintenance day or after saltwater regatta.
-
-## Pitch and height adjustments
-
-> [!PROCEDURE]
-> **Title:** Adjust gate height (washer stack)
+> [!TITLE]
+> Adjust gate height (washer stack)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> None
+> [!TOOLS]
+> Gate washers/shims, calipers/ruler, rigging sheet
+> [!DESCRIPTION]
+> When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
+> [!STEPS] Adjust gate height (washer stack)
 > **Skill level:** Intermediate
 > **Warnings:** None
 > **Required tools/materials:** Gate washers/shims, calipers/ruler, rigging sheet
@@ -73,12 +88,17 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 >
 > 1. Measure current height (club method). Record.
 > 2. Add/remove washers **symmetrically** to achieve target.
-> 3. Ensure gate still closes and rotates freely.
-> 4. Record final washer stack (count + thickness).
-> **Notes:** Measured height matches target; no play.
-
-> [!PROCEDURE]
-> **Title:** Set/verify pitch
+> [!TITLE]
+> Set/verify pitch
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> If you cannot match pitch across sides, replace pin/gate components
+> [!TOOLS]
+> Pitch gauge, correct pitch bushings, rigging sheet
+> [!DESCRIPTION]
+> After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
+> [!STEPS] Set/verify pitch
 > **Skill level:** Intermediate
 > **Warnings:** If you cannot match pitch across sides, replace pin/gate components
 > **Required tools/materials:** Pitch gauge, correct pitch bushings, rigging sheet

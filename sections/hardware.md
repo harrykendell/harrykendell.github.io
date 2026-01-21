@@ -87,12 +87,17 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 ## Hardware audit and reassembly
 
 > [!PROCEDURE]
-> **Title:** Hardware audit (riggers + critical fittings)
-> **Skill level:** Intermediate
-> **Warnings:** Spinning insert/stripped thread = stop and escalate. Avoid over-tightening and crushing hull
-> **Required tools/materials:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
-> **Description:** Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage.
-> **Steps:**
+> [!TITLE]
+> Hardware audit (riggers + critical fittings)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Spinning insert/stripped thread = stop and escalate. Avoid over-tightening and crushing hull
+> [!TOOLS]
+> Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
+> [!DESCRIPTION]
+> Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage.
+> [!STEPS]
 >
 > 1. Pick a boat and work systematically: bow to stern.
 > 2. For each critical fastener (rigger bolts, pins, stretcher mounts):
@@ -104,12 +109,17 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 > **Notes:** No missing washers; no loose fittings; riggers not rocking. Watch for mixed washer stacks and crushing split washers. Do monthly and after transport.
 
 > [!PROCEDURE]
-> **Title:** Freeing a seized stainless fastener (basic)
-> **Skill level:** Intermediate
-> **Warnings:** Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull = stop and escalate
-> **Required tools/materials:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
-> **Description:** Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
-> **Steps:**
+> [!TITLE]
+> Freeing a seized stainless fastener (basic)
+> [!SKILL]
+> Intermediate
+> [!WARNINGS]
+> Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull = stop and escalate
+> [!TOOLS]
+> Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
+> [!DESCRIPTION]
+> Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
+> [!STEPS]
 >
 > 1. Clean exposed threads. Apply penetrating oil. Wait.
 > 2. Use correctly sized tools; avoid rounding.
