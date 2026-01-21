@@ -7,6 +7,7 @@ const sectionFiles = [
     "seats",
     "coxbox-wiring",
     // "test",
+    "full_doc",
 ];
 
 const DEFAULT_TOC_DEPTH = 4;

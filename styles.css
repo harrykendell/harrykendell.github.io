@@ -331,7 +331,6 @@ header.page-header {
 .section-content {
     padding: var(--gap);
     background: var(--bg-elevated);
-    max-height: 10000px;
     transition:
         max-height 0.1s ease,
         padding 0.1s ease,

@@ -10,35 +10,6 @@
 >
 > **Document status:** Single-file manual intended to be split into component chapters later.
 
----
-
-## Table of contents
-
-- [Front matter](#front-matter)
-- [Part I — The boat (shell) and its systems](#part-i--the-boat-shell-and-its-systems)
-  - [7. Boats](#7-boats)
-- [Part II — Rigging hardware and interfaces](#part-ii--rigging-hardware-and-interfaces)
-  - [8. Hardware](#8-hardware)
-  - [9. Gates (oarlocks), pins, pitch bushings](#9-gates-oarlocks-pins-pitch-bushings)
-- [Part III — Athlete contact points and moving parts](#part-iii--athlete-contact-points-and-moving-parts)
-  - [10. Seats, wheels, and tracks](#10-seats-wheels-and-tracks)
-  - [11. Footplates, shoes, and steering](#11-footplates-shoes-and-steering)
-- [Part IV — Oars and blades](#part-iv--oars-and-blades)
-  - [12. Oars](#12-oars)
-- [Part V — Electronics and wiring](#part-v--electronics-and-wiring)
-  - [13. Coxbox wiring and boat harnesses](#13-coxbox-wiring-and-boat-harnesses)
-- [Appendices](#appendices)
-  - [Appendix A — Maintenance schedules](#appendix-a--maintenance-schedules)
-  - [Appendix B — Diagnostic flowcharts](#appendix-b--diagnostic-flowcharts)
-  - [Appendix C — Spares and inventory](#appendix-c--spares-and-inventory)
-  - [Appendix D — Suppliers and manuals](#appendix-d--suppliers-and-manuals)
-  - [Appendix E — Templates](#appendix-e--templates)
-  - [Appendix F — Photo library and damage gallery](#appendix-f--photo-library-and-damage-gallery)
-  - [Appendix G — Recommended products and standards](#appendix-g--recommended-products-and-standards)
-- [Mapping to the original source files](#mapping-to-the-original-source-files)
-
-## Front matter
-
 ### Title page
 
 - **Racing Rowing Boat Maintenance and Repair Manual**
