@@ -1,76 +1,5 @@
 <!-- # Oars -->
 
-<!-- Nearly all new blades are Skinnies, with older ones generally being Ultralight or Low I, and a range of blade shapes. Ideally we standardise over time to allow mixing and matching sets. The biggest factors in maintaining blades are cleaning handles and using vortex tips to prevent scraping spoons.
-
-The main maintenance tasks are replacing handles (including dealing with end caps popping out) and dealing with spoon deterioration. Major damage is usually handled by Concept2 at a major regatta; this should be arranged in advance where possible.
-
-## Handles
-
-Replacing handles is relatively easy for modern C2 ones, although we have some older handles that are directly epoxied on. Suede grips are epoxied on; the suede should be removed, not the entire handle.
-
-> [!INFO] Handle Types
->
-> There are two incompatible types of handle. Old Ultralights use the [larger handle][c2-large], while new oars or Skinnies / sculls need the [standard handle][c2-standard].
-
-[c2-large]: https://www.concept2.co.uk/product/168
-[c2-standard]: https://www.concept2.co.uk/product/62
-
-### Suede replacement
-
-<div class="video-wrapper">
-  <iframe
-    src="https://www.youtube.com/embed/BxoXXjtqYGc"
-    title="Suede replacement">
-  </iframe>
-</div>
-
-Suede squares need to be fitted so that the seam does not cause blisters, and should be the correct size for [sculls][c2-sculls] or sweep [inside][c2-inside] / [outside][c2-outside]. They can be removed with a heat gun and patience; clean the surface with IPA before installing replacements. Replacement patches are self-adhesive.
-
-[c2-sculls]: https://www.concept2.co.uk/product/448
-[c2-inside]: https://www.concept2.co.uk/product/174
-[c2-outside]: https://www.concept2.co.uk/product/173
-
-### Green rubber replacement
-
-<div class="video-wrapper">
-  <iframe
-    src="https://www.youtube.com/embed/wTvUfytJGFY"
-    title="Green rubber replacement">
-  </iframe>
-</div>
-Green grips must be unscrewed and fully replaced. If the end cap of the oar comes off with the grip, epoxy it back in place with Araldite, taking care with rotational alignment.
-
-### Fixed handle replacement
-
-<div class="video-wrapper">
-  <iframe
-    src="https://www.youtube.com/embed/OvrIL5SpyT4"
-    title="Fixed handle replacement">
-  </iframe>
-</div>
-Fixed-handle blades and inner green grips can be replaced similarly: remove the old grip, clean, and epoxy the new one in place.
-
-## Sleeves
-
-<div class="video-wrapper">
-  <iframe
-    src="https://www.youtube.com/embed/VKEmhbisczM"
-    title="Sleeves">
-  </iframe>
-</div>
-Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
-
-## Spoons
-
-For delamination or breakage, stabilise with epoxy:
-
-<div class="video-wrapper">
-  <iframe
-    src="https://www.youtube.com/embed/Z5Vee-V-pO8"
-    title="Spoon repair">
-  </iframe>
-</div> -->
-
 # Oars and blades
 
 ## Oars
@@ -95,151 +24,118 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > [!INFO] Handle Types
 > There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
-> [!PROCEDURE]
-> [!TITLE]
-> Replace suede patch
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Do not overheat carbon; avoid fumes
-> [!TOOLS]
-> Heat gun, IPA, replacement patches
-> [!DESCRIPTION]
-> Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
-> [!STEPS]
->
-> 1. Warm suede gently and peel off.
-> 2. Clean adhesive residue with IPA.
-> 3. Fit correct patch size: sculls or sweep inside/outside.
-> 4. Place seam away from pressure points to prevent blisters.
-> **Notes:** Patch fully bonded; seam placement acceptable. Do when suede is worn, torn, or lifting.
+[!PROCEDURE:Intermediate]] Replace suede patch
+Replace worn or torn suede grip patches to maintain comfort and prevent blisters. Use gentle heat and keep the gun moving to avoid overheating the carbon.
+
+**Tools:** Heat gun, IPA, replacement patches
+
+**Steps:**
+1. Warm the suede gently and peel off.
+2. Clean adhesive residue with IPA and let it dry.
+3. Fit the correct patch size (sculls or sweep inside/outside).
+4. Place the seam away from pressure points to prevent blisters.
+
+**Check:** Patch fully bonded; seam placement acceptable. Do when suede is worn, torn, or lifting.
+[!/PROCEDURE]
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
 </div>
 
-> [!PROCEDURE]
-> [!TITLE]
-> Replace green rubber grip
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> If end cap comes off, epoxy it back with correct rotational alignment
-> [!TOOLS]
-> Replacement grip, epoxy (e.g., Araldite) for end cap if needed
-> [!DESCRIPTION]
-> Replace a torn, slippery, or loose green grip to restore comfort and control.
-> [!STEPS]
->
-> 1. Unscrew and remove old grip.
-> 2. If end cap comes off: epoxy it back with correct rotational alignment.
-> 3. Fit new grip; ensure secure.
-> **Notes:** No rotation under load. Do when grip is torn, slippery, or loose.
+[!PROCEDURE:Intermediate]] Replace green rubber grip
+Replace a torn, slippery, or loose green grip to restore comfort and control. If the end cap comes off with the grip, epoxy it back in place with the correct rotational alignment before fitting the new grip.
 
-<d[!TITLE]
-> Fixed handle replacement (legacy)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Higher risk of damaging shaft; follow manufacturer guidance where possible
-> [!TOOLS]
-> New fixed handle, epoxy, heat tools as needed
-> [!DESCRIPTION]
-> Replace a fixed handle or inner grip on legacy oar models. This is higher risk than screw-on handles.
-> [!STEPS] Fixed handle replacement (legacy)
-> **Skill level:** Intermediate
-> **Warnings:** Higher risk of damaging shaft; follow manufacturer guidance where possible
-> **Required tools/materials:** New fixed handle, epoxy, heat tools as needed
-> **Description:** Replace a fixed handle or inner grip on legacy oar models. This is higher risk than screw-on handles.
-> **Steps:**
->
-> 1. Remove old handle carefully (avoid damaging shaft).
-> 2. Clean and prepare shaft surface.
-> 3. Install new handle with proper alignment.
-> 4. Ensure cure per manufacturer specs.
-> **Notes:** Do when fixed handle or inner grip is damaged. This is professional work - follow manufacturer guidance.
+**Tools:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
+
+**Steps:**
+1. Unscrew and remove the old grip.
+2. If the end cap comes off: clean mating surfaces and epoxy it back with correct rotational alignment; allow full cure.
+3. Fit the new grip and tighten fully.
+
+**Check:** No rotation under load. Replace when grip is torn, slippery, or loose.
+[!/PROCEDURE]
+
+<div class="video-wrapper">
+  <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
+</div>
+
+[!PROCEDURE:Advanced]] Fixed handle replacement (legacy)
+Replace a fixed handle or inner grip on legacy oars. This is higher risk than screw-on grips: if you cannot remove the old handle without damaging the shaft, stop and arrange manufacturer repair.
+
+**Tools:** New fixed handle, epoxy, heat tools as needed
+
+**Steps:**
+1. Confirm you have the correct replacement handle and orientation marks.
+2. Remove the old handle carefully (avoid cutting into the shaft).
+3. Clean and prepare the bonding surface.
+4. Bond the new handle with correct alignment; keep it fixed until fully cured.
+
+**Check:** Handle alignment correct; no play or twist after cure.
+[!/PROCEDURE]
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
-</[!TITLE]
-> Sleeve replacement and pitch alignment
-> [!SKILL]
-> Advanced
-> [!WARNINGS]
-> Alignment is critical; incorrect pitch ruins rigging. Cannot restore shape/alignment = stop and send to manufacturer
-> [!TOOLS]
-> Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
-> [!DESCRIPTION]
-> Replace a worn, rotated, or cracked sleeve and ensure correct pitch alignment for consistent rigging.
-> [!STEPS] Sleeve replacement and pitch alignment
-> **Skill level:** Advanced
-> **Warnings:** Alignment is critical; incorrect pitch ruins rigging. Cannot restore shape/alignment = stop and send to manufacturer
-> **Required tools/materials:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
-> **Description:** Replace a worn, rotated, or cracked sleeve and ensure correct pitch alignment for consistent rigging.
-> **Steps:**
->
-> 1. Mark current orientation relative to blade.
-> 2. Remove sleeve carefully (avoid cutting into shaft).
-> 3. Clean shaft; dry fit new sleeve at correct distance.
-> 4. Apply adhesive; align pitch (back face of blade aligns with P/S marking).
-> 5. Hold alignment until cure.
-> **Notes:** Pitch correct; sleeve secure; distance correct for gearing. Refer to Concept2 documentation for exact specs.
+</div>
+
+## Sleeves
+
+Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
+
+[!PROCEDURE:Advanced]] Sleeve replacement and pitch alignment
+Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. Pitch errors ruin rigging consistency; if you cannot restore alignment or the shaft is damaged, send to the manufacturer.
+
+**Tools:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
+
+**Steps:**
+1. Measure and mark the current sleeve position and orientation relative to the blade.
+2. Remove the old sleeve carefully (avoid cutting into the shaft).
+3. Clean the shaft and dry fit the new sleeve at the correct distance for the required gearing.
+4. Apply adhesive, slide on the sleeve, and align pitch (back face of blade aligns with the P/S marking) using a jig or flat reference.
+5. Hold alignment until full cure.
+
+**Check:** Sleeve secure; pitch alignment correct; distance correct for gearing.
+[!/PROCEDURE]
 
 > [!INFO] Concept2 sleeve/pitch references (use these for exact specs)
+>
 > - [Sleeve & pitch instruction booklet](https://www.concept2.ch/files/pdf/us/oars/Oar_SleevePitchBooklet.pdf)
 > - [Sleeve replacement PDF (includes P/S alignment wording)](https://www.concept2.at/files/pdf/us/oars/Oar_SleeveReplacement.pdf)
 > - [Rigging and pitch checking notes](https://www.concept2.com/support/oars/how-to-videos-and-information)
-
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
 </div>
 
-##[!TITLE]
-> Collar inspection and re-set
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> None
-> [!TOOLS]
-> Marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
-> [!DESCRIPTION]
-> Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
-> [!STEPS] Collar inspection and re-set
-> **Skill level:** Intermediate
-> **Warnings:** None
-> **Required tools/materials:** Marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
-> **Description:** Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
-> **Steps:**
->
-> 1. Check collar tightness and condition (cracks, slipping, deformed wear surfaces).
-> [!TITLE]
-> Stabilise spoon delamination (inject epoxy)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Large delam or structural cracks = arrange manufacturer repair
-> [!TOOLS]
-> Epoxy, syringe, clamps/weights, release film
-> [!DESCRIPTION]
-> Early intervention on spoon delamination to prevent blade failure and structural damage.
-> [!STEPS]
+[!PROCEDURE:Intermediate]] Collar inspection and re-set
+Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
 
-### Spoons
+**Tools:** Marker, tape measure, collar tools appropriate to model, spare collars/clams if used
 
-> [!PROCEDURE]
-> **Title:** Stabilise spoon delamination (inject epoxy)
-> **Skill level:** Intermediate
-> **Warnings:** Large delam or structural cracks = arrange manufacturer repair
-> **Required tools/materials:** Epoxy, syringe, clamps/weights, release film
-> **Description:** Early intervention on spoon delamination to prevent blade failure and structural damage.
-> **Steps:**
->
-> 1. Clean and dry.
-> 2. Inject epoxy into delam.
-> 3. Clamp to restore shape; cure.
-> 4. Sand/fair lightly if needed.
-> **Notes:** No flex; sealed edges. Do when early delamination or edge damage is observed.
+**Steps:**
+1. Check collar condition and tightness (cracks, slipping marks, deformed wear surfaces).
+2. Measure inboard and compare across the set; mark a reference line on the shaft for quick visual checks.
+3. If the collar has moved: reset to the correct inboard and secure per that collar type (clamp/tape/clams).
+
+**Check:** Inboard consistent across the set; collar does not slip under load.
+[!/PROCEDURE]
+
+## Spoons
+
+For delamination or breakage, stabilise with epoxy:
+
+[!PROCEDURE:Intermediate]] Stabilise spoon delamination (inject epoxy)
+Early intervention on spoon delamination to prevent blade failure and structural damage. For large delamination, structural cracks, or blade-to-shaft joint issues, arrange manufacturer repair.
+
+**Tools:** Epoxy, syringe, clamps/weights, release film
+
+**Steps:**
+1. Clean and dry the area thoroughly.
+2. Inject epoxy into the delamination.
+3. Clamp/weight to restore shape and hold until cure (use release film where needed).
+4. Sand/fair lightly if needed.
+
+**Check:** No flex; sealed edges. Do when early delamination or edge damage is observed.
+[!/PROCEDURE]
 
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/Z5Vee-V-pO8" title="Spoon repair"></iframe>
@@ -248,6 +144,7 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 ### When to send to manufacturer
 
 Concept2 also runs **Regatta Service** at select events (complimentary repairs/maintenance for Concept2 oars):
+
 - [Concept2 Regatta Service](https://www.concept2.com/support/oars/about-regatta-service)
 
 - Large shaft damage.
@@ -255,4 +152,4 @@ Concept2 also runs **Regatta Service** at select events (complimentary repairs/m
 - Major spoon structural damage.
 - Any repair that would materially change stiffness/weight balance.
 
-Note: Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a repalcement pair.
+Note: Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a replacement pair.

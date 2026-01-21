@@ -29,87 +29,63 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 
 ## Daily checks
 
-> [!PROCEDURE]
-> [!TITLE]
-> Gate safety check
-> [!SKILL]
-> Beginner
-> [!WARNINGS]
-> Latch failure, cracked gate, or loose pin = stop-use
-> [!TOOLS]
-> None (or gate nut tool if something is loose)
-> [!DESCRIPTION]
-> Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load.
-> [!STEPS]
->
-> 1. Close each gate and confirm latch fully engages.
-> 2. Lift the oar handle firmly to confirm the oar cannot pop out.
-> 3. Wiggle gate vertically: there should be minimal play (no rattle).
-> 4. Confirm top nut/retainer is tight.
-> **Notes:** Secure closure; no rattle. Do this before every outing.
+[!PROCEDURE:Beginner]] Gate safety check
+Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load. Latch failure, cracked gate, or loose pin: stop-use.
+
+**Tools:** None (or gate nut tool if something is loose)
+
+**Steps:**
+1. Close each gate and confirm latch fully engages.
+2. Lift the oar handle firmly to confirm the oar cannot pop out.
+3. Wiggle gate vertically: there should be minimal play (no rattle).
+4. Confirm top nut/retainer is tight.
+
+**Check:** Secure closure; no rattle. Do this before every outing.
+[!/PROCEDURE]
 
 ## Clean and rebuild
 
-> [!PROCEDURE]
-> [!TITLE]
-> Disassemble, clean, rebuild gate stack
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body = replace parts/escalate
-> [!TOOLS]
-> Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
-> [!DESCRIPTION]
-> Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking.
-> [!STEPS]
->
-> 1. Remove top nut/retainer and lift off gate.
-> 2. Keep washer stacks grouped (bottom vs top). Photograph if needed.
-> 3. Clean pin and all washers. Inspect for corrosion.
-> 4. Inspect pitch bushings for cracks/ovalisation; replace if worn.
-> 5. Reassemble: washers arranged to eliminate vertical play while allowing free rotation.
-> 6. Tighten top nut and re-check closure.
-> [!TITLE]
-> Adjust gate height (washer stack)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> None
-> [!TOOLS]
-> Gate washers/shims, calipers/ruler, rigging sheet
-> [!DESCRIPTION]
-> When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
-> [!STEPS] Adjust gate height (washer stack)
-> **Skill level:** Intermediate
-> **Warnings:** None
-> **Required tools/materials:** Gate washers/shims, calipers/ruler, rigging sheet
-> **Description:** When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
-> **Steps:**
->
-> 1. Measure current height (club method). Record.
-> 2. Add/remove washers **symmetrically** to achieve target.
-> [!TITLE]
-> Set/verify pitch
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> If you cannot match pitch across sides, replace pin/gate components
-> [!TOOLS]
-> Pitch gauge, correct pitch bushings, rigging sheet
-> [!DESCRIPTION]
-> After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
-> [!STEPS] Set/verify pitch
-> **Skill level:** Intermediate
-> **Warnings:** If you cannot match pitch across sides, replace pin/gate components
-> **Required tools/materials:** Pitch gauge, correct pitch bushings, rigging sheet
-> **Description:** After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
-> **Steps:**
->
-> 1. Verify bushing pair angle markings.
-> 2. Install bushings correctly oriented.
-> 3. Measure pitch with gauge and confirm both sides match.
-> 4. Record bushing type/angle.
-> **Notes:** No pitch drift; both sides match.
+[!PROCEDURE:Intermediate]] Disassemble, clean, rebuild gate stack
+Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking. Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body: replace parts/escalate. If you cannot match pitch across sides, replace pin/gate components.
+
+**Tools:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
+
+**Steps:**
+1. Remove top nut/retainer and lift off gate.
+2. Keep washer stacks grouped (bottom vs top). Photograph if needed.
+3. Clean pin and all washers. Inspect for corrosion.
+4. Inspect pitch bushings for cracks/ovalisation; replace if worn.
+5. Reassemble: washers arranged to eliminate vertical play while allowing free rotation.
+6. Tighten top nut and re-check closure.
+
+**Check:** Gate rotates freely; no vertical play; latch closes cleanly.
+[!/PROCEDURE]
+
+[!PROCEDURE:Intermediate]] Adjust gate height (washer stack)
+When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
+
+**Tools:** Gate washers/shims, calipers/ruler, rigging sheet
+
+**Steps:**
+1. Measure current height (club method). Record.
+2. Add/remove washers **symmetrically** to achieve target.
+
+**Check:** Gate height matches rigging sheet; sides match.
+[!/PROCEDURE]
+
+[!PROCEDURE:Intermediate]] Set/verify pitch
+After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
+
+**Tools:** Pitch gauge, correct pitch bushings, rigging sheet
+
+**Steps:**
+1. Verify bushing pair angle markings.
+2. Install bushings correctly oriented.
+3. Measure pitch with gauge and confirm both sides match.
+4. Record bushing type/angle.
+
+**Check:** No pitch drift; both sides match.
+[!/PROCEDURE]
 
 > [!WARNING] Stop-use criteria (gates)
 >

@@ -52,6 +52,7 @@ We buy generic hardware from [Westfield Fasteners](https://www.westfieldfastener
 - [Eurow](https://www.eurow.eu/en/parts-rowing-boats.html)
 
 > [!INFO] Use marine-appropriate stainless (and avoid galvanic surprises)
+>
 > - **A2** stainless is roughly **304** grade; **A4** is roughly **316** grade (better chloride resistance).
 > - Prefer **A4/316** for any hardware that regularly gets wet (especially salt/brackish).
 > - Where stainless mates to aluminium (riggers, backstays), use isolating washers and a corrosion inhibitor to reduce galvanic corrosion.
@@ -67,6 +68,7 @@ We buy generic hardware from [Westfield Fasteners](https://www.westfieldfastener
 > `Bolt head → Flat washer → Hull/Rigger → Flat washer → (Split/spring washer if used) → Nut`
 >
 > Exceptions (still require flat washers against composite):
+>
 > - Bolts with **integral flanges** can substitute for the bolt-head washer (only if the flange is broad and smooth).
 
 ## Parts reference (club standard)
@@ -86,47 +88,37 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 
 ## Hardware audit and reassembly
 
-> [!PROCEDURE]
-> [!TITLE]
-> Hardware audit (riggers + critical fittings)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Spinning insert/stripped thread = stop and escalate. Avoid over-tightening and crushing hull
-> [!TOOLS]
-> Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
-> [!DESCRIPTION]
-> Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage.
-> [!STEPS]
->
-> 1. Pick a boat and work systematically: bow to stern.
-> 2. For each critical fastener (rigger bolts, pins, stretcher mounts):
->    - Check tightness.
->    - Check correct washer stack.
->    - Replace any corroded or stripped nuts (nyloc that spins freely is done).
-> 3. If disassembling: bag and label washers/spacers per location.
-> 4. Reassemble using the standard washer rule.
-> **Notes:** No missing washers; no loose fittings; riggers not rocking. Watch for mixed washer stacks and crushing split washers. Do monthly and after transport.
+[!PROCEDURE:Intermediate]] Hardware audit (riggers + critical fittings)
+Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage. Spinning insert/stripped thread: stop and escalate. Avoid over-tightening and crushing hull. Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull: stop and escalate.
 
-> [!PROCEDURE]
-> [!TITLE]
-> Freeing a seized stainless fastener (basic)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull = stop and escalate
-> [!TOOLS]
-> Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
-> [!DESCRIPTION]
-> Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
-> [!STEPS]
->
-> 1. Clean exposed threads. Apply penetrating oil. Wait.
-> 2. Use correctly sized tools; avoid rounding.
-> 3. Try tightening slightly then loosening.
-> 4. If still stuck: consider controlled heat on the nut only (last resort).
-> 5. Replace hardware after removal.
-> **Notes:** Threads intact; mating surfaces undamaged. Do when a nut/bolt will not turn.
+**Tools:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
+
+**Steps:**
+1. Pick a boat and work systematically: bow to stern.
+2. For each critical fastener (rigger bolts, pins, stretcher mounts):
+	- Check tightness.
+	- Check correct washer stack.
+	- Replace any corroded or stripped nuts (nyloc that spins freely is done).
+3. If disassembling: bag and label washers/spacers per location.
+4. Reassemble using the standard washer rule.
+
+**Check:** No missing washers; no loose fittings; riggers not rocking. Watch for mixed washer stacks and crushing split washers. Do monthly and after transport.
+[!/PROCEDURE]
+
+[!PROCEDURE:Intermediate]] Freeing a seized stainless fastener (basic)
+Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
+
+**Tools:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
+
+**Steps:**
+1. Clean exposed threads. Apply penetrating oil. Wait.
+2. Use correctly sized tools; avoid rounding.
+3. Try tightening slightly then loosening.
+4. If still stuck: consider controlled heat on the nut only (last resort).
+5. Replace hardware after removal.
+
+**Check:** Threads intact; mating surfaces undamaged. Do when a nut/bolt will not turn.
+[!/PROCEDURE]
 
 ## Preventing galling and seizure (stainless hardware)
 
@@ -139,10 +131,8 @@ Stainless-on-stainless threads can **gall** (cold-weld) without warning, especia
 
 Where you must keep threads clean (e.g., bonding inserts nearby), keep lubricant off the composite and wipe excess immediately.
 
-
 > [!WARNING] Stop-use criteria (hardware)
 >
 > - Any rigger/pin attachment that moves relative to the hull.
 > - Any cracked/bent rigger, pin, or pin mount.
 > - Any stripped/loose fastener on steering or footplate safety components.
-

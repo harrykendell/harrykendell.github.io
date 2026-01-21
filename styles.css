@@ -356,7 +356,6 @@ header.page-header {
     display: flex;
 }
 
-
 .section h4 {
     margin: 14px 0;
     font-size: 1rem;
@@ -573,24 +572,6 @@ blockquote p {
     max-height: 0;
     padding: 0 26px;
     overflow: hidden;
-}
-
-.procedure-steps {
-    margin: 0;
-}
-
-.procedure-steps ol {
-    margin: 0;
-    padding-left: 1.2rem;
-}
-
-.procedure-steps li {
-    margin-bottom: 6px;
-    line-height: 1.5;
-}
-
-.procedure-steps li:last-child {
-    margin-bottom: 0;
 }
 
 .procedure-description {

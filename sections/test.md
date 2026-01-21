@@ -119,18 +119,23 @@ greet('World')
 ## Procedures
 **Template for new procedures:**
 
-> [!PROCEDURE]
-> **Title:** [Enter Title Here]
-> **Skill level:** [beginner/intermediate/advanced]
-> **Warnings:** [Identify hazardous items/processes]
-> **Required tools/materials:** [List all needed tools and materials]
-> **Description:** [Brief description of what this procedure accomplishes]
-> **Steps:**
->
-> 1. [Step 1]
-> 2. [Step 2]
-> 3. [Step 3]
-> **Notes:** [Any additional notes or tips]
+[!PROCEDURE:beginner]] Enter title here
+First paragraph is the description of what this procedure accomplishes.
+
+**Tools:** List all needed tools and materials
+
+**Steps:**
+1. Step 1
+2. Step 2
+3. Step 3
+
+**Check:** Any checks or acceptance criteria
+
+> [!WARNING] Optional warnings
+> Identify hazardous items/processes.
+
+**Notes:** Any additional notes or tips
+[!/PROCEDURE]
 
 ## Special HTML Elements
 

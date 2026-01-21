@@ -86,25 +86,19 @@ Refer to this document for detailed troubleshooting:
 
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
-> [!PROCEDURE]
-> [!TITLE]
-> Quick electrical diagnosis (multimeter)
-> [!SKILL]
-> Intermediate
-> [!WARNINGS]
-> Do not test wet connectors
-> [!TOOLS]
-> Multimeter, contact cleaner
-> [!DESCRIPTION]
-> Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
-> [!STEPS]
->
-> 1. Dry connector; inspect for corrosion.
-> 2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
-> 3. **Speakers:** C–B should read as a load/short when speakers are wired.
-> 4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
-> [!NOTES]
-> Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
+[!PROCEDURE:Intermediate]] Quick electrical diagnosis (multimeter)
+Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins. Do not test wet connectors.
+
+**Tools:** Multimeter, contact cleaner
+
+**Steps:**
+1. Dry connector; inspect for corrosion.
+2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
+3. **Speakers:** C–B should read as a load/short when speakers are wired.
+4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
+
+**Check:** Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
+[!/PROCEDURE]
 
 ## Parts and sourcing
 
@@ -153,32 +147,24 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 - **Power** lines are polarity-sensitive: fuse appropriately and protect against shorts.
 - For long runs in wet boats, prefer a **jacketed cable** and seal every transition with adhesive-lined heatshrink.
 
-
 ## Harness build/repair procedure
 
-> [!PROCEDURE]
-> [!TITLE]
-> Build or repair a harness segment
-> [!SKILL]
-> Advanced
-> [!WARNINGS]
-> Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins = stop-use
-> [!TOOLS]
-> Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
-> [!DESCRIPTION]
-> Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress.
-> [!STEPS]
->
-> 1. Cut back to clean, undamaged cable.
-> 2. Strip jacket and conductors to specified length.
-> 3. Crimp contacts (pull test each).
-> 4. Insert into housing following pinout and keyway orientation.
-> 5. Add adhesive-lined heatshrink for strain relief and sealing.
-> 6. Continuity test end-to-end; then functional test with coxbox/speakers.
-> [!NOTES]
-> Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
+[!PROCEDURE:Advanced]] Build or repair a harness segment
+Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress. Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins: stop-use.
+
+**Tools:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
+
+**Steps:**
+1. Cut back to clean, undamaged cable.
+2. Strip jacket and conductors to specified length.
+3. Crimp contacts (pull test each).
+4. Insert into housing following pinout and keyway orientation.
+5. Add adhesive-lined heatshrink for strain relief and sealing.
+6. Continuity test end-to-end; then functional test with coxbox/speakers.
+
+**Check:** Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
 
 > [!WARNING] Stop-use criteria (electronics)
->
 > - Exposed conductors in the cockpit.
 > - Connector pins corroded to the point of overheating or intermittent contact.
+[!/PROCEDURE]
