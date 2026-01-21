@@ -21,7 +21,7 @@
     --danger: #b91c1c;
     --danger-soft: #fee2e2;
 
-    --warn: #b45309;
+    --warn: #f59e0b;
     --warn-soft: #fef3c7;
 }
 
@@ -56,10 +56,6 @@ body {
     position: relative;
 }
 
-.top {
-    height: 100vh;
-}
-
 .layout {
     display: flex;
     width: 100%;
@@ -71,7 +67,7 @@ body {
     align-items: flex-start;
 }
 
-/* Sidebar nav */
+/* Sidebar / TOC */
 .sidebar {
     position: sticky;
     top: var(--gap);
@@ -338,6 +334,10 @@ header.page-header {
     opacity: 1;
 }
 
+.section-content > :first-child {
+    margin-top: 0;
+}
+
 .section.collapsed .section-content {
     max-height: 0;
     padding: 0 26px;
@@ -399,12 +399,17 @@ li {
     margin-bottom: 4px;
 }
 
-/* Callouts */
+/* Callouts & Procedures - Shared Styles */
+blockquote,
+.procedure {
+    font-size: 0.9rem;
+    overflow: hidden;
+    margin: var(--gap-small) 0;
+}
+
 blockquote {
     padding: var(--gap-small);
     border-left: 4px solid var(--border-subtle);
-    font-size: 0.9rem;
-    margin: 8px 0 12px;
     background: var(--bg-elevated);
     color: var(--text-main);
 }
@@ -413,12 +418,17 @@ blockquote p {
     margin: 0;
 }
 
-.callout-title {
+.callout-title,
+.procedure-title {
     font-weight: 600;
-    margin: 0 0 8px 0;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.callout-title {
+    margin-bottom: 8px;
 }
 
 .callout-title svg {
@@ -464,35 +474,10 @@ blockquote p {
     color: var(--warn);
 }
 
-/* Procedures */
+/* Procedures - Unique Styles */
 .procedure {
-    background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius);
-    margin: 10px 0 14px;
-    font-size: 0.9rem;
-    overflow: hidden;
-    box-shadow: var(--shadow-soft);
-}
-
-.procedure-header {
-    background: var(--bg);
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-subtle);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.procedure-title {
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--bristol-green);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
 }
 
 .procedure-description {
@@ -505,13 +490,35 @@ blockquote p {
     border-bottom: 1px solid var(--border-subtle);
 }
 
-.procedure-title svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    display: block;
-    color: var(--bristol-green);
-    opacity: 0.8;
+.procedure-skill-badge {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border: 1px solid var(--border-subtle);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.procedure-header {
+    background: var(--bg);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s;
+}
+
+.procedure-header:hover {
+    background: #ececf1;
+}
+
+.procedure-title {
+    font-size: 1rem;
 }
 
 .procedure-skill-badge {
@@ -556,34 +563,20 @@ blockquote p {
 }
 
 .procedure-content {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 14px 16px;
+    padding: var(--gap-small);
+    transition:
+        max-height 0.1s ease,
+        padding 0.1s ease;
 }
 
-.procedure-field {
-    margin: 0;
-    line-height: 1.5;
+.procedure.collapsed .procedure-content {
+    max-height: 0;
+    padding: 0 26px;
+    overflow: hidden;
 }
-
-.procedure-field strong {
-    color: var(--bristol-green);
-    font-weight: 600;
-}
-
 
 .procedure-steps {
     margin: 0;
-    background: transparent;
-}
-
-.procedure-steps strong {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--bristol-green);
-    font-size: 0.95rem;
-    font-weight: 600;
 }
 
 .procedure-steps ol {
@@ -594,11 +587,20 @@ blockquote p {
 .procedure-steps li {
     margin-bottom: 6px;
     line-height: 1.5;
-    color: var(--text-main);
 }
 
 .procedure-steps li:last-child {
     margin-bottom: 0;
+}
+
+.procedure-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-style: italic;
+    margin: 0 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 /* Tables */
@@ -672,16 +674,6 @@ hr {
     border: none;
     border-top: 1px dashed var(--border-subtle);
     margin: var(--gap) 0;
-}
-
-.themed-iframe {
-    display: block;
-    width: 100%;
-    min-height: 420px;
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-elevated);
-    margin: 0;
-    padding: 0;
 }
 
 /* Figures / images */

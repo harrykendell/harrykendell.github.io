@@ -3,7 +3,8 @@
  * Handles callouts, tables, headings, and reference-style links.
  */
 
-function slugify(text) {
+function slugify(text)
+{
     return text
         .toLowerCase()
         .trim()
@@ -12,12 +13,9 @@ function slugify(text) {
         .replace(/-+/g, "-");
 }
 
-function transformProcedures(rootEl) {
-    const procedureSvg =
-        '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L5 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>';
-
+function transformProcedures(rootEl)
+{
     const blockquotes = Array.from(rootEl.querySelectorAll("blockquote"));
-    console.log("Transforming procedures:", blockquotes.length);
 
     blockquotes.forEach((blockquote) => {
         const text = blockquote.textContent || "";
@@ -25,17 +23,14 @@ function transformProcedures(rootEl) {
             return;
         }
 
-        console.log("Found PROCEDURE blockquote");
-        console.log("Blockquote HTML:", blockquote.innerHTML);
-
         const fields = {
-            title: "",
-            skillLevel: "",
-            warnings: "",
-            tools: "",
-            description: "",
-            steps: [],
-            notes: "",
+            title : "",
+            skillLevel : "",
+            warnings : "",
+            tools : "",
+            description : "",
+            steps : [],
+            notes : "",
         };
 
         // Get all text content and parse line by line
@@ -56,8 +51,7 @@ function transformProcedures(rootEl) {
 
         // Extract notes - might span multiple lines
         const notesMatch = innerHTML.match(
-            /<strong>Notes:<\/strong>\s*([^<]+(?:<[^>]+>[^<]*)*)/i
-        );
+            /<strong>Notes:<\/strong>\s*([^<]+(?:<[^>]+>[^<]*)*)/i);
         if (notesMatch) {
             fields.notes = notesMatch[1].replace(/<[^>]+>/g, "").trim();
         }
@@ -75,8 +69,6 @@ function transformProcedures(rootEl) {
                 }
             });
         });
-
-        console.log("Parsed fields:", fields);
 
         // Build the HTML structure
         const procedureDiv = document.createElement("div");
@@ -97,22 +89,14 @@ function transformProcedures(rootEl) {
 
         const titleDiv = document.createElement("div");
         titleDiv.className = "procedure-title";
-        titleDiv.innerHTML = `${procedureSvg} <span>${fields.title}</span>`;
+        titleDiv.innerHTML = `<span>🛠</span><span>${fields.title}</span>`;
 
         // Add skill level badge if present
         if (fields.skillLevel) {
             const skillBadge = document.createElement("span");
             skillBadge.className = "procedure-skill-badge";
             skillBadge.textContent = fields.skillLevel;
-            // Add data attribute for styling based on skill level
-            const skillLower = fields.skillLevel.toLowerCase();
-            if (skillLower.includes("beginner")) {
-                skillBadge.setAttribute("data-skill", "beginner");
-            } else if (skillLower.includes("intermediate")) {
-                skillBadge.setAttribute("data-skill", "intermediate");
-            } else if (skillLower.includes("advanced")) {
-                skillBadge.setAttribute("data-skill", "advanced");
-            }
+            skillBadge.setAttribute("data-skill", fields.skillLevel.toLowerCase());
             titleDiv.appendChild(skillBadge);
         }
 
@@ -122,11 +106,23 @@ function transformProcedures(rootEl) {
         const contentDiv = document.createElement("div");
         contentDiv.className = "procedure-content";
 
-        // Add warnings
+        // Add description first (without label)
+        if (fields.description) {
+            const descDiv = document.createElement("div");
+            descDiv.className = "procedure-description";
+            descDiv.textContent = fields.description;
+            contentDiv.appendChild(descDiv);
+        }
+
+        // Add warnings using callout system
         if (fields.warnings) {
-            const warnDiv = document.createElement("div");
-            warnDiv.className = "procedure-field procedure-warnings";
-            warnDiv.innerHTML = `<strong>⚠ Safety warnings</strong><div>${fields.warnings}</div>`;
+            const warnDiv = document.createElement("blockquote");
+            const titleP = document.createElement("p");
+            titleP.textContent = "[!DANGER] Safety Considerations";
+            warnDiv.appendChild(titleP);
+            const contentP = document.createElement("p");
+            contentP.textContent = fields.warnings;
+            warnDiv.appendChild(contentP);
             contentDiv.appendChild(warnDiv);
         }
 
@@ -134,23 +130,15 @@ function transformProcedures(rootEl) {
         if (fields.tools) {
             const toolsDiv = document.createElement("div");
             toolsDiv.className = "procedure-field procedure-tools";
-            toolsDiv.innerHTML = `<strong>🔧 Tools & materials:</strong> ${fields.tools}`;
+            toolsDiv.innerHTML = `<h4>Tools & materials:</h4> ${fields.tools}`;
             contentDiv.appendChild(toolsDiv);
-        }
-
-        // Add description
-        if (fields.description) {
-            const descDiv = document.createElement("div");
-            descDiv.className = "procedure-field procedure-description";
-            descDiv.innerHTML = `<strong>Description:</strong> ${fields.description}`;
-            contentDiv.appendChild(descDiv);
         }
 
         // Add steps
         if (fields.steps.length > 0) {
             const stepsDiv = document.createElement("div");
             stepsDiv.className = "procedure-steps";
-            const stepsTitle = document.createElement("strong");
+            const stepsTitle = document.createElement("h4");
             stepsTitle.textContent = "Steps:";
             stepsDiv.appendChild(stepsTitle);
 
@@ -164,41 +152,52 @@ function transformProcedures(rootEl) {
             contentDiv.appendChild(stepsDiv);
         }
 
-        // Add notes
+        // Add notes using callout system
         if (fields.notes) {
-            const notesDiv = document.createElement("div");
-            notesDiv.className = "procedure-field procedure-notes";
-            notesDiv.innerHTML = `<strong>Notes:</strong> ${fields.notes}`;
+            const notesDiv = document.createElement("blockquote");
+            const titleP = document.createElement("p");
+            titleP.textContent = "[!INFO] Notes";
+            notesDiv.appendChild(titleP);
+            const contentP = document.createElement("p");
+            contentP.textContent = fields.notes;
+            notesDiv.appendChild(contentP);
             contentDiv.appendChild(notesDiv);
         }
 
         procedureDiv.appendChild(contentDiv);
         blockquote.replaceWith(procedureDiv);
-        console.log("Procedure transformation complete");
+
+        // Initialize procedure as collapsed
+        // procedureDiv.classList.add("collapsed");
+
+        // Add click handler for collapse/expand
+        headerDiv.addEventListener("click", () => {
+            procedureDiv.classList.toggle("collapsed");
+        });
     });
 }
 
-function transformCallouts(rootEl) {
+function transformCallouts(rootEl)
+{
     const classMap = {
-        INFO: "callout callout--info",
-        DANGER: "callout callout--danger",
-        WARNING: "callout callout--warn",
+        INFO : "callout callout--info",
+        DANGER : "callout callout--danger",
+        WARNING : "callout callout--warn",
     };
     const svgMap = {
-        INFO: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>',
-        WARNING:
+        INFO : '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>',
+        WARNING :
             '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>',
-        DANGER:
+        DANGER :
             '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>',
     };
 
     const blockquotes = Array.from(rootEl.querySelectorAll("blockquote"));
-    console.log("Transforming callouts:", blockquotes.length);
     blockquotes.forEach((blockquote) => {
         // Ensure all paragraphs are wrapped in <p> tags
         blockquote.innerHTML = blockquote.innerHTML
-            .trim()
-            .replace(/\n/g, "</p><p>");
+                                   .trim()
+                                   .replace(/\n/g, "</p><p>");
 
         const firstParagraph = blockquote.querySelector("p");
         if (!firstParagraph) {
@@ -220,7 +219,8 @@ function transformCallouts(rootEl) {
     });
 }
 
-function extractTitleAndContentFromMarkdown(md) {
+function extractTitleAndContentFromMarkdown(md)
+{
     const lines = md.split(/\r?\n/);
     let title = null;
     let start = 0;
@@ -236,7 +236,8 @@ function extractTitleAndContentFromMarkdown(md) {
     return { title, content };
 }
 
-function addHeadingIds(rootEl, sectionId) {
+function addHeadingIds(rootEl, sectionId)
+{
     const headings = rootEl.querySelectorAll("h2, h3, h4, h5, h6");
     const seenIds = new Set();
     headings.forEach((h) => {
@@ -258,7 +259,8 @@ function addHeadingIds(rootEl, sectionId) {
     });
 }
 
-function downgradeHeadings(rootEl) {
+function downgradeHeadings(rootEl)
+{
     const headings = rootEl.querySelectorAll("h1, h2, h3, h4, h5");
     headings.forEach((heading) => {
         const currentLevel = parseInt(heading.tagName.slice(1), 10);
@@ -278,13 +280,12 @@ function downgradeHeadings(rootEl) {
     });
 }
 
-function wrapTables(rootEl) {
+function wrapTables(rootEl)
+{
     const tables = Array.from(rootEl.querySelectorAll("table"));
     tables.forEach((table) => {
         if (
-            table.parentElement &&
-            table.parentElement.classList.contains("table-scroll")
-        ) {
+            table.parentElement && table.parentElement.classList.contains("table-scroll")) {
             return;
         }
         const wrapper = document.createElement("div");
@@ -294,7 +295,8 @@ function wrapTables(rootEl) {
     });
 }
 
-function extractYouTubeId(src) {
+function extractYouTubeId(src)
+{
     try {
         const url = new URL(src);
         if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
@@ -308,7 +310,8 @@ function extractYouTubeId(src) {
     }
 }
 
-function buildYouTubeEmbed(iframe, videoId) {
+function buildYouTubeEmbed(iframe, videoId)
+{
     const title = iframe.getAttribute("title") || "YouTube video";
 
     let dataSrc = iframe.getAttribute("src") || "";
@@ -335,17 +338,14 @@ function buildYouTubeEmbed(iframe, videoId) {
 
     const iconPath = document.createElementNS(
         "http://www.w3.org/2000/svg",
-        "path"
-    );
+        "path");
     iconPath.setAttribute(
         "d",
-        "M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z"
-    );
+        "M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z");
     iconPath.setAttribute("fill", "#ff0000");
     const iconTriangle = document.createElementNS(
         "http://www.w3.org/2000/svg",
-        "path"
-    );
+        "path");
     iconTriangle.setAttribute("d", "M45 24 27 14v20z");
     iconTriangle.setAttribute("fill", "#ffffff");
     icon.appendChild(iconPath);
@@ -375,7 +375,8 @@ function buildYouTubeEmbed(iframe, videoId) {
     return wrapper;
 }
 
-function transformYouTubeEmbeds(rootEl) {
+function transformYouTubeEmbeds(rootEl)
+{
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
     console.log("Transforming YouTube embeds", iframes.length);
     iframes.forEach((iframe) => {
@@ -396,7 +397,8 @@ function transformYouTubeEmbeds(rootEl) {
  * @param {string} sectionId - The section ID
  * @returns {HTMLElement} The section element
  */
-function markdownToSection(markdown, sectionId) {
+function markdownToSection(markdown, sectionId)
+{
     const { title, content } = extractTitleAndContentFromMarkdown(markdown);
     const html = marked.parse(content);
 

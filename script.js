@@ -69,8 +69,7 @@ function setTocDepth(depth) {
 
 function refreshSidebarLinksCache() {
   sidebarLinksCache = Array.from(
-    document.querySelectorAll(".sidebar a[href^='#']")
-  );
+    document.querySelectorAll(".sidebar a[href^='#']"));
 }
 
 function setupTocDepthControl() {
@@ -238,8 +237,7 @@ function generateSidebar() {
 
     // Create sub-list for content headings if any exist
     const headings = section.querySelectorAll(
-      ".section-content h2[id], .section-content h3[id], .section-content h4[id], .section-content h5[id], .section-content h6[id]"
-    );
+      ".section-content h2[id], .section-content h3[id], .section-content h4[id], .section-content h5[id], .section-content h6[id]");
     const effectiveDepth = getEffectiveTocLevel();
     const visibleHeadings = Array.from(headings).filter((heading) => {
       const level = parseInt(heading.tagName.slice(1), 10);
@@ -291,16 +289,14 @@ function generateSidebar() {
 
   console.debug(
     "Sidebar: items rendered",
-    sidebarList.querySelectorAll("li").length
-  );
+    sidebarList.querySelectorAll("li").length);
   console.groupEnd();
   refreshSidebarLinksCache();
 }
 
 function setupActiveTracking() {
   const headings = document.querySelectorAll(
-    ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]"
-  );
+    ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]");
   function isCollapsedHeading(heading) {
     if (heading.classList && heading.classList.contains("section")) {
       return false;
@@ -347,19 +343,12 @@ function setupActiveTracking() {
     if (activeElement) {
       let activeLink;
       if (
-        activeElement.tagName === "H2" ||
-        activeElement.tagName === "H3" ||
-        activeElement.tagName === "H4" ||
-        activeElement.tagName === "H5" ||
-        activeElement.tagName === "H6"
-      ) {
+        activeElement.tagName === "H2" || activeElement.tagName === "H3" || activeElement.tagName === "H4" || activeElement.tagName === "H5" || activeElement.tagName === "H6") {
         activeLink = document.querySelector(
-          `.sidebar a[href="#${activeElement.id}"]`
-        );
+          `.sidebar a[href="#${activeElement.id}"]`);
       } else {
         activeLink = document.querySelector(
-          `.sidebar a[data-section="${activeElement.id}"]`
-        );
+          `.sidebar a[data-section="${activeElement.id}"]`);
       }
       if (activeLink) {
         activeLink.classList.add("active");
@@ -374,7 +363,12 @@ function setupActiveTracking() {
 
   window.updateActiveLink = updateActiveLink;
 
-  window.addEventListener("scroll", updateActiveLink, { passive: true });
+  // Debounce scroll listener for better performance
+  let scrollTimeout;
+  window.addEventListener("scroll", () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(updateActiveLink, 50);
+  }, { passive: true });
   updateActiveLink();
 }
 
@@ -429,8 +423,7 @@ function setupSectionToggle() {
           const isCollapsed = section.classList.contains("collapsed");
           localStorage.setItem(
             `section-${sectionId}`,
-            isCollapsed ? "collapsed" : "expanded"
-          );
+            isCollapsed ? "collapsed" : "expanded");
           // Update sidebar arrow
           updateSidebarArrow(sectionId, isCollapsed);
           if (typeof window.updateActiveLink === "function") {
@@ -444,16 +437,14 @@ function setupSectionToggle() {
 
 function updateSidebarArrow(sectionId, isCollapsed) {
   const arrow = document.querySelector(
-    `.sidebar .nav-arrow[data-section="${sectionId}"]`
-  );
+    `.sidebar .nav-arrow[data-section="${sectionId}"]`);
 
   if (arrow) {
     arrow.classList.toggle("collapsed", !!isCollapsed);
   }
 
   const sublist = document.querySelector(
-    `.sidebar .sub-list[data-parent-section="${sectionId}"]`
-  );
+    `.sidebar .sub-list[data-parent-section="${sectionId}"]`);
   if (sublist) {
     sublist.classList.toggle("collapsed", !!isCollapsed);
   }
@@ -496,8 +487,7 @@ function setupSidebarLinks() {
       if (href && href.startsWith("#")) {
         e.preventDefault();
 
-        const targetSectionId =
-          link.getAttribute("data-parent") || link.getAttribute("data-section");
+        const targetSectionId = link.getAttribute("data-parent") || link.getAttribute("data-section");
 
         if (targetSectionId) {
           const section = document.getElementById(targetSectionId);
