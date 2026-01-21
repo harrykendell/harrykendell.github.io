@@ -1,4 +1,4 @@
-# Boats
+<!-- # Boats
 
 ## Boat care & routine maintenance
 
@@ -111,4 +111,220 @@ Typical steps:
 - Sand back.
 - Fair in.
 - Prime and paint.
-- Polish, then lacquer if required.
+- Polish, then lacquer if required. -->
+# Boats
+
+## Routine care & cleaning
+
+**Procedure: Post-outing wash-down**
+
+- **Skill level:** Beginner
+- **When to do it:** After every outing (mandatory)
+- **Tools & materials:** hose, bucket, mild soap, soft brush, microfibre cloths
+- **Parts:** none
+- **Safety:** avoid pressure-washing near seams, decals, or hatch seals
+- **Steps:**
+  1. Rinse hull, riggers, and runners/tracks with fresh water.
+  2. Wash with mild soap (inside and outside), then rinse thoroughly.
+  3. Wipe dry with microfibre cloth (especially runners and inside cockpit).
+  4. Open bow/stern hatches briefly to ventilate. Close once dry.
+  5. Quick visual check: fin/rudder, obvious scratches, loose hardware.
+- **Checks:** no standing water; tracks feel smooth; no new obvious cracks
+- **Common failure modes:** leaving salt = corrosion; leaving water = mould and seized hardware
+- **Escalation:** if you see cracks, soft spots, or impact damage, report and tag the boat
+
+**Procedure: Maintenance day deep-clean**
+
+- **Skill level:** Intermediate
+- **When to do it:** Weekly/biweekly (fleet dependent)
+- **Tools & materials:** standard tool kit, brushes, microfibres, vinegar (dilute), hull cleaner (optional)
+- **Parts:** replacement washers, nyloc nuts as needed
+- **Safety:** gloves/eye protection for cleaners
+- **Steps:**
+  1. Remove seats and clean wheels/tracks.
+  2. Remove selected hardware (rigger bolts, key fasteners) and check for missing washers.
+  3. Inspect for cracks in seats, riggers, footplates.
+  4. Remove limescale with diluted vinegar; rinse thoroughly.
+  5. If using a hull cleaner (e.g., Starbrite): apply briefly, scrub lightly, rinse thoroughly.
+- **Checks:** no missing washers; all critical bolts tightened; steering functional
+- **Common failure modes:** reassembly mistakes (washer order); over-cleaning with aggressive chemicals
+- **Escalation:** stripped inserts, seized bolts, or any structural cracking → escalate to equipment officer
+
+**Procedure: Periodic polish**
+
+- **Skill level:** Intermediate
+- **When to do it:** As needed (typically end-of-season)
+- **Tools & materials:** fine-cut compound, foam pad, low-RPM polisher, microfibres, wax (if used)
+- **Safety:** eye protection; keep cables clear of water; do not overheat paint
+- **Steps:**
+  1. Wash and dry the hull completely.
+  2. Machine polish at low RPM, keeping the pad moving.
+  3. Wipe residue and inspect. Repeat lightly if needed.
+  4. Apply wax/sealant if part of club policy.
+- **Checks:** finish restored without burn-through
+- **Escalation:** if paint is thin or you see primer/carbon, stop and plan professional repaint
+
+## Storage and transport
+
+**Storage rules (always):**
+
+- Store indoors where possible; avoid long-term UV exposure.
+- Support boats on correct slings/trestles at approved points.
+- Keep hatches closed during storage (after drying) to prevent pests and humidity cycling.
+- Do not store with riggers bearing abnormal loads; avoid leaning shells against hard edges.
+
+**Procedure: Trailer loading and transport**
+
+- **Skill level:** Beginner (with supervision for large boats)
+- **When to do it:** Every transport
+- **Tools & materials:** straps, padding, fin/rudder protectors, tape
+- **Safety:** pinch points; overhead hazards; avoid strap crush on decks
+- **Steps:**
+  1. Confirm fin/rudder clearance and protection.
+  2. Place hull in cradles; ensure contact points are padded.
+  3. Strap snugly (no deck crushing). Use bow/stern lines to prevent fore-aft movement.
+  4. Secure loose riggers or remove if required.
+  5. After 10–15 minutes driving, stop and re-check strap tension.
+- **Checks:** no movement; fin/rudder protected
+- **Escalation:** if the boat flexes under straps, stop and re-rig the support points
+
+## Inspection and damage triage
+
+> [!WARNING] Stop-use criteria (shell)
+> Take the boat **out of service immediately** if any of the following are true:
+>
+> - Cracks radiating from rigger mounting areas or along structural ribs.
+> - Any **soft spot** that is growing, especially on the hull near the waterline or near the fin box.
+> - Fin box movement, cracking, or leaking (water ingress).
+> - Seat track mounts/inserts moving or pulling out.
+> - Delamination you can flex by hand, or that sounds “dead” in a tap test over a large area.
+> - Any puncture where core is exposed and has been wet.
+
+**Procedure: Damage triage (cosmetic vs structural)**
+
+- **Skill level:** Intermediate
+- **When to do it:** After any impact, or when new damage is observed
+- **Tools & materials:** bright light, marker/tape, camera, coin/tap hammer, ruler
+- **Safety:** gloves if fibres exposed
+- **Steps:**
+  1. Clean the area; damage is hard to classify when dirty.
+  2. Photograph with a scale (ruler/coin). Mark the boundary with tape.
+  3. Tap test outward from the damage: listen for change from “sharp” to “dull”.
+  4. Check both sides (inside cockpit and outside hull) if accessible.
+  5. Classify:
+     - **Cosmetic:** paint/gelcoat scratch with no fibre break, no soft spot.
+     - **Minor structural:** shallow fibre damage limited area, no core crush.
+     - **Structural:** core crush, delamination, cracks through skin, puncture.
+  6. Decide next action: seal-and-monitor / in-house repair / professional repair.
+- **Checks:** damage logged; boat tagged appropriately
+- **Common failure modes:** underestimating hidden delamination; ignoring water ingress
+- **Escalation:** uncertain classification → treat as structural and escalate
+
+## Composite construction primer
+
+Most racing shells are sandwich structures:
+
+- **Outer and inner skins:** carbon and/or aramid (Kevlar) and/or glass fibre in multiple plies.
+- **Core:** often Nomex honeycomb.
+- **Finish:** 2K automotive-style paint (common in high-end shells) or gelcoat (older/cheaper builds).
+
+Repair implications:
+
+- You can do strong wet layups and vacuum-bagging in-house.
+- You generally **cannot** replicate factory 2K paint safely without proper spray/ventilation.
+- You typically **cannot** oven-cure a whole boat; cure at ambient and avoid heat damage.
+
+## Composite repairs (overview)
+
+Useful reading:
+
+- [Vacuum bagging (West System)](https://eu.westsystem.com/app/uploads/2022/10/VacuumBag-7th-Ed.pdf)
+- [Fibreglass manual (West System)](https://eu.westsystem.com/app/uploads/2022/10/Fibreglass-Manual-2015.pdf)
+- [Cobonded tapered scarf repairs (CompositesWorld)](https://www.compositesworld.com/articles/a-second-look-at-cobonded-tapered-scarf-repairs-for-composite-structures)
+- [Damage classification in sandwich structures](https://www.aircraftsystemstech.com/2019/06/damage-classification-sandwich.html)
+
+<div class="figure-grid">
+  <figure class="figure-grid-item">
+    <img src="imgs/hull_damage_example.jpg" alt="Localized hull damage before scarf repair" />
+    <div class="figure-body">
+      <p class="figure-caption">Example of localized hull damage before any prep work.</p>
+    </div>
+  </figure>
+  <figure class="figure-grid-item">
+    <img src="imgs/hull_repair_scarf.jpg" alt="Prepared scarf joint area before layup" />
+    <div class="figure-body">
+      <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>
+    </div>
+  </figure>
+</div>
+
+**Repair decision rules (practical):**
+
+- **Seal and monitor (in-house, fast):** hairline paint cracks, superficial scratches, tiny gelcoat chips.
+- **In-house structural repair:** localised skin damage, small delamination, small punctures where core can be dried and replaced.
+- **Professional repair:** large-area delamination, fin box rebuild, major core crush, long cracks near rigger mounts, any damage that changes hull shape.
+
+## Composite repairs (procedures)
+
+**Procedure: Cosmetic scratch/chip seal**
+
+- **Skill level:** Beginner → Intermediate
+- **When to do it:** As soon as practical (prevents water ingress)
+- **Tools & materials:** fine sandpaper (400–800), IPA, small brush, epoxy or clearcoat/paint touch-up
+- **Parts:** none
+- **Safety:** gloves; avoid breathing sanding dust
+- **Steps:**
+  1. Clean and dry the area.
+  2. Lightly sand the damaged paint edge to remove sharp flaking.
+  3. Wipe with IPA; allow to dry.
+  4. Apply a thin seal coat (epoxy or matching touch-up) over exposed fibre/primer.
+  5. Allow to cure; lightly sand and blend if needed.
+- **Checks:** no exposed fibre; no sharp edges
+- **Escalation:** if fibres are broken or area feels soft → treat as structural
+
+**Procedure: Small delamination stabilisation (inject + clamp)**
+
+- **Skill level:** Intermediate
+- **When to do it:** Early, before delam grows
+- **Tools & materials:** syringe, low-viscosity epoxy, masking tape, clamps/weights, wax paper/release film
+- **Safety:** gloves; keep epoxy off paint where possible
+- **Steps:**
+  1. Define boundary with tap test; mark with tape.
+  2. Drill a tiny injection hole at the edge of delam (only through outer skin).
+  3. Warm the area slightly (optional) to reduce viscosity (do not overheat).
+  4. Inject epoxy until it wets the delam area (watch for squeeze-out at boundary).
+  5. Cover with release film/wax paper and clamp/weight to restore shape.
+  6. Cure fully; sand/finish cosmetically.
+- **Checks:** tap test sounds uniform; no flex by hand
+- **Common failure modes:** not enough epoxy penetration; clamping dents the hull
+- **Escalation:** if delam is large or near structural attachments → scarf repair or professional
+
+**Procedure: Scarf repair (structural skin + core)**
+
+- **Skill level:** Professional
+- **When to do it:** punctures, core crush, structural cracks
+- **Tools & materials:** grinder/sander, vacuum, carbon cloth/tape, core, epoxy, peel ply, perforated film, breather, bag film, tacky tape, vacuum pump, fairing filler, primers/paint
+- **Safety:** respirator, goggles, gloves, ventilation
+- **Steps:**
+  1. **Open up damage:** remove all broken laminate/core to sound material. Round corners.
+  2. **Scarf/taper:** bevel skins to a shallow taper (typical 12:1 or longer).
+  3. **Dry-fit core:** cut replacement core flush with surrounding; bond in with thickened epoxy.
+  4. **Layup:** cut plies to fill scarf (stepped patches); wet out and lay in order.
+  5. **Vacuum bag:** peel ply → perf film → breather → bag. Pull vacuum and watch for resin starvation.
+  6. **Cure:** allow full cure (do not disturb shape).
+  7. **Sand/shape:** bring flush with surrounding.
+  8. **Fair:** apply fairing compound; sand smooth.
+  9. **Prime/paint:** apply compatible primer and paint (air-dry system). Blend and polish.
+- **Checks:** thickness matches surrounding; no hard steps; tap test uniform; finish sealed
+- **Common failure modes:** leaving damaged laminate; too-steep scarf; starving laminate under vacuum; creating a stiff “hard patch” edge
+- **Escalation:** if you cannot restore shape/alignment, stop and send out
+
+## Supplies and suppliers
+
+We keep supplies mainly from:
+
+- [YourSprayPaints](https://www.yourspraypaints.com/)
+- [EasyComposites](https://www.easycomposites.co.uk)
+- [EC Fibreglass Supplies](https://www.ecfibreglasssupplies.co.uk)
+
+Stock list is in Appendix C.

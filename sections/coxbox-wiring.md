@@ -1,6 +1,6 @@
-# Coxbox wiring
+<!-- # Coxbox wiring -->
 
-<figure class="figure figure--float-right">
+<!-- <figure class="figure figure--float-right">
   <img
     src="imgs/coxbox_plug.jpg"
     alt="Close-up of a coxbox plug showing pin layout"
@@ -64,4 +64,75 @@ The Amphenol 44 series is designed for 14-18 AWG conductors. Suitable cable type
 - [YY control cable 1.5 mm²][cable-yy] (cheaper but less well insulated / waterproof, so may degrade faster).
 
 [cable-h07]: https://www.cef.co.uk/catalogue/products/2014148-1-5mm-2-core-ho7rnf-rubber-flexible-cable-cut-length-sold-by-the-mtr
-[cable-yy]: https://www.cef.co.uk/catalogue/products/4835737-1-5mm-2-core-yy-control-flexible-cable-100m
+[cable-yy]: https://www.cef.co.uk/catalogue/products/4835737-1-5mm-2-core-yy-control-flexible-cable-100m -->
+
+# Coxbox wiring and boat harnesses
+
+<figure class="figure figure--float-right">
+  <img src="imgs/coxbox_plug.jpg" alt="Close-up of a coxbox plug showing pin layout" />
+  <div class="figure-body">
+    <p class="figure-title">Reference photo of a coxbox plug</p>
+    <p class="figure-caption">
+      Match the pin numbering and keyway orientation shown here when assembling new harnesses or replacing plugs.
+    </p>
+  </div>
+</figure>
+
+The wiring harness is relatively simple, with 5 pins on the main plug. These are split into speakers, rate, and charging pins. Not all pins are used in every connector, so wiring can break out to 2-pin or 4-pin plugs where needed.
+
+## Troubleshooting
+
+Refer to this document for detailed troubleshooting:
+
+- <http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf>
+
+**Procedure: Quick electrical diagnosis (multimeter)**
+
+- **Skill level:** Intermediate
+- **When to do it:** when rate/speakers/charging do not work
+- **Tools & materials:** multimeter, contact cleaner
+- **Safety:** do not test wet connectors
+- **Steps:**
+  1. Dry connector; inspect for corrosion.
+  2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
+  3. **Speakers:** C–B should read as a load/short when speakers are wired.
+  4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
+- **Checks:** values consistent; if not, locate break by testing each segment
+
+## Parts and sourcing
+
+Harness components are sold at significant markup by NK Sports, Oarsport, etc. The connectors appear to be based on the [Amphenol 44 series](https://www.amphenol-sine.com/pdf/catalog/44-Series.pdf).
+
+**Components (club standard):**
+
+- Coxbox plug: [044-104-10004-02](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-104-10004-02?qs=tA%252Bq7m13GXUySe5HIfp6fg%3D%3D)
+- 2-pin plugs: [044-103-10002](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-103-10002?qs=tA%252Bq7m13GXW6faQI3kLxYw%3D%3D), [044-104-10002-02](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-104-10002-02?qs=tA%252Bq7m13GXWv2d8caGUzFQ%3D%3D)
+- Crimps: [044-100-1414P-100-101](https://www.mouser.co.uk/c/?q=044%20100%201414P%20100%20101), [044-102-1414S-100-101](https://www.mouser.co.uk/c/?q=044%20102%201414S%20100%20101)
+- Heat shrink: [DWFR-6/2-0-STK](https://www.mouser.co.uk/ProductDetail/TE-Connectivity-Raychem/DWFR-6-2-0-STK?qs=YeFsEeYZIJnMEfWsJKC2lA%3D%3D), [DWFR-16/4-0-STK](https://www.mouser.co.uk/ProductDetail/TE-Connectivity-Raychem/DWFR-16-4-0-STK?qs=YeFsEeYZIJkJLuipLRO0CA%3D%3D)
+
+Suitable cable types:
+
+- [H07RN-F 1.5 mm² rubber flex](https://www.cef.co.uk/catalogue/products/2014148-1-5mm-2-core-ho7rnf-rubber-flexible-cable-cut-length-sold-by-the-mtr)
+- [YY control cable 1.5 mm²](https://www.cef.co.uk/catalogue/products/4835737-1-5mm-2-core-yy-control-flexible-cable-100m)
+
+## Harness build/repair procedure
+
+**Procedure: Build or repair a harness segment**
+
+- **Skill level:** Professional
+- **When to do it:** broken connectors, water ingress, intermittent wiring
+- **Tools & materials:** correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
+- **Safety:** ensure correct keying and pinout; poor strain relief causes repeat failures
+- **Steps:**
+  1. Cut back to clean, undamaged cable.
+  2. Strip jacket and conductors to specified length.
+  3. Crimp contacts (pull test each).
+  4. Insert into housing following pinout and keyway orientation.
+  5. Add adhesive-lined heatshrink for strain relief and sealing.
+  6. Continuity test end-to-end; then functional test with coxbox/speakers.
+- **Checks:** correct pinout; no shorts between pins; mechanical strain relief effective
+
+> [!WARNING] Stop-use criteria (electronics)
+>
+> - Exposed conductors in the cockpit.
+> - Connector pins corroded to the point of overheating or intermittent contact.
