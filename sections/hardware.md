@@ -113,3 +113,18 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 > - Any rigger/pin attachment that moves relative to the hull.
 > - Any cracked/bent rigger, pin, or pin mount.
 > - Any stripped/loose fastener on steering or footplate safety components.
+
+> [!PROCEDURE]
+> **Title:** Example Maintenance Task
+> **Skill level:** Advanced
+> **Description:** This procedure demonstrates the proper format for documenting maintenance tasks in a clear, structured way.
+> **Warnings:** Sharp edges on metal parts; avoid over-tightening to prevent hull damage
+> **Required tools/materials:** Adjustable wrench, Allen keys (3mm, 5mm), WD-40, clean cloth
+> **Steps:**
+>
+> 1. Gather all required tools and materials before beginning work.
+> 2. Inspect the area to be worked on for any existing damage or issues.
+> 3. Apply WD-40 to any stuck fasteners and wait 5 minutes.
+> 4. Use the correct size tool to loosen fasteners, working systematically.
+> 5. Clean and inspect all parts before reassembly.
+> **Notes:** Always check torque specifications in the manufacturer's manual when available. Store removed hardware in labeled bags to prevent loss.

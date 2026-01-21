@@ -116,6 +116,22 @@ greet('World')
 > [!DANGER] DANGER
 > This is a danger callout. Use it for critical warnings or dangerous operations.
 
+## Procedures
+**Template for new procedures:**
+
+> [!PROCEDURE]
+> **Title:** [Enter Title Here]
+> **Skill level:** [beginner/intermediate/advanced]
+> **Warnings:** [Identify hazardous items/processes]
+> **Required tools/materials:** [List all needed tools and materials]
+> **Description:** [Brief description of what this procedure accomplishes]
+> **Steps:**
+>
+> 1. [Step 1]
+> 2. [Step 2]
+> 3. [Step 3]
+> **Notes:** [Any additional notes or tips]
+
 ## Special HTML Elements
 
 ### Highlighted Text
