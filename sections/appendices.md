@@ -6,10 +6,11 @@
 
 | Frequency | Task | Skill | Owner | Notes |
 |---|---|---:|---|---|
+| Pre-row | Bow ball + buoyancy hatches/bungs + fin/rudder secure | B | Crew | Safety-critical quick check |
 | After outing | Rinse/wash/dry hull, riggers, cockpit | B | Crew | Mandatory after salt water |
-| Weekly | Maintenance day deep-clean + bolt checks | I | Equipment | Include gates + steering |
-| Monthly | Tap test suspect areas + inspect fin box | I | Equipment | Log any change |
-| Annual | Polish/wax (if used), full inspection | I/P | Equipment | Plan pro repairs |
+| Weekly | Maintenance day deep-clean + bolt checks | I | Equipment | Include riggers/stays, seats, gates, steering |
+| Monthly | Inspect hatch seals + tap test suspect areas + inspect fin box | I | Equipment | Log any change; investigate water ingress |
+| Annual | Full inspection + plan pro repairs | I/P | Equipment | Include leak checks and major hardware refresh |
 
 **A2. Gates/pins**
 
@@ -94,6 +95,29 @@
 
 ---
 
+**B3. Boat takes on water / buoyancy compartment wet**
+
+- Confirm hatch covers/bungs present and seated.
+  - If missing → stop-use until replaced.
+- Dry the compartment and go looking:
+  - Check fin box area and rudder mount for cracks or staining.
+  - Check recent impact points (dock, trailer, bridge strike).
+  - Check hatch seal condition (splits, sand, deformation).
+- If water returns after one outing:
+  - Treat as structural/watertightness issue → repair before further use.
+
+**B4. Steering failure (stiff, stuck, or no response)**
+
+- Check rudder moves freely at the stern.
+  - If jammed/bent → stop-use; fix rudder/fin.
+- Check the steering line/tube in the cockpit:
+  - If line snapped/frayed → replace cable/rope.
+  - If clamps/stops slipped → re-set and witness-mark.
+  - If routing is rubbing/sharp → add guide tube or re-route.
+- Re-test full travel and centring before launching.
+
+
+
 ## Appendix C — Spares and inventory
 
 ### C1. Workshop stock (bulk)
@@ -128,18 +152,18 @@ Suggested minimum quantities:
 ## Appendix D — Suppliers and manuals
 
 - West System manuals:
-  - Vacuum bagging: <https://eu.westsystem.com/app/uploads/2022/10/VacuumBag-7th-Ed.pdf>
-  - Fibreglass manual: <https://eu.westsystem.com/app/uploads/2022/10/Fibreglass-Manual-2015.pdf>
+  - [Vacuum bagging (7th Ed.)](https://eu.westsystem.com/app/uploads/2022/10/VacuumBag-7th-Ed.pdf)
+  - [Fibreglass manual](https://eu.westsystem.com/app/uploads/2022/10/Fibreglass-Manual-2015.pdf)
 - Composite suppliers:
-  - EasyComposites: <https://www.easycomposites.co.uk>
-  - EC Fibreglass: <https://www.ecfibreglasssupplies.co.uk>
+  - [EasyComposites](https://www.easycomposites.co.uk)
+  - [EC Fibreglass](https://www.ecfibreglasssupplies.co.uk)
 - Paint:
-  - YourSprayPaints: <https://www.yourspraypaints.com/>
+  - [YourSprayPaints](https://www.yourspraypaints.com/)
 - Hardware:
-  - Westfield Fasteners: <https://www.westfieldfasteners.co.uk/>
+  - [Westfield Fasteners](https://www.westfieldfasteners.co.uk/)
 - Coxbox:
-  - Troubleshooting doc: <http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf>
-  - Amphenol 44 series: <https://www.amphenol-sine.com/pdf/catalog/44-Series.pdf>
+  - [Troubleshooting doc](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
+  - [Amphenol 44 series](https://www.amphenol-sine.com/pdf/catalog/44-Series.pdf)
 
 ---
 
@@ -199,6 +223,26 @@ Suggested minimum quantities:
 
 ---
 
+### E5. Pre-row safety checklist (crew sign-off)
+
+- Bow ball present and secure (where applicable)
+- Hatch covers/bungs present and sealed; buoyancy dry
+- Gates latch and top nuts tight
+- Pins tight; no play
+- Heel restraints fitted and set (≤ 7 cm heel rise); shoes release freely
+- Steering functional; rudder/fin secure (where fitted)
+- Seats roll freely; end-stops present
+- No new cracks/soft spots around riggers/pins/fin box
+
+### E6. Post-outing wash checklist
+
+- Rinse boat (especially gates, pins, riggers, fin/rudder)
+- Wipe grips/sleeves; rinse electronics plugs if splashed
+- Drain/dry any compartments; report any water ingress
+- Store correctly on racks/slings; protect fin/rudder
+
+
+
 ## Appendix F — Photo library and damage gallery
 
 Recommended folder structure:
@@ -252,3 +296,27 @@ This is a **standards list** (what type) rather than a shopping list (which chan
 - Adhesive-lined heat shrink for sealing and strain relief.
 - Proper ratcheting crimper matched to contact series.
 - Dielectric grease (very light) to reduce corrosion at exposed plugs.
+
+## Appendix F — Coverage map (system → chapter → frequency → stop-use)
+
+Use this to confirm the guide covers the full maintenance + repair scope, and to avoid “orphan” faults that never get checked.
+
+> **Legend:** Pre-row = before launching; Post-row = after outing; Monthly = ~every 4–6 weeks in season; Annual = winter refit/overhaul; Incident = after any collision/grounding/drop.
+
+| System / component | Minimum check frequency | Where covered | Stop-use / escalation triggers |
+|---|---:|---|---|
+| **Crew safety items (boat-level)**: bow ball, heel restraints/foot release, buoyancy closures, fin/rudder, steering, riggers, gates | **Pre-row** | `introduction.md` (Safety-critical checks)<br>`boats.md` (Riggers; Buoyancy; Fin/rudder)<br>`footplates.md` (Heel restraints; Steering) | Missing/loose **bow ball**; **heel lift > 7 cm** or restraint failure; open/missing **bungs/hatches**; loose/cracked **fin/rudder**; steering not functional; cracked rigger/stay mount; gate does not latch/close reliably |
+| Hull, deck, cockpit, seams, damage triage | Pre-row + **Incident** | `boats.md` (Boat care; Composite repairs; Stop-use criteria) | Structural crack, soft spot, major delamination; sudden/new water ingress; damage at rigger/fin/heel restraint attachments |
+| **Buoyancy compartments / hatches / bungs / canvas** | **Pre-row** + Post-row | `boats.md` (Buoyancy compartments…) <br>`appendices.md` (Water ingress flow) | Water sloshing in sealed volume; hatch won’t seal; missing bungs; repeated ingress without clear source |
+| **Riggers, stays, structural attachments** (incl. bolts, backing plates) | Pre-row + Monthly + **Incident** | `boats.md` (Riggers, stays…)<br>`hardware.md` (Fasteners; washers; galling) | Any crack in rigger/stay; movement at mounts; stripped insert; fretting powder; bent rigger that won’t align |
+| **Fin, rudder, fin box, tiller/steering linkage** | Pre-row + **Incident** | `boats.md` (Fin, rudder, fin box)<br>`footplates.md` (Steering wire)<br>`appendices.md` (Steering failure flow) | Loose fin/rudder; fin box crack; steering cable frayed/binding; rudder doesn’t move through full range |
+| Gates (oarlocks), pins, top-nuts, pitch bushings | Pre-row + Monthly | `gates.md` (Daily checks; Rebuild; Pitch/height)<br>`hardware.md` (Fasteners) | Gate won’t latch; cracked gate body; pin loose in rigger; top nut backs off; broken pitch bushing |
+| Seats: wheels/bearings, axles, tracks, end-stops | Post-row + Monthly | `seats.md` (Cleaning; Track alignment; Troubleshooting) | Seat can derail; track loose; wheels seized/flat-spotted beyond usable; broken end-stop |
+| Footplates: rails, adjusters, shoes, stretcher fasteners | Monthly + Incident | `footplates.md` (Adjustment; Inspection) | Loose footplate under load; stripped adjuster; cracked shoe base/rail; missing fasteners |
+| **Heel restraints / foot release** | **Pre-row** | `footplates.md` (Heel restraints) | Restraint broken/missing; shoe cannot release foot; heel rise > 7 cm |
+| Hardware & fasteners (washers, nylocs, corrosion, seized bolts) | Monthly + Annual | `hardware.md` (Selection; Assembly; Galling; Seized fasteners) | Corroded/necked fastener; repeated loosening; seized joint you can’t service without damage |
+| Oars: handles/suede, sleeves/pitch, collars/buttons, spoons, damage triage | Pre-row + Monthly + Incident | `oars.md` (Inspection; Sleeves; Collars/buttons; Spoons) | Structural crack; sleeve rotates/slips; collar/button loose/moves; split spoon; unsafe splintering |
+| Cox box, wiring looms, connectors, speakers | Pre-row + Monthly | `coxbox-wiring.md` (Troubleshooting; Components; Pinouts) | Critical comms not working for session/race; intermittent shorts; exposed conductors; water ingress into connectors |
+| Cleaning, drying, storage, transport | Post-row + Weekly | `boats.md` (Routine care; Storage/transport)<br>`appendices.md` (Schedules) | Persistent damp/mould; hardware corrosion; repeated loosening after transport; hull contact points causing dents |
+| Paint/finish: chips, UV protection, cosmetic touch-up | As needed + Annual | `boats.md` (Finish / touch-up guidance)<br>`appendices.md` (Materials list / procedures) | Exposed fibres in wear areas; cracking that suggests structural damage; flaking around structural attachments |
+| Documentation, inventory, templates, supplier references | Continuous | `appendices.md` (Schedules; Suppliers; Templates) | If repeated faults occur without logged corrective action, treat as a process failure—update checklist and ownership |

@@ -43,6 +43,36 @@ Seat maintenance details can be expanded here (bearings, wheels, rails, fastener
   4. Reinstall and test.
 - **Checks:** smooth travel; no wobble
 
+### Track alignment and fasteners
+
+Seat problems are often track problems.
+
+**Procedure: Track alignment check**
+
+- **Skill level:** Intermediate
+- **When to do it:** Monthly; after transport; if seats bind or run “tight” in one direction
+- **Tools & materials:** straight edge or taut string line, tape measure, marker
+- **Steps:**
+  1. Clean tracks thoroughly first (grit can mimic misalignment).
+  2. Check each track is straight (no kinks) and firmly fixed along its length.
+  3. Measure track spacing at the front/middle/back: values should match within a small tolerance (aim for consistency rather than a specific number).
+  4. If misaligned: loosen fasteners slightly, re-set spacing, then re-tighten evenly.
+  5. Confirm end-stops are fitted and secure (prevents seat leaving tracks).
+- **Checks:** seats roll freely end-to-end; no binding; end-stops present
+
+**Procedure: Fix loose/spinning track fasteners**
+
+- **Skill level:** Intermediate → Professional (depends on insert type)
+- **When to do it:** Immediately on any loose track screw/bolt
+- **Tools & materials:** correct fasteners, suitable threadlocker, washer stack per manufacturer; insert repair kit if required
+- **Steps:**
+  1. Do **not** over-tighten: you will strip inserts and crush laminate.
+  2. Remove fastener and inspect: is the insert spinning, pulled through, or just loose?
+  3. If insert is sound: clean threads and reassemble with appropriate locking method (nyloc or threadlocker).
+  4. If insert spins or is pulled: stop and escalate (often requires bonded insert repair).
+- **Checks:** fasteners hold torque; no movement of track relative to hull
+
+
 ## Noise troubleshooting
 
 Common causes:

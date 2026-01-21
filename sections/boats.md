@@ -54,11 +54,7 @@ This creates complications for repairs: we cannot safely use 2K paints without a
 
 #### Supplies
 
-We keep a range of supplies for repairs, mainly from [YourSprayPaints], [EasyComposites], and [EC Fibreglass Supplies].
-
-[YourSprayPaints]: https://www.yourspraypaints.com/
-[EasyComposites]: https://www.easycomposites.co.uk/
-[EC Fibreglass Supplies]: https://www.ecfibreglasssupplies.co.uk
+We keep a range of supplies for repairs, mainly from [YourSprayPaints](https://www.yourspraypaints.com/), [EasyComposites](https://www.easycomposites.co.uk/), and [EC Fibreglass Supplies](https://www.ecfibreglasssupplies.co.uk)
 
 - Carbon twill ~200 g cloth
 - Carbon and aramid/carbon ~240 g tape
@@ -112,6 +108,7 @@ Typical steps:
 - Fair in.
 - Prime and paint.
 - Polish, then lacquer if required. -->
+
 # Boats
 
 ## Routine care & cleaning
@@ -180,13 +177,86 @@ Typical steps:
 - **Tools & materials:** straps, padding, fin/rudder protectors, tape
 - **Safety:** pinch points; overhead hazards; avoid strap crush on decks
 - **Steps:**
-  1. Confirm fin/rudder clearance and protection.
+  1. Confirm fin/rudder clearance and protection (remove fin/rudder if manufacturer allows and transport demands it).
   2. Place hull in cradles; ensure contact points are padded.
   3. Strap snugly (no deck crushing). Use bow/stern lines to prevent fore-aft movement.
   4. Secure loose riggers or remove if required.
   5. After 10–15 minutes driving, stop and re-check strap tension.
 - **Checks:** no movement; fin/rudder protected
 - **Escalation:** if the boat flexes under straps, stop and re-rig the support points
+
+## Buoyancy compartments, hatch covers, and bungs (safety-critical)
+
+Water ingress is the hidden killer: it turns minor damage into major repairs and can make a boat unsafe in a capsize.
+
+**Procedure: Buoyancy and hatch check**
+
+- **Skill level:** Beginner
+- **When to do it:** Before every outing (quick check); monthly (detailed check)
+- **Tools & materials:** towel, flashlight, spare hatch cover seal (if available)
+- **Steps:**
+  1. Confirm bow/stern hatch covers are present, seated fully, and not cracked.
+  2. Check seals/O-rings: clean, not split, and lightly lubricated only if manufacturer recommends.
+  3. Confirm any **bungs/vent plugs** are present and tightened appropriately.
+  4. Shine a light inside the compartment: look for standing water, mould, or salt residue.
+  5. If water is present: drain/dry and **find the leak** (fin box, hatch seal, impact damage).
+- **Checks:** covers secure; seals intact; compartments dry
+- **Common failure modes:** missing bungs after cleaning; cracked hatch covers; degraded seals
+- **Escalation:** persistent water ingress → inspect fin box + hull; treat as structural risk
+
+> [!WARNING] Stop-use criteria (buoyancy)
+>
+> - Missing hatch cover, missing bung, or a compartment that will not seal.
+> - Water sloshing in a sealed compartment (unknown leak).
+
+## Riggers, stays, and structural attachments
+
+Riggers, pins, and stays are the primary load path from athlete → boat. Failures here are safety-critical and often cascade into hull damage.
+
+**Procedure: Rigger and stay inspection**
+
+- **Skill level:** Intermediate
+- **When to do it:** Monthly; after transport; after any impact/bridge strike
+- **Tools & materials:** spanners/Allen keys, spare washers/nuts, marker, straight edge
+- **Steps:**
+  1. Check each rigger for visible bends, cracks, or chipped paint exposing aluminium.
+  2. Try to rock the rigger at the hull interface: there should be **no movement**.
+  3. Inspect stay wires (where fitted): look for fraying, broken strands, kinks, or loose swages.
+  4. Confirm washer stacks are present and identical left/right where expected.
+  5. Re-tighten fasteners as required (snug; do not crush the hull). Replace any nylocs that spin freely.
+  6. Mark “witness lines” on key nuts/bolts so loosening is obvious.
+- **Checks:** no movement at mounts; no cracking; stays taut and undamaged
+- **Common failure modes:** missing washers → crushed deck; corrosion under paint; hidden cracks at welds
+- **Escalation:** any crack, bend, or movement → stop-use; do not “row it gently”
+
+## Fin, rudder, and fin box
+
+Fins/rudders are frequently damaged during launching, shallow water, and transport. Fin box damage is high-risk for water ingress.
+
+**Procedure: Fin + rudder quick check**
+
+- **Skill level:** Beginner
+- **When to do it:** Before every outing in steered boats
+- **Tools & materials:** none
+- **Steps:**
+  1. Confirm fin is fully seated and set screws (if used) are tight.
+  2. Confirm rudder is securely attached and moves smoothly through full travel.
+  3. Centre the rudder and confirm alignment with the fin.
+  4. Check for play: fin/rudder should not wobble relative to the hull.
+- **Checks:** secure; aligned; smooth travel
+- **Escalation:** looseness, binding, or new cracks around fin box → stop-use
+
+**Procedure: Fin box leak check (after damage)**
+
+- **Skill level:** Intermediate
+- **When to do it:** Any fin strike / unexplained water in buoyancy compartments
+- **Tools & materials:** towel, flashlight, marker, low-pressure leak test method (optional)
+- **Steps:**
+  1. Dry everything thoroughly.
+  2. Inspect inside access (if available) for cracking, lifted laminate, or staining.
+  3. Mark any cracks; do not launch until sealed and assessed.
+- **Escalation:** suspected structural fin box damage → professional repair (common cause of repeat leaks)
+
 
 ## Inspection and damage triage
 
@@ -307,7 +377,7 @@ Useful reading:
 - **Safety:** respirator, goggles, gloves, ventilation
 - **Steps:**
   1. **Open up damage:** remove all broken laminate/core to sound material. Round corners.
-  2. **Scarf/taper:** bevel skins to a shallow taper (typical 12:1 or longer).
+  2. **Scarf/taper:** bevel skins to a shallow taper (typical **20:1–50:1**; practical minimum **12:1** where access is limited).
   3. **Dry-fit core:** cut replacement core flush with surrounding; bond in with thickened epoxy.
   4. **Layup:** cut plies to fill scarf (stepped patches); wet out and lay in order.
   5. **Vacuum bag:** peel ply → perf film → breather → bag. Pull vacuum and watch for resin starvation.

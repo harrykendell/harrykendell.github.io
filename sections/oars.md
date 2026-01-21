@@ -153,9 +153,33 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
   5. Hold alignment until cure.
 - **Checks:** pitch correct; sleeve secure; distance correct for gearing
 
+> [!INFO] Concept2 sleeve/pitch references (use these for exact specs)
+> - [Sleeve & pitch instruction booklet](https://www.concept2.ch/files/pdf/us/oars/Oar_SleevePitchBooklet.pdf)
+> - [Sleeve replacement PDF (includes P/S alignment wording)](https://www.concept2.at/files/pdf/us/oars/Oar_SleeveReplacement.pdf)
+> - [Rigging and pitch checking notes](https://www.concept2.com/support/oars/how-to-videos-and-information)
+
+
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
 </div>
+
+### Collars (buttons) and inboard consistency
+
+Collars define **inboard** and directly affect gearing and blade work. Small collar problems create persistent rigging issues.
+
+**Procedure: Collar inspection and re-set**
+
+- **Skill level:** Intermediate
+- **When to do it:** Monthly; when swapping oars between boats; after any sleeve work
+- **Tools & materials:** marker, tape measure, appropriate collar tools (varies by model), spare collars/clams if used
+- **Steps:**
+  1. Check collar tightness and condition (cracks, slipping, deformed wear surfaces).
+  2. Measure inboard and confirm both oars/sculls in a pair match.
+  3. Mark a witness line across collar → shaft so any slip is obvious.
+  4. If using quick-adjust systems (e.g. CLAM), confirm they seat fully and don’t rock.
+- **Checks:** inboard matched; collars do not slip; witness lines stable
+
+
 
 ### Spoons
 
@@ -178,9 +202,12 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 
 ### When to send to manufacturer
 
+Concept2 also runs **Regatta Service** at select events (complimentary repairs/maintenance for Concept2 oars):
+- [Concept2 Regatta Service](https://www.concept2.com/support/oars/about-regatta-service)
+
 - Large shaft damage.
 - Blade-to-shaft joint failure.
 - Major spoon structural damage.
 - Any repair that would materially change stiffness/weight balance.
 
-NB insurance on blades covers both if one is written off from a pair
+Note: Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a repalcement pair.

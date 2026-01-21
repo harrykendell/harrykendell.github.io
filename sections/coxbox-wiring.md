@@ -84,7 +84,7 @@ The wiring harness is relatively simple, with 5 pins on the main plug. These are
 
 Refer to this document for detailed troubleshooting:
 
-- <http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf>
+- [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
 **Procedure: Quick electrical diagnosis (multimeter)**
 
@@ -114,6 +114,38 @@ Suitable cable types:
 
 - [H07RN-F 1.5 mm² rubber flex](https://www.cef.co.uk/catalogue/products/2014148-1-5mm-2-core-ho7rnf-rubber-flexible-cable-cut-length-sold-by-the-mtr)
 - [YY control cable 1.5 mm²](https://www.cef.co.uk/catalogue/products/4835737-1-5mm-2-core-yy-control-flexible-cable-100m)
+
+## Connector and pinout reference
+
+Coxbox harnesses are only “standard” if **you make them standard**. Pinouts vary by device generation and by what the club has historically wired.
+
+**Rule:** never assume pin functions. Always verify with continuity testing and a known-good device.
+
+- Keep a **master pinout sheet** for each device type (CoxBox, SpeedCoach, amplifier, etc.) and each boat harness.
+- Label both ends of every cable with: boat ID, device type, and revision/date.
+- Add strain relief so the connector never carries cable load.
+
+### Pin numbering
+
+For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manufacturer diagram for pin numbering and keying:
+
+- [44 Series catalog](https://www.amphenol-sine.com/pdf/catalog/44-Series.pdf)
+
+### Pinout template (fill in for your club standard)
+
+| Connector | Pin | Function | Wire colour | Notes |
+|---|---:|---|---|---|
+| Boat harness (to coxbox) | 1 |  |  |  |
+| Boat harness (to coxbox) | 2 |  |  |  |
+| Boat harness (to coxbox) | 3 |  |  |  |
+| Boat harness (to coxbox) | 4 |  |  |  |
+
+### Polarity and shielding notes
+
+- **Audio/speaker** lines are often polarity-insensitive, but keeping polarity consistent avoids phase issues when multiple speakers are used.
+- **Power** lines are polarity-sensitive: fuse appropriately and protect against shorts.
+- For long runs in wet boats, prefer a **jacketed cable** and seal every transition with adhesive-lined heatshrink.
+
 
 ## Harness build/repair procedure
 

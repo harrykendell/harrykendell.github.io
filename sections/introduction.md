@@ -10,6 +10,25 @@
 >
 > **Document status:** Single-file manual intended to be split into component chapters later.
 
+## Safety-critical checks (non-negotiable)
+
+This manual assumes you follow the relevant governing-body safety requirements (and any club policy). At minimum, every outing should confirm:
+
+- **Bow ball** present, secure, and in good condition (where required).
+- **Buoyancy**: compartments/hatches/bungs sealed and watertight; buoyancy bags fitted if no sealed compartments.
+- **Heel restraints and foot release**: heel straps intact and correctly adjusted (typical requirement: heel cannot rise more than **7 cm** from the footplate); foot release must be self-acting.
+- **Rudder/fin** secure and steering functional (where fitted).
+- **Gates/pins** latch securely; no loose pins.
+- **Structure**: no cracks/soft spots around riggers/pins/fin box; no fittings moving relative to the hull.
+
+References (start here if you need the formal wording):
+
+- [British Rowing "Check your boat before you go afloat"](https://www.britishrowing.org/2016/02/safety-alert-check-your-boat-before-you-go-afloat/)
+- [British Rowing RowSafe (latest)](https://www.britishrowing.org/wp-content/uploads/2025/04/British-Rowing-2025-RowSafe.pdf)
+- [British Rowing Rules of Racing (current edition)](https://www.britishrowing.org/wp-content/uploads/2025/03/2025-British-Rowing-Rules-of-Racing.pdf)
+- [World Rowing / FISA Minimum Guidelines for Safe Practice of Rowing](https://worldrowing.com/wp-content/uploads/2020/12/FISA%E2%80%99sMinimumGuidelinesfortheSafePracticeofRowing_Neutral.pdf)
+
+
 ## Title page
 
 - **Racing Rowing Boat Maintenance and Repair Manual**
@@ -115,6 +134,12 @@ Each procedure in this manual follows this format:
 - Fin secure and straight.
 - Footplates secure; heel restraints compliant.
 - Spares in launch: gate nut tool, spare top nuts/washers, tape, multi-tool.
+
+
+
+## Coverage map
+
+A component-by-component coverage map (inspection frequency + stop-use triggers + where each topic lives) is in **Appendix F** (`appendices.md`).
 
 ### Tools, consumables, and shop setup
 

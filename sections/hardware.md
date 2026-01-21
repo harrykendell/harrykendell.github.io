@@ -51,12 +51,23 @@ We buy generic hardware from [Westfield Fasteners](https://www.westfieldfastener
 - [Oarsport](https://oarsport.co.uk/)
 - [Eurow](https://www.eurow.eu/en/parts-rowing-boats.html)
 
-> [!INFO] Use Marine-Appropriate Stainless
-> Hardware should be at least A2 stainless. A4 is best for marine environments, but A2 can work.
+> [!INFO] Use marine-appropriate stainless (and avoid galvanic surprises)
+> - **A2** stainless is roughly **304** grade; **A4** is roughly **316** grade (better chloride resistance).
+> - Prefer **A4/316** for any hardware that regularly gets wet (especially salt/brackish).
+> - Where stainless mates to aluminium (riggers, backstays), use isolating washers and a corrosion inhibitor to reduce galvanic corrosion.
 
-> [!WARNING] Split Washers Will Damage The Hull
-> Never put a split washer directly on a boat. Always use a flat washer for it to dig into:
-> `Bolt → Flat → Surface → Flat → Split → Nut`
+> [!WARNING] Split washers: never against composite
+> Split/spring washers can **crush paint**, **bruise laminate**, and create stress concentrations.
+>
+> - Never put a split washer directly on a boat surface.
+> - Use **flat washers** against composite: they spread load and protect paint.
+> - If you need locking: prefer **nyloc nuts**, **threadlocker**, or manufacturer-specified locking features.
+>
+> Typical safe stack:
+> `Bolt head → Flat washer → Hull/Rigger → Flat washer → (Split/spring washer if used) → Nut`
+>
+> Exceptions (still require flat washers against composite):
+> - Bolts with **integral flanges** can substitute for the bolt-head washer (only if the flange is broad and smooth).
 
 ## Parts reference (club standard)
 
@@ -107,6 +118,18 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
   5. Replace hardware after removal.
 - **Checks:** threads intact; mating surfaces undamaged
 - **Escalation:** if applying force risks ripping an insert from the hull → stop and escalate
+
+## Preventing galling and seizure (stainless hardware)
+
+Stainless-on-stainless threads can **gall** (cold-weld) without warning, especially when dry or over-tightened.
+
+- Use a **small amount of anti-seize** (or suitable grease) on stainless threads that are frequently removed.
+- Avoid high-speed tightening with power tools; hand-tighten and stop when “snug”.
+- Replace **nyloc nuts** when the nylon ring no longer provides friction.
+- If a fastener starts to feel “gritty” or binds early, stop and replace it (don’t force it).
+
+Where you must keep threads clean (e.g., bonding inserts nearby), keep lubricant off the composite and wipe excess immediately.
+
 
 > [!WARNING] Stop-use criteria (hardware)
 >

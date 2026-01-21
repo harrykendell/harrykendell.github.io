@@ -10,6 +10,8 @@ They can generally all use the same wire: 2 mm high-grade [PVC-coated stainless 
 
 # Footplates, shoes, and steering
 
+Different boats use different stretcher and steering systems (wing-nut tracks, quick-release clamps, wire rope, Dyneema, rigid pushrods). Always confirm the exact routing and parts on that boat’s rigging sheet.
+
 ## Footplate adjustment and inspection
 
 **Procedure: Footplate set-up (athlete adjustment)**
@@ -25,8 +27,16 @@ They can generally all use the same wire: 2 mm high-grade [PVC-coated stainless 
 
 ## Heel restraints (safety-critical)
 
-> [!WARNING] Heel restraints are safety-critical
-> Heel restraints must prevent the heel lifting excessively and must be intact and properly secured. If in doubt, **do not row**.
+> [!WARNING] Heel restraints and foot release are safety-critical
+> In any boat with fitted shoes, each shoe must be independently restrained and the **heel must not be able to rise more than 7 cm** (measured at right angles from the footplate). The foot release must be **self-acting** (should not require intervention by athlete or rescuer).
+>
+> Do not use **laces** or **cable ties** as heel restraints; use durable cord/strap designed for the job.
+>
+> References:
+> - [British Rowing heel restraint guidance](https://www.britishrowing.org/2016/04/do-you-check-your-heel-restraints/)
+> - [British Rowing Rules of Racing (current edition)](https://www.britishrowing.org/wp-content/uploads/2025/03/2025-British-Rowing-Rules-of-Racing.pdf)
+> - [British Rowing safety alert (heel restraints)](https://www.britishrowing.org/wp-content/uploads/2022/05/Safety-Alert-Heel-Restraints.pdf)
+
 
 **Procedure: Heel restraint inspection and replacement**
 
@@ -35,7 +45,7 @@ They can generally all use the same wire: 2 mm high-grade [PVC-coated stainless 
 - **Tools & materials:** suitable cord/strap, scissors, lighter/heat to seal ends
 - **Steps:**
   1. Inspect both heel ties for fraying, knots, looseness.
-  2. Confirm heel lift is limited per club policy.
+  2. Measure heel lift: the heel must not rise more than **7 cm** from the footplate.
   3. Replace using durable cord/strap; secure knots and seal ends.
 - **Checks:** cannot lift heel beyond limit; both shoes secured
 
@@ -43,7 +53,7 @@ They can generally all use the same wire: 2 mm high-grade [PVC-coated stainless 
 
 They can generally all use the same wire: **2 mm high-grade PVC-coated stainless rope (7x7)**.
 
-Reference product: <https://www.wireropeshop.co.uk/clear-coated-pvc-stainless-steel-wire-rope-7x7/>
+Reference product: [PVC-coated stainless steel wire rope 7x7](https://www.wireropeshop.co.uk/clear-coated-pvc-stainless-steel-wire-rope-7x7/)
 
 **Procedure: Steering functional check**
 
