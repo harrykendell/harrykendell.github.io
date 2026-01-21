@@ -117,6 +117,7 @@ greet('World')
 > This is a danger callout. Use it for critical warnings or dangerous operations.
 
 ## Procedures
+
 **Template for new procedures:**
 
 [!PROCEDURE:beginner]] Enter title here
@@ -125,6 +126,7 @@ First paragraph is the description of what this procedure accomplishes.
 **Tools:** List all needed tools and materials
 
 **Steps:**
+
 1. Step 1
 2. Step 2
 3. Step 3

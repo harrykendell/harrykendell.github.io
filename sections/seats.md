@@ -12,6 +12,7 @@ Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
 **Tools:** Damp cloth, microfibre
 
 **Steps:**
+
 1. Wipe tracks end-to-end to remove grit.
 2. Wipe wheel treads; remove any embedded debris.
 3. Roll the seat end-to-end and listen/feel for new roughness.
@@ -27,6 +28,7 @@ Weekly inspection of wheel condition and track integrity by removing the seat an
 **Tools:** Allen keys/spanners for axle hardware
 
 **Steps:**
+
 1. Remove the seat and place it on a clean bench.
 2. Spin each wheel: it should run freely with no grinding, wobble, or tight spots.
 3. Check each wheel for flat spots, cracks, and loose bearings/axles.
@@ -41,6 +43,7 @@ Annual or wear-based replacement of seat wheels to maintain smooth rolling. Repl
 **Tools:** Replacement wheels, correct fasteners/spacers
 
 **Steps:**
+
 1. Remove the seat.
 2. Replace all wheels in that seat assembly (do not mix worn and new wheels).
 3. Reuse the correct spacers/washer stack; tighten axles so wheels spin freely without side play.
@@ -55,6 +58,7 @@ Monthly check that seat tracks are straight and parallel to catch misalignment b
 **Tools:** Straight edge or taut string line, tape measure, marker
 
 **Steps:**
+
 1. Clean the tracks so you are measuring metal-to-metal, not grit.
 2. Check track straightness with a straight edge (or a taut string line) along each track; mark any obvious bows.
 3. Measure track spacing at front, middle, and rear; compare values to confirm the tracks are parallel.
@@ -70,6 +74,7 @@ Immediately address any track fasteners that are loose or spinning to prevent tr
 **Tools:** Correct fasteners, suitable threadlocker or nyloc, washer stack per manufacturer, insert repair kit if required
 
 **Steps:**
+
 1. Remove the suspect fastener and inspect: is the insert sound, spinning, or pulled through?
 2. If the insert is sound: clean threads, reassemble with the correct washer stack, and use the appropriate locking method (nyloc or threadlocker).
 3. Tighten until the track is secure, then stop (do not “chase torque” if the insert starts to give).

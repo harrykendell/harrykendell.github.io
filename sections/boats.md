@@ -301,6 +301,7 @@ Assess damage after any impact or when new damage is observed to decide if it is
 - **Minor structural:** shallow fibre damage limited area, no core crush.
 - **Structural:** core crush, delamination, cracks through skin, puncture.
 
+<!-- markdownlint-disable MD029 -->
 6. Decide next action: seal-and-monitor / in-house repair / professional repair.
 
 **Check:** Damage logged; boat tagged appropriately.

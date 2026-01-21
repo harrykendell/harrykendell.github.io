@@ -20,6 +20,7 @@ Quick pre-rowing adjustment of stretcher position to the athlete's preferred set
 **Tools:** None or wing nuts (depending on system)
 
 **Steps:**
+
 1. Set stretcher position to the athlete's number/mark.
 2. Confirm left/right are symmetric (count holes/marks).
 3. Confirm all clamps/nuts are tight.
@@ -46,6 +47,7 @@ Safety-critical check and replacement of heel ties to ensure foot retention in c
 **Tools:** Suitable cord/strap, scissors, lighter/heat to seal ends
 
 **Steps:**
+
 1. Inspect both heel ties for fraying, knots, looseness, or missing attachments.
 2. Measure heel lift: the heel must not rise more than **7 cm** from the footplate.
 3. Replace using durable cord/strap; tie securely and seal/finish ends so they cannot fray.
@@ -62,6 +64,7 @@ Quick pre-outing check that steering is centred and moves freely. If steering bi
 **Tools:** None
 
 **Steps:**
+
 1. With the boat supported, centre the toe steering and confirm the rudder is centred.
 2. Move toes to full travel left/right; confirm smooth, even rudder travel with no snags.
 3. Check cable/rope tension throughout travel (no slack loops, no rubbing on sharp edges).
@@ -75,6 +78,7 @@ Replace a frayed or snapped steering cable to restore full steering responsivene
 **Tools:** Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape/heatshrink
 
 **Steps:**
+
 1. Photograph routing and attachment points (toe mechanism and rudder yoke).
 2. Remove the old cable; if possible, use it to pull the new cable through the same routing.
 3. Attach at the toe mechanism first, then centre toe and centre rudder.

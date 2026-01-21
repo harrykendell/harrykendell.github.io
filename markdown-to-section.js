@@ -63,8 +63,7 @@ function transformProcedureBlocks(markdown) {
         const procedureHtml = [
             `<div class="procedure"${
                 skillRaw ? ` data-skill="${skillValue}"` : ""
-            }>`
-            ,
+            }>`,
             `  <div class="procedure-header">`,
             `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
             `  </div>`,

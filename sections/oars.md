@@ -30,6 +30,7 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
 **Tools:** Heat gun, IPA, replacement patches
 
 **Steps:**
+
 1. Warm the suede gently and peel off.
 2. Clean adhesive residue with IPA and let it dry.
 3. Fit the correct patch size (sculls or sweep inside/outside).
@@ -48,6 +49,7 @@ Replace a torn, slippery, or loose green grip to restore comfort and control. If
 **Tools:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
 
 **Steps:**
+
 1. Unscrew and remove the old grip.
 2. If the end cap comes off: clean mating surfaces and epoxy it back with correct rotational alignment; allow full cure.
 3. Fit the new grip and tighten fully.
@@ -65,6 +67,7 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 **Tools:** New fixed handle, epoxy, heat tools as needed
 
 **Steps:**
+
 1. Confirm you have the correct replacement handle and orientation marks.
 2. Remove the old handle carefully (avoid cutting into the shaft).
 3. Clean and prepare the bonding surface.
@@ -87,6 +90,7 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. 
 **Tools:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
 
 **Steps:**
+
 1. Measure and mark the current sleeve position and orientation relative to the blade.
 2. Remove the old sleeve carefully (avoid cutting into the shaft).
 3. Clean the shaft and dry fit the new sleeve at the correct distance for the required gearing.
@@ -112,6 +116,7 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 **Tools:** Marker, tape measure, collar tools appropriate to model, spare collars/clams if used
 
 **Steps:**
+
 1. Check collar condition and tightness (cracks, slipping marks, deformed wear surfaces).
 2. Measure inboard and compare across the set; mark a reference line on the shaft for quick visual checks.
 3. If the collar has moved: reset to the correct inboard and secure per that collar type (clamp/tape/clams).
@@ -129,6 +134,7 @@ Early intervention on spoon delamination to prevent blade failure and structural
 **Tools:** Epoxy, syringe, clamps/weights, release film
 
 **Steps:**
+
 1. Clean and dry the area thoroughly.
 2. Inject epoxy into the delamination.
 3. Clamp/weight to restore shape and hold until cure (use release film where needed).

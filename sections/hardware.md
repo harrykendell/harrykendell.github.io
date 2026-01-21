@@ -94,11 +94,12 @@ Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catc
 **Tools:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
 
 **Steps:**
+
 1. Pick a boat and work systematically: bow to stern.
 2. For each critical fastener (rigger bolts, pins, stretcher mounts):
-	- Check tightness.
-	- Check correct washer stack.
-	- Replace any corroded or stripped nuts (nyloc that spins freely is done).
+ - Check tightness.
+ - Check correct washer stack.
+ - Replace any corroded or stripped nuts (nyloc that spins freely is done).
 3. If disassembling: bag and label washers/spacers per location.
 4. Reassemble using the standard washer rule.
 
@@ -111,6 +112,7 @@ Free a stuck stainless bolt or nut caused by corrosion or galling so it can be r
 **Tools:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
 
 **Steps:**
+
 1. Clean exposed threads. Apply penetrating oil. Wait.
 2. Use correctly sized tools; avoid rounding.
 3. Try tightening slightly then loosening.

@@ -92,6 +92,7 @@ Troubleshoot non-working rate, speakers, or charging by testing for continuity a
 **Tools:** Multimeter, contact cleaner
 
 **Steps:**
+
 1. Dry connector; inspect for corrosion.
 2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
 3. **Speakers:** C–B should read as a load/short when speakers are wired.
@@ -155,6 +156,7 @@ Build a new or repair a damaged boat harness to restore electrical continuity an
 **Tools:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
 
 **Steps:**
+
 1. Cut back to clean, undamaged cable.
 2. Strip jacket and conductors to specified length.
 3. Crimp contacts (pull test each).
@@ -165,6 +167,7 @@ Build a new or repair a damaged boat harness to restore electrical continuity an
 **Check:** Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
 
 > [!WARNING] Stop-use criteria (electronics)
+>
 > - Exposed conductors in the cockpit.
 > - Connector pins corroded to the point of overheating or intermittent contact.
 [!/PROCEDURE]

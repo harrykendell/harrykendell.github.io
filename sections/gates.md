@@ -35,6 +35,7 @@ Daily pre-outing check that the gate latch is secure and the gate cannot pop out
 **Tools:** None (or gate nut tool if something is loose)
 
 **Steps:**
+
 1. Close each gate and confirm latch fully engages.
 2. Lift the oar handle firmly to confirm the oar cannot pop out.
 3. Wiggle gate vertically: there should be minimal play (no rattle).
@@ -51,6 +52,7 @@ Maintenance day procedure to disassemble, clean, and reassemble gate hardware to
 **Tools:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
 
 **Steps:**
+
 1. Remove top nut/retainer and lift off gate.
 2. Keep washer stacks grouped (bottom vs top). Photograph if needed.
 3. Clean pin and all washers. Inspect for corrosion.
@@ -67,6 +69,7 @@ When rigging changes or mismatched heights are observed, adjust the washer stack
 **Tools:** Gate washers/shims, calipers/ruler, rigging sheet
 
 **Steps:**
+
 1. Measure current height (club method). Record.
 2. Add/remove washers **symmetrically** to achieve target.
 
@@ -79,6 +82,7 @@ After bushing replacement or suspected pitch drift, verify that both sides have 
 **Tools:** Pitch gauge, correct pitch bushings, rigging sheet
 
 **Steps:**
+
 1. Verify bushing pair angle markings.
 2. Install bushings correctly oriented.
 3. Measure pitch with gauge and confirm both sides match.
