@@ -5,18 +5,21 @@
 To keep boats in good condition there are a number of routine tasks we should be doing.
 
 #### Every outing
+
 - Wash inside and out with soap and then fresh water, and wipe dry with a micro-fibre cloth:
   - Hull
   - Riggers
   - Runners
 
 #### Maintenance days
+
 - Remove hardware, clean, and check for missing washers.
 - Check for cracks in seats, riggers, and footplates.
 - Clean hull with Starbrite Hull Cleaner (wash off thoroughly afterwards).
 - Remove limescale with diluted vinegar (wash off thoroughly afterwards).
 
 #### Periodically
+
 - Machine-polish with fine-cut compound on a foam pad at low RPM.
 
 ## Composite repairs
@@ -29,6 +32,7 @@ Useful reference documents: [Vacuum bagging (West System, 7th Ed.)][vacbag] / [F
 We try to do minor repairs in-house to avoid the high cost of sending boats away. Many repairers have minimum quotes of about GBP 450 and our insurance excess is GBP 250. For nicer boats it can still be worth sending them away for major work.
 
 #### Construction
+
 The boats are generally built with a composite sandwich structure with carbon/kevlar skins of roughly 3 x 200 g plies and a Nomex honeycomb core. When originally made this will be prepreg under vacuum in an autoclave. This is then covered with either 2K automotive-style paint or gelcoat in some older/cheaper cases.
 
 This creates complications for repairs: we cannot safely use 2K paints without a spray booth, and we cannot bake boats at high temperature. However, we can do vacuum-bagged wet layups and we have carbon, core material, and decent quality aerosol paints available.
@@ -49,6 +53,7 @@ This creates complications for repairs: we cannot safely use 2K paints without a
 </div>
 
 #### Supplies
+
 We keep a range of supplies for repairs, mainly from [YourSprayPaints], [EasyComposites], and [EC Fibreglass Supplies].
 
 [YourSprayPaints]: https://www.yourspraypaints.com/
@@ -75,6 +80,7 @@ We keep a range of supplies for repairs, mainly from [YourSprayPaints], [EasyCom
   - #00491E "Bristol green"
 
 **Consumables:**
+
 - Cups for mixing
 - Nitrile gloves
 - Mixing sticks
@@ -88,6 +94,7 @@ We keep a range of supplies for repairs, mainly from [YourSprayPaints], [EasyCom
 #### Methodology (high-level)
 
 Useful reading:
+
 - [Cobonded tapered scarf repairs for composite structures][scarf-repair]
 - [Damage classification in sandwich structures][damage-class]
 
@@ -95,6 +102,7 @@ Useful reading:
 [damage-class]: https://www.aircraftsystemstech.com/2019/06/damage-classification-sandwich.html
 
 Typical steps:
+
 - Open up the damaged area.
 - Cut a scarf (taper) into the skins.
 - Prep and clean thoroughly.

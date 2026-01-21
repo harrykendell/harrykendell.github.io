@@ -17,9 +17,11 @@
 The wiring harness is relatively simple, with 5 pins on the main plug. These are split into speakers, rate, and charging pins. Not all pins are used in every connector, so wiring can break out to 2-pin or 4-pin plugs where needed.
 
 ## Troubleshooting guide
+
 Refer to this [document][nk-doc] for detailed troubleshooting.
 
 [nk-doc]: http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf
+
 - A-D should connect to a magnet (if present in the boat). Shorting periodically should show a stroke rate on the coxbox.
 - C-B should be a short when speakers are wired in.
 - D-E (not shown in some diagrams) should read 13.5-15 V from the charger.
@@ -31,15 +33,19 @@ Harness components are sold at a significant markup by NK Sports, Oarsport, and 
 ## Components
 
 #### Coxbox plug
+
 [044 104 10004 02][cox-plug] — 4-pin receptacle. Polarity of each pair does not matter.
 
 #### Speaker / rate plug
+
 [044 103 10002][speaker-103], [044 104 10002 02][speaker-104] — 2-pin connectors, polarity not critical. There seems to be a convention on male/female orientation for main wire vs. speaker pick-offs, but it is not always consistent.
 
 #### Crimps
+
 [044 100 1414P 100 101][crimp-p], [044 102 1414S 100 101][crimp-s]. NK appear to use different gold crimps; those solid types are nicer to work with but have not yet been positively identified.
 
 #### Heat shrink
+
 [DWFR-6/2-0-STK][shrink-6], [DWFR-16/4-0-STK][shrink-16]. Use heat-shrink to protect wires and plugs, and to provide strain relief. These are epoxy-filled so seal well.
 
 [cox-plug]: https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-104-10004-02?qs=tA%252Bq7m13GXUySe5HIfp6fg%3D%3D
@@ -51,7 +57,9 @@ Harness components are sold at a significant markup by NK Sports, Oarsport, and 
 [shrink-16]: https://www.mouser.co.uk/ProductDetail/TE-Connectivity-Raychem/DWFR-16-4-0-STK?qs=YeFsEeYZIJkJLuipLRO0CA%3D%3D
 
 #### Wires
+
 The Amphenol 44 series is designed for 14-18 AWG conductors. Suitable cable types include:
+
 - [H07RN-F 1.5 mm² rubber flex][cable-h07]
 - [YY control cable 1.5 mm²][cable-yy] (cheaper but less well insulated / waterproof, so may degrade faster).
 

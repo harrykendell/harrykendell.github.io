@@ -21,14 +21,14 @@ Washers should always be used on bolts to help spread the load and protect the b
 
 Example supplier reference: [Westfield Fasteners example order (PDF)][fasteners-example].
 
-|  | M3 | M4 (bow balls) | M5 | M6 (standard rigging) | M8 (large rigging) | M12 (pins) |
-|---|---|---|---|---|---|---|
-| [Nuts][wf-nuts] / [Nyloc][wf-nyloc] | Nyloc T | Nyloc T |  | Standard Nyloc T | Standard | Nyloc T |
-| Bolts |  |  |  | 16mm, 30mm, 50mm (wing riggers), 25mm countersunk hex (wing riggers) | 70mm (sections), 25mm / 16mm (pins) |  |
-| Washers | Form A | Form C |  | Form A, Form C, Form G, rectangular spring | Form G, rectangular spring |  |
-| [Machine screws][wf-machine-screws] | 16mm, 25mm | 10mm (fin set screws), 20mm (1x), 30mm (4s), 40mm (8s) | 10mm (shoes) | 10mm (shoes) |  |  |
-| [Self tapping screws][wf-tapping-screws] | No.6 9.5mm (seats) | No.8 9.5mm (seats), No.8 16mm (Empacher slots), No.8 25mm |  |  |  |  |
-| Other |  |  |  | Wing nut (feet), 60mm coach bolts (3 stays) |  |  |
+|                                           | M3                  | M4 (bow balls)                                             | M5            | M6 (standard rigging)                                                 | M8 (large rigging)                   | M12 (pins)  |
+|------------------------------------------ |-------------------- |----------------------------------------------------------- |-------------- |---------------------------------------------------------------------- |------------------------------------- |------------ |
+| [Nuts][wf-nuts] / [Nyloc][wf-nyloc]       | Nyloc T             | Nyloc T                                                    |               | Standard Nyloc T                                                      | Standard                             | Nyloc T     |
+| Bolts                                     |                     |                                                            |               | 16mm, 30mm, 50mm (wing riggers), 25mm countersunk hex (wing riggers)  | 70mm (sections), 25mm / 16mm (pins)  |             |
+| Washers                                   | Form A              | Form C                                                     |               | Form A, Form C, Form G, rectangular spring                            | Form G, rectangular spring           |             |
+| [Machine screws][wf-machine-screws]       | 16mm, 25mm          | 10mm (fin set screws), 20mm (1x), 30mm (4s), 40mm (8s)     | 10mm (shoes)  | 10mm (shoes)                                                          |                                      |             |
+| [Self tapping screws][wf-tapping-screws]  | No.6 9.5mm (seats)  | No.8 9.5mm (seats), No.8 16mm (Empacher slots), No.8 25mm  |               |                                                                       |                                      |             |
+| Other                                     |                     |                                                            |               | Wing nut (feet), 60mm coach bolts (3 stays)                           |                                      |             |
 
 **Other commonly used items:**
 
