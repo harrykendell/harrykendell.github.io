@@ -12,6 +12,7 @@ const sectionFiles = [
 const DEFAULT_TOC_DEPTH = 4;
 let tocDepth = DEFAULT_TOC_DEPTH;
 let sidebarLinksCache = [];
+const ACTIVATION_OFFSET = 120;
 
 function getEffectiveTocLevel() {
     return Math.min(6, tocDepth + 1);
@@ -299,8 +300,6 @@ function setupActiveTracking() {
     const headings = document.querySelectorAll(
         ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]"
     );
-    const ACTIVATION_OFFSET = 120;
-
     function isCollapsedHeading(heading) {
         if (heading.classList && heading.classList.contains("section")) {
             return false;
@@ -365,9 +364,7 @@ function setupActiveTracking() {
                 activeLink.classList.add("active");
             }
         } else {
-            const contentsLink = document.querySelector(
-                '.sidebar a[href="#top"]'
-            );
+            const contentsLink = document.querySelector('.sidebar a[href="#top"]');
             if (contentsLink) {
                 contentsLink.classList.add("active");
             }
@@ -378,6 +375,26 @@ function setupActiveTracking() {
 
     window.addEventListener("scroll", updateActiveLink, { passive: true });
     updateActiveLink();
+}
+
+function scrollToSection(hash) {
+    if (!hash || !hash.startsWith("#")) {
+        return;
+    }
+
+    const target = document.getElementById(hash.slice(1));
+    if (!target) {
+        return;
+    }
+
+    const targetTop = target.getBoundingClientRect().top + window.scrollY;
+    const destination = Math.max(targetTop - ACTIVATION_OFFSET + 5, 0);
+
+    window.scrollTo({ top: destination, behavior: "smooth" });
+
+    if (typeof history.replaceState === "function") {
+        history.replaceState(null, "", hash);
+    }
 }
 
 function setInitialSectionState(section) {
@@ -425,30 +442,19 @@ function setupSectionToggle() {
 }
 
 function updateSidebarArrow(sectionId, isCollapsed) {
-    const link = document.querySelector(
-        `.sidebar a[data-section="${sectionId}"]`
-    );
     const arrow = document.querySelector(
         `.sidebar .nav-arrow[data-section="${sectionId}"]`
     );
 
-    // Also update the sublist visibility
+    if (arrow) {
+        arrow.classList.toggle("collapsed", !!isCollapsed);
+    }
+
     const sublist = document.querySelector(
         `.sidebar .sub-list[data-parent-section="${sectionId}"]`
     );
     if (sublist) {
-        if (arrow) {
-            if (isCollapsed) {
-                arrow.classList.add("is-collapsed");
-            } else {
-                arrow.classList.remove("is-collapsed");
-            }
-        }
-        if (isCollapsed) {
-            sublist.classList.add("collapsed");
-        } else {
-            sublist.classList.remove("collapsed");
-        }
+        sublist.classList.toggle("collapsed", !!isCollapsed);
     }
 }
 
@@ -465,23 +471,19 @@ function setupSidebarLinks() {
             const section = document.getElementById(sectionId);
 
             if (section && section.classList.contains("section")) {
-                const isCurrentlyCollapsed =
-                    section.classList.contains("collapsed");
+                const isCurrentlyCollapsed = section.classList.contains("collapsed");
 
                 if (isCurrentlyCollapsed) {
                     section.classList.remove("collapsed");
                     localStorage.setItem(`section-${sectionId}`, "expanded");
                     updateSidebarArrow(sectionId, false);
-                    if (typeof window.updateActiveLink === "function") {
-                        window.updateActiveLink();
-                    }
                 } else {
                     section.classList.add("collapsed");
                     localStorage.setItem(`section-${sectionId}`, "collapsed");
                     updateSidebarArrow(sectionId, true);
-                    if (typeof window.updateActiveLink === "function") {
-                        window.updateActiveLink();
-                    }
+                }
+                if (typeof window.updateActiveLink === "function") {
+                    window.updateActiveLink();
                 }
             }
         });
@@ -491,53 +493,25 @@ function setupSidebarLinks() {
         link.addEventListener("click", (e) => {
             const href = link.getAttribute("href");
             if (href && href.startsWith("#")) {
-                // Check if this is a subheading
-                const parentSection = link.getAttribute("data-parent");
+                e.preventDefault();
 
-                if (parentSection) {
-                    // Expand parent section for subheadings (always expand, don't toggle)
-                    const section = document.getElementById(parentSection);
+                const targetSectionId =
+                    link.getAttribute("data-parent") || link.getAttribute("data-section");
+
+                if (targetSectionId) {
+                    const section = document.getElementById(targetSectionId);
                     if (section && section.classList.contains("section")) {
-                        section.classList.remove("collapsed");
-                        localStorage.setItem(
-                            `section-${parentSection}`,
-                            "expanded"
-                        );
-                        updateSidebarArrow(parentSection, false);
-                        if (typeof window.updateActiveLink === "function") {
-                            window.updateActiveLink();
-                        }
-                    }
-                } else {
-                    // Main section link - toggle behavior
-                    const sectionId = link.getAttribute("data-section");
-                    const section = document.getElementById(sectionId);
+                        const wasCollapsed = section.classList.contains("collapsed");
 
-                    if (section && section.classList.contains("section")) {
-                        // Toggle the section
-                        const isCurrentlyCollapsed =
-                            section.classList.contains("collapsed");
-
-                        if (isCurrentlyCollapsed) {
+                        if (wasCollapsed) {
                             section.classList.remove("collapsed");
-                            localStorage.setItem(
-                                `section-${sectionId}`,
-                                "expanded"
-                            );
-                            updateSidebarArrow(sectionId, false);
-                            if (typeof window.updateActiveLink === "function") {
-                                window.updateActiveLink();
-                            }
-                        } else {
-                            section.classList.add("collapsed");
-                            localStorage.setItem(
-                                `section-${sectionId}`,
-                                "collapsed"
-                            );
-                            updateSidebarArrow(sectionId, true);
-                            if (typeof window.updateActiveLink === "function") {
-                                window.updateActiveLink();
-                            }
+                            localStorage.setItem(`section-${targetSectionId}`, "expanded");
+                            updateSidebarArrow(targetSectionId, false);
+                        }
+
+                        if (typeof window.updateActiveLink === "function") {
+                            // Always refresh highlight after navigation
+                            window.updateActiveLink();
                         }
                     }
                 }
@@ -547,6 +521,8 @@ function setupSidebarLinks() {
                         window.setTocOpen(false);
                     }
                 }
+
+                scrollToSection(href);
             }
         });
     });
@@ -572,5 +548,5 @@ function restoreScrollPosition() {
     if (scrollPosition !== null) {
         window.scrollTo(0, parseInt(scrollPosition));
     }
-    document.documentElement.style.scrollBehavior = "";
+    document.documentElement.style.scrollBehavior = "auto";
 }

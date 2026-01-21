@@ -177,7 +177,7 @@ body {
     cursor: pointer;
 }
 
-.sidebar .nav-arrow.is-collapsed {
+.sidebar .nav-arrow.collapsed {
     transform: rotate(-90deg);
 }
 
