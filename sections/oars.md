@@ -1,5 +1,3 @@
-<!-- # Oars -->
-
 # Oars and blades
 
 ## Oars
