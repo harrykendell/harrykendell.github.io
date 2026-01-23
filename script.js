@@ -11,6 +11,8 @@ const sectionFiles = [
 ];
 
 const DEFAULT_TOC_DEPTH = 4;
+const MIN_TOC_DEPTH = 1;
+const MAX_TOC_DEPTH = 5;
 let tocDepth = DEFAULT_TOC_DEPTH;
 let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
@@ -67,7 +69,7 @@ async function loadSections() {
 
 function initTocDepth() {
   const stored = parseInt(localStorage.getItem("toc-depth"), 10);
-  if (!Number.isNaN(stored) && stored >= 1 && stored <= 6) {
+  if (!Number.isNaN(stored) && stored >= MIN_TOC_DEPTH && stored <= MAX_TOC_DEPTH) {
     tocDepth = stored;
   } else {
     tocDepth = DEFAULT_TOC_DEPTH;
@@ -91,11 +93,20 @@ function setupTocDepthControl() {
     return;
   }
 
+  if (control.options.length === 0) {
+    for (let value = MIN_TOC_DEPTH; value <= MAX_TOC_DEPTH; value += 1) {
+      const option = document.createElement("option");
+      option.value = String(value);
+      option.textContent = String(value);
+      control.appendChild(option);
+    }
+  }
+
   control.value = String(tocDepth);
 
   control.addEventListener("change", () => {
     const nextDepth = parseInt(control.value, 10);
-    if (!Number.isNaN(nextDepth) && nextDepth >= 1 && nextDepth <= 6) {
+    if (!Number.isNaN(nextDepth) && nextDepth >= MIN_TOC_DEPTH && nextDepth <= MAX_TOC_DEPTH) {
       setTocDepth(nextDepth);
       generateSidebar();
       setupSidebarLinks();
