@@ -230,10 +230,6 @@ main {
     transition: opacity 0.3s ease;
 }
 
-main.toc-dim {
-    opacity: 0.2;
-}
-
 .page {
     background: var(--bg-elevated);
     border-radius: var(--radius);
@@ -797,6 +793,10 @@ hr {
         opacity: 1;
         pointer-events: auto;
         transform: translateX(0);
+    }
+
+    main.toc-dim {
+        opacity: 0.2;
     }
 
     .toc-toggle {

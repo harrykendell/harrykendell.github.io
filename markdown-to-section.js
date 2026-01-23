@@ -12,6 +12,19 @@ function slugify(text) {
         .replace(/-+/g, "-");
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
 function transformProcedureBlocks(markdown) {
     const lines = markdown.split(/\r?\n/);
     const output = [];
@@ -61,8 +74,7 @@ function transformProcedureBlocks(markdown) {
             : "";
 
         const procedureHtml = [
-            `<div class="procedure"${
-                skillRaw ? ` data-skill="${skillValue}"` : ""
+            `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""
             }>`,
             `  <div class="procedure-header">`,
             `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
@@ -232,74 +244,53 @@ function extractYouTubeId(src) {
 
 function buildYouTubeEmbed(iframe, videoId) {
     const title = iframe.getAttribute("title") || "YouTube video";
+    const safeTitle = escapeHtml(title);
 
     let dataSrc = iframe.getAttribute("src") || "";
     try {
-        dataSrc = new URL(dataSrc).searchParams.set("autoplay", "1").toString();
+        dataSrc = new URL(dataSrc);
+        dataSrc.searchParams.set("autoplay", "1");
+        dataSrc = dataSrc.toString();
     } catch (error) {
         dataSrc += dataSrc.includes("?") ? "&autoplay=1" : "?autoplay=1";
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "youtube-embed";
+    const safeDataSrc = escapeAttribute(dataSrc);
+    const template = document.createElement("template");
+    template.innerHTML = `
+        <div class="youtube-embed">
+            <button type="button" class="youtube-embed__button" title="Play video: ${safeTitle}" aria-label="Play video: ${safeTitle}">
+                <svg class="youtube-embed__icon" viewBox="0 0 68 48" aria-hidden="true" focusable="false">
+                    <path d="M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z" fill="#ff0000"></path>
+                    <path d="M45 24 27 14v20z" fill="#ffffff"></path>
+                </svg>
+                <img loading="lazy" decoding="async" alt="${safeTitle}" src="https://img.youtube.com/vi/${videoId}/0.jpg" />
+            </button>
+            <iframe title="${safeTitle}" src="about:blank" data-src="${safeDataSrc}" frameborder="0" allowfullscreen="" allow="autoplay; encrypted-media" loading="lazy"></iframe>
+        </div>
+    `;
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "youtube-embed__button";
-    button.title = `Play video: ${title}`;
-    button.setAttribute("aria-label", `Play video: ${title}`);
+    const wrapper = template.content.firstElementChild;
+    const button = wrapper.querySelector(".youtube-embed__button");
+    const lazyIframe = wrapper.querySelector("iframe");
 
-    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    icon.setAttribute("class", "youtube-embed__icon");
-    icon.setAttribute("viewBox", "0 0 68 48");
-    icon.setAttribute("aria-hidden", "true");
-    icon.setAttribute("focusable", "false");
+    button.addEventListener("click", () => {
+        const src = lazyIframe.getAttribute("data-src");
+        if (!src) {
+            return;
+        }
 
-    const iconPath = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path"
-    );
-    iconPath.setAttribute(
-        "d",
-        "M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z"
-    );
-    iconPath.setAttribute("fill", "#ff0000");
-    const iconTriangle = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "path"
-    );
-    iconTriangle.setAttribute("d", "M45 24 27 14v20z");
-    iconTriangle.setAttribute("fill", "#ffffff");
-    icon.appendChild(iconPath);
-    icon.appendChild(iconTriangle);
-
-    const thumbnail = document.createElement("img");
-    thumbnail.loading = "lazy";
-    thumbnail.decoding = "async";
-    thumbnail.alt = title;
-    thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
-
-    button.appendChild(icon);
-    button.appendChild(thumbnail);
-
-    const lazyIframe = document.createElement("iframe");
-    lazyIframe.title = title;
-    lazyIframe.src = "about:blank";
-    lazyIframe.setAttribute("data-src", dataSrc);
-    lazyIframe.setAttribute("frameborder", "0");
-    lazyIframe.setAttribute("allowfullscreen", "");
-    lazyIframe.setAttribute("allow", "autoplay; encrypted-media");
-    lazyIframe.loading = "lazy";
-
-    wrapper.appendChild(button);
-    wrapper.appendChild(lazyIframe);
+        lazyIframe.setAttribute("src", src);
+        wrapper.classList.add("is-playing");
+        button.setAttribute("aria-hidden", "true");
+        button.disabled = true;
+    });
 
     return wrapper;
 }
 
 function transformYouTubeEmbeds(rootEl) {
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
-    console.log("Transforming YouTube embeds", iframes.length);
     iframes.forEach((iframe) => {
         const src = iframe.getAttribute("src") || "";
         const videoId = extractYouTubeId(src);
@@ -322,23 +313,21 @@ function markdownToSection(markdown, sectionId) {
     const { title, content } = extractTitleAndContentFromMarkdown(markdown);
     const html = marked.parse(transformProcedureBlocks(content));
 
-    const sectionEl = document.createElement("section");
-    sectionEl.className = "section";
-    sectionEl.id = sectionId;
+    const safeTitle = escapeHtml(title || sectionId);
+    const safeSectionId = escapeAttribute(sectionId);
+    const template = document.createElement("template");
+    template.innerHTML = `
+        <section class="section" id="${safeSectionId}">
+            <div class="section-header">
+                <span class="section-toggle">▼</span>
+                <h2>${safeTitle}</h2>
+            </div>
+            <div class="section-content">${html}</div>
+        </section>
+    `;
 
-    const headerEl = document.createElement("div");
-    headerEl.className = "section-header";
-    const toggleEl = document.createElement("span");
-    toggleEl.className = "section-toggle";
-    toggleEl.textContent = "▼";
-    const h2El = document.createElement("h2");
-    h2El.textContent = title || sectionId;
-    headerEl.appendChild(toggleEl);
-    headerEl.appendChild(h2El);
-
-    const contentEl = document.createElement("div");
-    contentEl.className = "section-content";
-    contentEl.innerHTML = html;
+    const sectionEl = template.content.firstElementChild;
+    const contentEl = sectionEl.querySelector(".section-content");
 
     // Ensure section content doesn't include h1
     downgradeHeadings(contentEl);
@@ -350,9 +339,6 @@ function markdownToSection(markdown, sectionId) {
 
     // Wrap tables for mobile horizontal scrolling
     wrapTables(contentEl);
-
-    sectionEl.appendChild(headerEl);
-    sectionEl.appendChild(contentEl);
 
     // Set ids for sidebar linking without changing heading levels
     addHeadingIds(contentEl, sectionId);
