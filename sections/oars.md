@@ -35,11 +35,10 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
 4. Place the seam away from pressure points to prevent blisters.
 
 **Check:** Patch fully bonded; seam placement acceptable. Do when suede is worn, torn, or lifting.
-[!/PROCEDURE]
-
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
 </div>
+[!/PROCEDURE]
 
 [!PROCEDURE:Intermediate]] Replace green rubber grip
 Replace a torn, slippery, or loose green grip to restore comfort and control. If the end cap comes off with the grip, epoxy it back in place with the correct rotational alignment before fitting the new grip.
@@ -53,11 +52,10 @@ Replace a torn, slippery, or loose green grip to restore comfort and control. If
 3. Fit the new grip and tighten fully.
 
 **Check:** No rotation under load. Replace when grip is torn, slippery, or loose.
-[!/PROCEDURE]
-
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
 </div>
+[!/PROCEDURE]
 
 [!PROCEDURE:Advanced]] Fixed handle replacement (legacy)
 Replace a fixed handle or inner grip on legacy oars. This is higher risk than screw-on grips: if you cannot remove the old handle without damaging the shaft, stop and arrange manufacturer repair.
@@ -72,11 +70,10 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 4. Bond the new handle with correct alignment; keep it fixed until fully cured.
 
 **Check:** Handle alignment correct; no play or twist after cure.
-[!/PROCEDURE]
-
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
 </div>
+[!/PROCEDURE]
 
 ## Sleeves
 
@@ -96,6 +93,9 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. 
 5. Hold alignment until full cure.
 
 **Check:** Sleeve secure; pitch alignment correct; distance correct for gearing.
+<div class="video-wrapper">
+  <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
+</div>
 [!/PROCEDURE]
 
 > [!INFO] Concept2 sleeve/pitch references (use these for exact specs)
@@ -103,10 +103,6 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. 
 > - [Sleeve & pitch instruction booklet](https://www.concept2.ch/files/pdf/us/oars/Oar_SleevePitchBooklet.pdf)
 > - [Sleeve replacement PDF (includes P/S alignment wording)](https://www.concept2.at/files/pdf/us/oars/Oar_SleeveReplacement.pdf)
 > - [Rigging and pitch checking notes](https://www.concept2.com/support/oars/how-to-videos-and-information)
-
-<div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
-</div>
 
 [!PROCEDURE:Intermediate]] Collar inspection and re-set
 Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
@@ -139,11 +135,10 @@ Early intervention on spoon delamination to prevent blade failure and structural
 4. Sand/fair lightly if needed.
 
 **Check:** No flex; sealed edges. Do when early delamination or edge damage is observed.
-[!/PROCEDURE]
-
 <div class="video-wrapper">
   <iframe src="https://www.youtube.com/embed/Z5Vee-V-pO8" title="Spoon repair"></iframe>
 </div>
+[!/PROCEDURE]
 
 ### When to send to manufacturer
 
