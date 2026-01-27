@@ -2,7 +2,7 @@
 
 ## Routine cleaning
 
-[!PROCEDURE:Beginner]] Track and wheel wipe-down
+[!PROCEDURE:Beginner] Track and wheel wipe-down
 Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
 
 **Tools:** Damp cloth, microfibre
@@ -18,7 +18,7 @@ Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
 
 ## Inspection and service
 
-[!PROCEDURE:Intermediate]] Seat inspection (remove + check)
+[!PROCEDURE:Intermediate] Seat inspection (remove + check)
 Weekly inspection of wheel condition and track integrity by removing the seat and spinning wheels by hand.
 
 **Tools:** Allen keys/spanners for axle hardware
@@ -33,7 +33,7 @@ Weekly inspection of wheel condition and track integrity by removing the seat an
 **Check:** No wheel grinding, flats, or wobble; tracks are clean and end-stops secure. Do weekly or if a seat feels rough.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Replace seat wheels (as a set)
+[!PROCEDURE:Intermediate] Replace seat wheels (as a set)
 Annual or wear-based replacement of seat wheels to maintain smooth rolling. Replace all wheels in a seat together to avoid mismatched diameters and uneven tracking.
 
 **Tools:** Replacement wheels, correct fasteners/spacers
@@ -48,7 +48,7 @@ Annual or wear-based replacement of seat wheels to maintain smooth rolling. Repl
 **Check:** Smooth travel with no wobble or binding. Replace annually or when wheels show flats/grinding.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Track alignment check
+[!PROCEDURE:Intermediate] Track alignment check
 Monthly check that seat tracks are straight and parallel to catch misalignment before it causes binding or uneven wear.
 
 **Tools:** Straight edge or taut string line, tape measure, marker
@@ -64,7 +64,7 @@ Monthly check that seat tracks are straight and parallel to catch misalignment b
 **Check:** Seat rolls freely end-to-end; track spacing consistent along the length. Do monthly, after transport, and if seats bind.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Fix loose/spinning track fasteners
+[!PROCEDURE:Intermediate] Fix loose/spinning track fasteners
 Immediately address any track fasteners that are loose or spinning to prevent track movement relative to the hull. Tighten only to the point the track is secure; over-tightening strips inserts and can crush laminate. If an insert is spinning or pulled through, stop and escalate (often requires bonded insert repair).
 
 **Tools:** Correct fasteners, suitable threadlocker or nyloc, washer stack per manufacturer, insert repair kit if required

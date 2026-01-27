@@ -44,7 +44,7 @@ Other commonly used items: cable clamps/blocks, hatch-cover string, hose clamps.
 
 ## Hardware audit and reassembly
 
-[!PROCEDURE:Intermediate]] Hardware audit (riggers + critical fittings)
+[!PROCEDURE:Intermediate] Hardware audit (riggers + critical fittings)
 Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage. Spinning insert/stripped thread: stop and escalate. Avoid over-tightening and crushing hull. Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull: stop and escalate.
 
 **Tools:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
@@ -62,7 +62,7 @@ Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catc
 **Check:** No missing washers; no loose fittings; riggers not rocking. Watch for mixed washer stacks and crushing split washers. Do monthly and after transport.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Freeing a seized stainless fastener (basic)
+[!PROCEDURE:Intermediate] Freeing a seized stainless fastener (basic)
 Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
 
 **Tools:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware

@@ -83,8 +83,7 @@ function setTocDepth(depth) {
 
 function refreshSidebarLinksCache() {
   sidebarLinksCache = Array.from(
-    document.querySelectorAll(".sidebar a[href^='#']"),
-  );
+    document.querySelectorAll(".sidebar a[href^='#']"));
 }
 
 function setupTocDepthControl() {

@@ -25,74 +25,157 @@ function escapeAttribute(value) {
     return escapeHtml(value).replace(/`/g, "&#96;");
 }
 
-function transformProcedureBlocks(markdown) {
+function renderProcedureNode(node) {
+    const skillRaw = (node.skillRaw || "").trim();
+    const title = (node.title || "Procedure").trim() || "Procedure";
+
+    console.groupCollapsed(`🔨 Rendering: "${title}"`);
+
+    const blockContent = node.content
+        .map((part) => (typeof part === "string" ? part : part.html))
+        .join("\n")
+        .trim();
+
+    console.log('📝 Markdown content:', blockContent);
+
+    const chunks = blockContent
+        ? blockContent.split(/\n\s*\n/).filter(Boolean)
+        : [];
+    const descriptionChunk = (chunks.shift() || "").trim();
+    const restMarkdown = chunks.join("\n\n");
+
+    const descriptionHtml = descriptionChunk
+        ? marked.parseInline(descriptionChunk.replace(/\n+/g, " "))
+        : "";
+    const bodyHtml = restMarkdown ? marked.parse(restMarkdown) : "";
+
+    const skillValue = skillRaw.toLowerCase();
+    const skillLabel = skillRaw.replace(/[_-]+/g, " ");
+    const skillBadge = skillRaw
+        ? `<span class="procedure-skill-badge" data-skill="${skillValue}">${skillLabel}</span>`
+        : "";
+
+    const html = [
+        `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""}>`,
+        `  <div class="procedure-header">`,
+        `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
+        `  </div>`,
+        `  <div class="procedure-content">`,
+        descriptionHtml
+            ? `    <div class="procedure-description">${descriptionHtml}</div>`
+            : "",
+        bodyHtml ? `    ${bodyHtml}` : "",
+        `  </div>`,
+        `</div>`,
+    ].filter(Boolean).join("\n");
+
+    console.log('✅ Rendered HTML:', html);
+    console.groupEnd();
+
+    return html;
+}
+
+function transformProcedureBlocks(markdown, documentTitle) {
+    const titleInfo = documentTitle ? ` in "${documentTitle}"` : '';
+    console.group(`📋 PROCEDURE TRANSFORM${titleInfo}`);
     const lines = markdown.split(/\r?\n/);
     const output = [];
+    const stack = [];
 
     for (let idx = 0; idx < lines.length; idx += 1) {
         const line = lines[idx];
-        const match = /^\s*\[!PROCEDURE:([^\]]+)\]\]?\s*(.*?)\s*$/.exec(line);
-        if (!match) {
-            output.push(line);
+        const startMatch = /^(.*?)\[!PROCEDURE:([^\]]+)\]\]?\s*(.*?)\s*$/.exec(line);
+        const endMatch = /^(.*?)\[!\/PROCEDURE\]\s*(.*)$/.exec(line);
+
+        if (startMatch) {
+            const prefix = startMatch[1];
+            const skillRaw = (startMatch[2] || "").trim();
+            const title = (startMatch[3] || "Procedure").trim() || "Procedure";
+
+            console.groupCollapsed(`▶️ START "${title}" [${skillRaw}] at line ${idx}`);
+            if (prefix.trim()) {
+                console.log('Prefix text:', prefix);
+            }
+            console.log('Stack depth:', stack.length, '→', stack.length + 1);
+            console.groupEnd();
+
+            // Output any text before the tag
+            if (prefix.trim()) {
+                if (stack.length) {
+                    stack[stack.length - 1].content.push(prefix.trimEnd());
+                } else {
+                    output.push(prefix.trimEnd());
+                }
+            }
+
+            stack.push({ skillRaw, title, content: [] });
             continue;
         }
 
-        const skillRaw = (match[1] || "").trim();
-        const title = (match[2] || "Procedure").trim() || "Procedure";
+        if (endMatch) {
+            const prefix = endMatch[1];
+            const suffix = endMatch[2];
 
-        const blockLines = [];
-        idx += 1;
-        while (idx < lines.length) {
-            if (/^\s*\[!\/PROCEDURE\]\s*$/.test(lines[idx])) {
-                break;
+            if (!stack.length) {
+                // Unmatched close; treat as plain text
+                console.warn('⚠️ Unmatched [!/PROCEDURE] at line', idx);
+                output.push(line);
+                continue;
             }
-            blockLines.push(lines[idx]);
-            idx += 1;
+
+            const completed = stack[stack.length - 1];
+            console.groupCollapsed(`⏹️ END "${completed.title}" [Line ${idx}]`);
+
+            // Add any text before the closing tag to the procedure content
+            if (prefix.trim()) {
+                console.log('Prefix text:', prefix);
+                stack[stack.length - 1].content.push(prefix.trimEnd());
+            }
+            if (suffix.trim()) {
+                console.log('Suffix text:', suffix);
+            }
+            console.log('Content lines captured:', completed.content.length);
+            console.log('Stack depth:', stack.length, '→', stack.length - 1);
+
+            stack.pop();
+            const rendered = { html: renderProcedureNode(completed) };
+            console.groupEnd();
+
+            if (stack.length) {
+                stack[stack.length - 1].content.push(rendered);
+            } else {
+                output.push(rendered.html);
+            }
+
+            // Output any text after the closing tag
+            if (suffix.trim()) {
+                if (stack.length) {
+                    stack[stack.length - 1].content.push(suffix.trimStart());
+                } else {
+                    output.push(suffix.trimStart());
+                }
+            }
+            continue;
         }
 
-        if (idx >= lines.length) {
-            output.push(line, ...blockLines);
-            break;
+        if (stack.length) {
+            stack[stack.length - 1].content.push(line);
+        } else {
+            output.push(line);
         }
-
-        const blockContent = blockLines.join("\n").trim();
-        const chunks = blockContent
-            ? blockContent.split(/\n\s*\n/).filter(Boolean)
-            : [];
-        const descriptionChunk = (chunks.shift() || "").trim();
-        const restMarkdown = chunks.join("\n\n");
-
-        const descriptionHtml = descriptionChunk
-            ? marked.parseInline(descriptionChunk.replace(/\n+/g, " "))
-            : "";
-        const bodyHtml = restMarkdown ? marked.parse(restMarkdown) : "";
-
-        const skillValue = skillRaw.toLowerCase();
-        const skillLabel = skillRaw.replace(/[_-]+/g, " ");
-        const skillBadge = skillRaw
-            ? `<span class="procedure-skill-badge" data-skill="${skillValue}">${skillLabel}</span>`
-            : "";
-
-        const procedureHtml = [
-            `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""
-            }>`,
-            `  <div class="procedure-header">`,
-            `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
-            `  </div>`,
-            `  <div class="procedure-content">`,
-            descriptionHtml
-                ? `    <div class="procedure-description">${descriptionHtml}</div>`
-                : "",
-            bodyHtml ? `    ${bodyHtml}` : "",
-            `  </div>`,
-            `</div>`,
-        ]
-            .filter(Boolean)
-            .join("\n");
-
-        output.push(procedureHtml);
     }
 
+    // If any unclosed procedures remain, emit them as raw text to avoid loss
+    while (stack.length) {
+        const dangling = stack.shift();
+        console.error(`❌ Unclosed procedure: "${dangling.title}"`);
+        output.push(
+            `[!PROCEDURE:${dangling.skillRaw}] ${dangling.title}`,
+            ...dangling.content.map((part) => typeof part === "string" ? part : part.html));
+    }
+
+    console.log('✅ Transform complete. Output items:', output.length);
+    console.groupEnd();
     return output.join("\n");
 }
 
@@ -145,8 +228,7 @@ function transformCallouts(rootEl) {
         const kind = match[1];
         const title = match[2].trim();
 
-        blockquote.className =
-            `${blockquote.className} ${classMap[kind]}`.trim();
+        blockquote.className = `${blockquote.className} ${classMap[kind]}`.trim();
         firstParagraph.className = "callout-title";
         firstParagraph.innerHTML = `${svgMap[kind]} ${title}`.trim();
     });
@@ -214,9 +296,7 @@ function wrapTables(rootEl) {
     const tables = Array.from(rootEl.querySelectorAll("table"));
     tables.forEach((table) => {
         if (
-            table.parentElement &&
-            table.parentElement.classList.contains("table-scroll")
-        ) {
+            table.parentElement && table.parentElement.classList.contains("table-scroll")) {
             return;
         }
         const wrapper = document.createElement("div");
@@ -227,26 +307,34 @@ function wrapTables(rootEl) {
 }
 
 function extractYouTubeId(src) {
+    console.log('🔍 Extracting video ID from:', src);
     try {
         const url = new URL(src);
         if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
+            console.log('❌ Not a YouTube URL');
             return null;
         }
         const match = url.pathname.match(/\/embed\/([^/?]+)/);
-        return match ? match[1] : null;
+        const videoId = match ? match[1] : null;
+        console.log('✅ Extracted video ID:', videoId);
+        return videoId;
     } catch (error) {
+        console.log('⚠️ URL parse failed, trying fallback regex');
         const fallback = /youtube(?:-nocookie)?\.com\/embed\/([^?&]+)/.exec(
-            src
-        );
-        return fallback ? fallback[1] : null;
+            src);
+        const videoId = fallback ? fallback[1] : null;
+        console.log(videoId ? '✅ Fallback extracted:' : '❌ Fallback failed:', videoId);
+        return videoId;
     }
 }
 
 function buildYouTubeEmbed(iframe, videoId) {
     const title = iframe.getAttribute("title") || "YouTube video";
+    console.groupCollapsed(`📺 Building embed: "${title}" [${videoId}]`);
     const safeTitle = escapeHtml(title);
 
     let dataSrc = iframe.getAttribute("src") || "";
+    console.log('Original src:', dataSrc);
     try {
         dataSrc = new URL(dataSrc);
         dataSrc.searchParams.set("autoplay", "1");
@@ -254,53 +342,92 @@ function buildYouTubeEmbed(iframe, videoId) {
     } catch (error) {
         dataSrc += dataSrc.includes("?") ? "&autoplay=1" : "?autoplay=1";
     }
+    console.log('Data-src with autoplay:', dataSrc);
 
-    const safeDataSrc = escapeAttribute(dataSrc);
-    const template = document.createElement("template");
-    template.innerHTML = `
-        <div class="youtube-embed">
-            <button type="button" class="youtube-embed__button" title="Play video: ${safeTitle}" aria-label="Play video: ${safeTitle}">
-                <svg class="youtube-embed__icon" viewBox="0 0 68 48" aria-hidden="true" focusable="false">
-                    <path d="M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z" fill="#ff0000"></path>
-                    <path d="M45 24 27 14v20z" fill="#ffffff"></path>
-                </svg>
-                <img loading="lazy" decoding="async" alt="${safeTitle}" src="https://img.youtube.com/vi/${videoId}/0.jpg" />
-            </button>
-            <iframe title="${safeTitle}" src="about:blank" data-src="${safeDataSrc}" frameborder="0" allowfullscreen="" allow="autoplay; encrypted-media" loading="lazy"></iframe>
-        </div>
-    `;
+    const wrapper = document.createElement("div");
+    wrapper.className = "youtube-embed";
 
-    const wrapper = template.content.firstElementChild;
-    const button = wrapper.querySelector(".youtube-embed__button");
-    const lazyIframe = wrapper.querySelector("iframe");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "youtube-embed__button";
+    button.title = `Play video: ${title}`;
+    button.setAttribute("aria-label", `Play video: ${title}`);
 
-    button.addEventListener("click", () => {
-        const src = lazyIframe.getAttribute("data-src");
-        if (!src) {
-            return;
-        }
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("class", "youtube-embed__icon");
+    icon.setAttribute("viewBox", "0 0 68 48");
+    icon.setAttribute("aria-hidden", "true");
+    icon.setAttribute("focusable", "false");
 
-        lazyIframe.setAttribute("src", src);
-        wrapper.classList.add("is-playing");
-        button.setAttribute("aria-hidden", "true");
-        button.disabled = true;
-    });
+    const iconPath = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path");
+    iconPath.setAttribute(
+        "d",
+        "M66.52 7.06a8 8 0 0 0-5.63-5.66C55.65 0 34 0 34 0S12.35 0 7.11 1.4A8 8 0 0 0 1.48 7.06 83.2 83.2 0 0 0 0 24a83.2 83.2 0 0 0 1.48 16.94 8 8 0 0 0 5.63 5.66C12.35 48 34 48 34 48s21.65 0 26.89-1.4a8 8 0 0 0 5.63-5.66A83.2 83.2 0 0 0 68 24a83.2 83.2 0 0 0-1.48-16.94z");
+    iconPath.setAttribute("fill", "#ff0000");
+    const iconTriangle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path");
+    iconTriangle.setAttribute("d", "M45 24 27 14v20z");
+    iconTriangle.setAttribute("fill", "#ffffff");
+    icon.appendChild(iconPath);
+    icon.appendChild(iconTriangle);
+
+    const thumbnail = document.createElement("img");
+    thumbnail.loading = "lazy";
+    thumbnail.decoding = "async";
+    thumbnail.alt = title;
+    thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+    console.log('Thumbnail URL:', thumbnail.src);
+
+    button.appendChild(icon);
+    button.appendChild(thumbnail);
+
+    const lazyIframe = document.createElement("iframe");
+    lazyIframe.title = title;
+    lazyIframe.src = "about:blank";
+    lazyIframe.setAttribute("data-src", dataSrc);
+    lazyIframe.setAttribute("frameborder", "0");
+    lazyIframe.setAttribute("allowfullscreen", "");
+    // lazyIframe.setAttribute("allow", "autoplay; encrypted-media");
+    lazyIframe.loading = "lazy";
+
+    wrapper.appendChild(button);
+    wrapper.appendChild(lazyIframe);
+
+    console.log('✅ Wrapper built');
+    console.groupEnd();
 
     return wrapper;
 }
 
 function transformYouTubeEmbeds(rootEl) {
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
-    iframes.forEach((iframe) => {
+    console.group(`📺 YOUTUBE TRANSFORM (${iframes.length} iframes found)`);
+
+    let transformed = 0;
+    iframes.forEach((iframe, index) => {
         const src = iframe.getAttribute("src") || "";
+        console.groupCollapsed(`🎬 iframe ${index + 1}/${iframes.length}`);
+        console.log('Source:', src);
+
         const videoId = extractYouTubeId(src);
         if (!videoId) {
+            console.log('⏭️ Skipping (not a YouTube embed)');
+            console.groupEnd();
             return;
         }
 
         const wrapper = buildYouTubeEmbed(iframe, videoId);
         iframe.replaceWith(wrapper);
+        transformed++;
+        console.log('✅ Replaced with lazy-load wrapper');
+        console.groupEnd();
     });
+
+    console.log(`✅ Transformation complete. Converted: ${transformed}/${iframes.length}`);
+    console.groupEnd();
 }
 
 /**
@@ -311,7 +438,10 @@ function transformYouTubeEmbeds(rootEl) {
  */
 function markdownToSection(markdown, sectionId) {
     const { title, content } = extractTitleAndContentFromMarkdown(markdown);
-    const html = marked.parse(transformProcedureBlocks(content));
+
+    console.groupCollapsed(`📄 Processing markdown: "${title || sectionId}" (${sectionId}.md)`);
+
+    const html = marked.parse(transformProcedureBlocks(content, title));
 
     const safeTitle = escapeHtml(title || sectionId);
     const safeSectionId = escapeAttribute(sectionId);
@@ -342,6 +472,9 @@ function markdownToSection(markdown, sectionId) {
 
     // Set ids for sidebar linking without changing heading levels
     addHeadingIds(contentEl, sectionId);
+
+    console.log('✅ Section complete');
+    console.groupEnd();
 
     return sectionEl;
 }
