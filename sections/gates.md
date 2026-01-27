@@ -15,7 +15,7 @@ The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**,
 
 ## Daily checks
 
-[!PROCEDURE:Beginner]] Gate safety check
+[!PROCEDURE:Beginner] Gate safety check
 Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load. Latch failure, cracked gate, or loose pin: stop-use.
 
 **Tools:** None (or gate nut tool if something is loose)
@@ -32,7 +32,7 @@ Daily pre-outing check that the gate latch is secure and the gate cannot pop out
 
 ## Clean and rebuild
 
-[!PROCEDURE:Intermediate]] Disassemble, clean, rebuild gate stack
+[!PROCEDURE:Intermediate] Disassemble, clean, rebuild gate stack
 Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking. Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body: replace parts/escalate. If you cannot match pitch across sides, replace pin/gate components.
 
 **Tools:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
@@ -49,7 +49,7 @@ Maintenance day procedure to disassemble, clean, and reassemble gate hardware to
 **Check:** Gate rotates freely; no vertical play; latch closes cleanly.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Adjust gate height (washer stack)
+[!PROCEDURE:Intermediate] Adjust gate height (washer stack)
 When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
 
 **Tools:** Gate washers/shims, calipers/ruler, rigging sheet
@@ -62,7 +62,7 @@ When rigging changes or mismatched heights are observed, adjust the washer stack
 **Check:** Gate height matches rigging sheet; sides match.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Set/verify pitch
+[!PROCEDURE:Intermediate] Set/verify pitch
 After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
 
 **Tools:** Pitch gauge, correct pitch bushings, rigging sheet

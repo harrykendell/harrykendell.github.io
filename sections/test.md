@@ -120,7 +120,7 @@ greet('World')
 
 **Template for new procedures:**
 
-[!PROCEDURE:beginner]] Enter title here
+[!PROCEDURE:beginner] Enter title here
 First paragraph is the description of what this procedure accomplishes.
 
 **Tools:** List all needed tools and materials
@@ -138,6 +138,38 @@ First paragraph is the description of what this procedure accomplishes.
 
 **Notes:** Any additional notes or tips
 [!/PROCEDURE]
+
+### Procedure Handoff (nesting)
+
+[!PROCEDURE:Intermediate] Parent procedure (composite repair overview)
+Overview for handling a composite repair that includes a curing step and a separate finish step. Hand off to the follow-on procedure once curing is complete.
+
+> [!INFO] Tip
+> Keep procedures flat (no nesting). Link to follow-on steps like this instead.
+
+**Tools:** Epoxy kit, sanding block, PPE, heat gun (low setting)
+
+**Steps:**
+
+1. Prep surface and confirm damage scope.
+2. Execute the patch and start the cure timer.
+3. [!PROCEDURE:Beginner] Finish procedure (post-cure tidy)
+Follow-on tidy step after the primary cure completes. This stays separate so procedures remain parseable.
+
+**Tools:** 400–800 grit sandpaper, lint-free cloth, polish/wax
+
+**Steps:**
+
+1. Lightly sand to knock down high spots; avoid cutting through the patch.
+2. Wipe clean with a lint-free cloth.
+3. Apply polish/wax if required by the parent procedure.
+
+**Check:** Surface smooth; no dust left; finish matches surrounding area.
+[!/PROCEDURE]
+
+**Check:** Surface is clean; patch laid correctly; cure timer running.
+[!/PROCEDURE]
+
 
 ## Special HTML Elements
 

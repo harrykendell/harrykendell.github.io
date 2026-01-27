@@ -4,7 +4,7 @@ Different boats use different stretcher and steering systems (wing-nut tracks, q
 
 ## Footplate adjustment and inspection
 
-[!PROCEDURE:Beginner]] Footplate set-up (athlete adjustment)
+[!PROCEDURE:Beginner] Footplate set-up (athlete adjustment)
 Quick pre-rowing adjustment of stretcher position to the athlete's preferred setting.
 
 **Tools:** None or wing nuts (depending on system)
@@ -31,7 +31,7 @@ Quick pre-rowing adjustment of stretcher position to the athlete's preferred set
 > - [British Rowing Rules of Racing (current edition)](https://www.britishrowing.org/wp-content/uploads/2025/03/2025-British-Rowing-Rules-of-Racing.pdf)
 > - [British Rowing safety alert (heel restraints)](https://www.britishrowing.org/wp-content/uploads/2022/05/Safety-Alert-Heel-Restraints.pdf)
 
-[!PROCEDURE:Beginner]] Heel restraint inspection and replacement
+[!PROCEDURE:Beginner] Heel restraint inspection and replacement
 Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize. If any heel restraint is broken or missing, stop-use until corrected.
 
 **Tools:** Suitable cord/strap, scissors, lighter/heat to seal ends
@@ -48,7 +48,7 @@ Safety-critical check and replacement of heel ties to ensure foot retention in c
 
 ## Steering wire
 
-[!PROCEDURE:Beginner]] Steering functional check
+[!PROCEDURE:Beginner] Steering functional check
 Quick pre-outing check that steering is centred and moves freely. If steering binds, goes slack, or will not centre, do not launch until fixed.
 
 **Tools:** None
@@ -62,7 +62,7 @@ Quick pre-outing check that steering is centred and moves freely. If steering bi
 **Check:** Rudder centred at toe-centre; full travel smooth and repeatable. Do before every outing.
 [!/PROCEDURE]
 
-[!PROCEDURE:Intermediate]] Replace steering cable
+[!PROCEDURE:Intermediate] Replace steering cable
 Replace a frayed or snapped steering cable to restore full steering responsiveness. Cable ends are sharp when cut; handle with gloves and eye protection and tape ends immediately.
 
 **Tools:** Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape/heatshrink

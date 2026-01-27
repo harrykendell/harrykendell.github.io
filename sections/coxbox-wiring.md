@@ -18,7 +18,7 @@ Refer to this document for detailed troubleshooting:
 
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
-[!PROCEDURE:Intermediate]] Quick electrical diagnosis (multimeter)
+[!PROCEDURE:Intermediate] Quick electrical diagnosis (multimeter)
 Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins. Do not test wet connectors.
 
 **Tools:** Multimeter, contact cleaner
@@ -82,7 +82,7 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 
 ## Harness build/repair procedure
 
-[!PROCEDURE:Advanced]] Build or repair a harness segment
+[!PROCEDURE:Advanced] Build or repair a harness segment
 Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress. Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins: stop-use.
 
 **Tools:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester

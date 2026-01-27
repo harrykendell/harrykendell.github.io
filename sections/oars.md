@@ -22,7 +22,7 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > [!INFO] Handle Types
 > There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
-[!PROCEDURE:Intermediate]] Replace suede patch
+[!PROCEDURE:Intermediate] Replace suede patch
 Replace worn or torn suede grip patches to maintain comfort and prevent blisters. Use gentle heat and keep the gun moving to avoid overheating the carbon.
 
 **Tools:** Heat gun, IPA, replacement patches
@@ -41,7 +41,7 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
   <iframe src="https://www.youtube.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
 </div>
 
-[!PROCEDURE:Intermediate]] Replace green rubber grip
+[!PROCEDURE:Intermediate] Replace green rubber grip
 Replace a torn, slippery, or loose green grip to restore comfort and control. If the end cap comes off with the grip, epoxy it back in place with the correct rotational alignment before fitting the new grip.
 
 **Tools:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
@@ -59,7 +59,7 @@ Replace a torn, slippery, or loose green grip to restore comfort and control. If
   <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
 </div>
 
-[!PROCEDURE:Advanced]] Fixed handle replacement (legacy)
+[!PROCEDURE:Advanced] Fixed handle replacement (legacy)
 Replace a fixed handle or inner grip on legacy oars. This is higher risk than screw-on grips: if you cannot remove the old handle without damaging the shaft, stop and arrange manufacturer repair.
 
 **Tools:** New fixed handle, epoxy, heat tools as needed
@@ -82,7 +82,7 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
 
-[!PROCEDURE:Advanced]] Sleeve replacement and pitch alignment
+[!PROCEDURE:Advanced] Sleeve replacement and pitch alignment
 Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. Pitch errors ruin rigging consistency; if you cannot restore alignment or the shaft is damaged, send to the manufacturer.
 
 **Tools:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
@@ -108,7 +108,7 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. 
   <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
 </div>
 
-[!PROCEDURE:Intermediate]] Collar inspection and re-set
+[!PROCEDURE:Intermediate] Collar inspection and re-set
 Monthly check that collars are tight and that inboard is consistent across a pair or scull set.
 
 **Tools:** Marker, tape measure, collar tools appropriate to model, spare collars/clams if used
@@ -126,7 +126,7 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 
 For delamination or breakage, stabilise with epoxy:
 
-[!PROCEDURE:Intermediate]] Stabilise spoon delamination (inject epoxy)
+[!PROCEDURE:Intermediate] Stabilise spoon delamination (inject epoxy)
 Early intervention on spoon delamination to prevent blade failure and structural damage. For large delamination, structural cracks, or blade-to-shaft joint issues, arrange manufacturer repair.
 
 **Tools:** Epoxy, syringe, clamps/weights, release film

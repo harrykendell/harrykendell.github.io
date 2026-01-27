@@ -1,0 +1,22 @@
+# Copilot Instructions
+
+- Project is a static single-page Rowing Repairs Manual; no build step or bundler. Open [index.html](index.html) directly or run `python -m http.server` from repo root for local preview.
+- Entry HTML pulls [styles.css](styles.css), [script.js](script.js), CDN `marked` parser, and [markdown-to-section.js](markdown-to-section.js); cache-busting version string is `?v=11` in [index.html](index.html).
+- Section order and filenames live in `sectionFiles` at the top of [script.js](script.js); each slug maps to `sections/<slug>.md` fetched at runtime.
+- Adding/renaming a section: create `sections/<slug>.md` starting with a single `# Title`, register the slug in `sectionFiles`, and keep the cache-busting version aligned for CSS/JS when shipping.
+- Markdown H1 is stripped for the section title; remaining headings are downgraded one level, and IDs are auto-slugged with the section prefix in [markdown-to-section.js](markdown-to-section.js).
+- Sidebar/TOC is auto-built from section and in-content headings in [script.js](script.js); depth is user-adjustable (`toc-depth` in localStorage) with default 4.
+- Section collapse state persists per section via `section-<id>` in localStorage; collapse/expand also toggles sidebar arrows and sublists.
+- Scroll restoration uses sessionStorage `scrollPosition`; smooth scrolling offsets by `ACTIVATION_OFFSET` (120px) to align headings with viewport.
+- Mobile breakpoint at 860px hides the sidebar behind the hamburger; opening it dims `<main>` (`toc-dim` class).
+- Callouts: blockquotes whose first line starts `[!INFO]`, `[!WARNING]`, or `[!DANGER]` become styled callouts in [markdown-to-section.js](markdown-to-section.js); keep the first line as the title text.
+- Procedure blocks: wrap with `[!PROCEDURE:<skill>]] <Title>` … `[!/PROCEDURE]`; first paragraph becomes the italic description, later paragraphs render as markdown. `data-skill` drives badge colors in [styles.css](styles.css).
+- Procedures default to collapsed; clicking the header toggles open/closed in both procedures and top-level sections.
+- YouTube embeds: place a standard `youtube.com/embed/<id>` iframe; [markdown-to-section.js](markdown-to-section.js) swaps it for a lazy-load wrapper with a play button.
+- Tables are wrapped for horizontal scrolling automatically; write standard Markdown tables and avoid hard-coded widths.
+- Images/videos: store under `imgs/` (favicons under `favicon/`) and reference with root-relative paths; use the `.figure` helper classes in [styles.css](styles.css) for captions/grids.
+- Styling tokens (colors, spacing, radii) and responsive tweaks live in [styles.css](styles.css); keep new components aligned with existing callout/procedure styles.
+- External dependency surface is minimal (only `marked` via CDN); keep scripts self-contained and avoid adding build-time tooling unless necessary.
+- When changing JS/CSS behavior, bump the `?v=11` cache string in [index.html](index.html) for GitHub Pages cache busting.
+- Anchors: sidebar links use generated IDs combining section slug + heading slug; prefer standard Markdown headings over manual `<a>` tags.
+- Content examples to follow: intro safety checklists in [sections/introduction.md](sections/introduction.md); hardware callouts and procedures in [sections/hardware.md](sections/hardware.md) illustrate custom syntax.
