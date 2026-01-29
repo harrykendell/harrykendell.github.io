@@ -34,7 +34,10 @@ Weekly inspection of wheel condition and track integrity by removing the seat an
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Replace seat wheels (as a set)
-Annual or wear-based replacement of seat wheels to maintain smooth rolling. Replace all wheels in a seat together to avoid mismatched diameters and uneven tracking.
+Annual or wear-based replacement of seat wheels to maintain smooth rolling.
+
+> [!INFO] Important
+> Replace all wheels in a seat together to avoid mismatched diameters and uneven tracking.
 
 **Tools:** Replacement wheels, correct fasteners/spacers
 
@@ -65,7 +68,10 @@ Monthly check that seat tracks are straight and parallel to catch misalignment b
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Fix loose/spinning track fasteners
-Immediately address any track fasteners that are loose or spinning to prevent track movement relative to the hull. Tighten only to the point the track is secure; over-tightening strips inserts and can crush laminate. If an insert is spinning or pulled through, stop and escalate (often requires bonded insert repair).
+Immediately address any track fasteners that are loose or spinning to prevent track movement relative to the hull.
+
+> [!WARNING] Important
+> Tighten only to the point the track is secure; over-tightening strips inserts and can crush the laminate. If an insert is spinning or pulled through, stop and escalate (often requires bonded insert repair).
 
 **Tools:** Correct fasteners, suitable threadlocker or nyloc, washer stack per manufacturer, insert repair kit if required
 
@@ -81,7 +87,7 @@ Immediately address any track fasteners that are loose or spinning to prevent tr
 
 ## Noise troubleshooting
 
-Common causes:
+**Common causes:**
 
 - **Grit on tracks/wheels:** clean thoroughly.
 - **Flat-spotted wheels:** replace wheels (as a set).

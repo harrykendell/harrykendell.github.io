@@ -19,7 +19,10 @@ Refer to this document for detailed troubleshooting:
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
 [!PROCEDURE:Intermediate] Quick electrical diagnosis (multimeter)
-Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins. Do not test wet connectors.
+Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
+
+> [!WARNING] Important
+> Do not test wet connectors.
 
 **Tools:** Multimeter, contact cleaner
 
@@ -30,7 +33,7 @@ Troubleshoot non-working rate, speakers, or charging by testing for continuity a
 3. **Speakers:** C–B should read as a load/short when speakers are wired.
 4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
 
-**Check:** Values consistent; if not, locate break by testing each segment. Do when rate/speakers/charging do not work.
+**Check:** Values consistent; if not, locate break by testing each segment.
 [!/PROCEDURE]
 
 ## Parts and sourcing
@@ -44,7 +47,7 @@ Harness components are sold at significant markup by NK Sports, Oarsport, etc. T
 - Crimps: [044-100-1414P-100-101](https://www.mouser.co.uk/c/?q=044%20100%201414P%20100%20101), [044-102-1414S-100-101](https://www.mouser.co.uk/c/?q=044%20102%201414S%20100%20101)
 - Heat shrink: [DWFR-6/2-0-STK](https://www.mouser.co.uk/ProductDetail/TE-Connectivity-Raychem/DWFR-6-2-0-STK?qs=YeFsEeYZIJnMEfWsJKC2lA%3D%3D), [DWFR-16/4-0-STK](https://www.mouser.co.uk/ProductDetail/TE-Connectivity-Raychem/DWFR-16-4-0-STK?qs=YeFsEeYZIJkJLuipLRO0CA%3D%3D)
 
-Suitable cable types:
+**Suitable cable types:**
 
 - [H07RN-F 1.5 mm² rubber flex](https://www.cef.co.uk/catalogue/products/2014148-1-5mm-2-core-ho7rnf-rubber-flexible-cable-cut-length-sold-by-the-mtr)
 - [YY control cable 1.5 mm²](https://www.cef.co.uk/catalogue/products/4835737-1-5mm-2-core-yy-control-flexible-cable-100m)
@@ -83,7 +86,10 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 ## Harness build/repair procedure
 
 [!PROCEDURE:Advanced] Build or repair a harness segment
-Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress. Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins: stop-use.
+Build a new or repair a damaged boat harness to restore electrical continuity and seal against water ingress.
+
+> [!WARNING] Important
+> Ensure correct keying and pinout; poor strain relief causes repeat failures. Exposed conductors in cockpit or corroded connector pins: stop-use.
 
 **Tools:** Correct crimper, contacts, housings, adhesive-lined heatshrink, heat gun, continuity tester
 
@@ -96,10 +102,5 @@ Build a new or repair a damaged boat harness to restore electrical continuity an
 5. Add adhesive-lined heatshrink for strain relief and sealing.
 6. Continuity test end-to-end; then functional test with coxbox/speakers.
 
-**Check:** Correct pinout; no shorts between pins; mechanical strain relief effective. This is professional work - mistakes can cause safety failures.
-
-> [!WARNING] Stop-use criteria (electronics)
->
-> - Exposed conductors in the cockpit.
-> - Connector pins corroded to the point of overheating or intermittent contact.
+**Check:** Correct pinout; no shorts between pins; mechanical strain relief effective.
 [!/PROCEDURE]

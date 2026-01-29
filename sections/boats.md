@@ -3,7 +3,7 @@
 ## Routine care & cleaning
 
 [!PROCEDURE:Beginner] Post-outing wash-down
-Routine rinse and wash to remove salt, algae, and grit after every outing. This prevents corrosion, mould, and deterioration of seals. Avoid pressure-washing near seams, decals, or hatch seals; leaving salt causes corrosion; leaving water causes mould and seized hardware.
+Routine rinse and wash to remove salt, algae, and grit after every outing. This prevents corrosion, mould, and deterioration of seals.
 
 **Tools:** Hose, bucket, mild soap, microfibre cloths
 
@@ -16,12 +16,16 @@ Routine rinse and wash to remove salt, algae, and grit after every outing. This 
 5. Quick visual check: fin/rudder, obvious scratches, loose hardware.
 
 > [!INFO] Check for Damage
-> Report and tag the boat if you see cracks, soft spots, or other damage
+> Report and tag the boat if you see cracks, soft spots, or other damage.
+
+**Check:** No standing water; tracks feel smooth; no new obvious cracks.
 [!/PROCEDURE]
-<!-- > **Check:** No standing water; tracks feel smooth; no new obvious cracks. Report and tag the boat if you see cracks, soft spots, or impact damage. -->
 
 [!PROCEDURE:Intermediate] Maintenance day deep-clean
-Weekly or biweekly deep clean with hardware inspection and removal to prevent corrosion and catch loose fasteners early. Gloves/eye protection for cleaners; reassembly mistakes on washer order; over-cleaning with aggressive chemicals.
+Weekly or biweekly deep clean with hardware inspection and removal to prevent corrosion and catch loose fasteners early.
+
+> [!WARNING] Safety
+> Wear gloves/eye protection for cleaners; avoid over-cleaning with aggressive chemicals.
 
 **Tools:** Standard tool kit, brushes, microfibres, vinegar (dilute), hull cleaner (optional), replacement washers, nyloc nuts as needed
 
@@ -33,11 +37,17 @@ Weekly or biweekly deep clean with hardware inspection and removal to prevent co
 4. Remove limescale with diluted vinegar; rinse thoroughly.
 5. If using a hull cleaner (e.g., Starbrite): apply briefly, scrub lightly, rinse thoroughly.
 
-**Check:** No missing washers; all critical bolts tightened; steering functional. Stripped inserts, seized bolts, or any structural cracking → escalate to equipment officer.
+**Check:** No missing washers; all critical bolts tightened; steering functional.
+
+> [!WARNING] Escalation
+> Stripped inserts, seized bolts, or any structural cracking → escalate to equipment officer.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Periodic polish
-Machine polish the hull at end-of-season to restore finish and protect against UV and salt staining. Eye protection; keep cables clear of water; do not overheat paint.
+Machine polish the hull at end-of-season to restore finish and protect against UV and salt staining.
+
+> [!WARNING] Safety
+> Eye protection required; keep cables clear of water; do not overheat paint.
 
 **Tools:** Fine-cut compound, foam pad, low-RPM polisher, microfibres, wax (if used)
 
@@ -67,13 +77,16 @@ Safe loading onto a trailer to prevent damage during transport. Proper support a
 
 **Steps:**
 
-1. Confirm fin/rudder clearance and protection (remove fin/rudder if manufacturer allows and transport demands it).
+1. Confirm fin/rudder clearance and protection.
 2. Place hull in cradles; ensure contact points are padded.
 3. Strap snugly (no deck crushing). Use bow/stern lines to prevent fore-aft movement.
 4. Secure loose riggers or remove if required.
 5. After 10–15 minutes driving, stop and re-check strap tension.
 
-**Check:** No movement; fin/rudder protected. Requires supervision for large boats. This is a beginner procedure with supervision.
+**Check:** No movement; fin/rudder protected.
+
+> [!WARNING] Important
+> If the boat flexes under straps, stop and re-rig the support points. Requires supervision for large boats.
 [!/PROCEDURE]
 
 ## Buoyancy compartments, hatch covers, and bungs (safety-critical)
@@ -81,7 +94,7 @@ Safe loading onto a trailer to prevent damage during transport. Proper support a
 Water ingress is the hidden killer: it turns minor damage into major repairs and can make a boat unsafe in a capsize.
 
 [!PROCEDURE:Beginner] Buoyancy and hatch check
-Safety-critical check that buoyancy compartments are watertight and that hatch covers and bungs are present and functional. Missing hatch cover, missing bung, or a compartment that will not seal: stop-use. Water sloshing in a sealed compartment (unknown leak): stop-use.
+Safety-critical check that buoyancy compartments are watertight and that hatch covers and bungs are present and functional.
 
 **Tools:** Towel, flashlight, spare hatch cover seal (if available)
 
@@ -94,19 +107,22 @@ Safety-critical check that buoyancy compartments are watertight and that hatch c
 5. If water is present: drain/dry and find the leak (fin box, hatch seal, impact damage).
 
 **Check:** Covers secure; seals intact; compartments dry. Do this before every outing (quick check) and monthly (detailed check). If persistent water ingress, inspect fin box and hull; treat as structural risk.
-[!/PROCEDURE]
 
 > [!WARNING] Stop-use criteria (buoyancy)
 >
 > - Missing hatch cover, missing bung, or a compartment that will not seal.
 > - Water sloshing in a sealed compartment (unknown leak).
 
+> [!WARNING] Escalation
+> If persistent water ingress, inspect fin box and hull; treat as structural risk.
+[!/PROCEDURE]
+
 ## Riggers, stays, and structural attachments
 
 Riggers, pins, and stays are the primary load path from athlete → boat. Failures here are safety-critical and often cascade into hull damage.
 
 [!PROCEDURE:Intermediate] Rigger and stay inspection
-Monthly inspection of riggers, pins, and stays to catch movement, cracking, or corrosion before failure. Do this after transport or any impact/bridge strike.
+Monthly inspection of riggers, pins, and stays to catch movement, cracking, or corrosion before failure.
 
 **Tools:** Spanners/Allen keys, spare washers/nuts, marker, straight edge
 
@@ -123,7 +139,8 @@ Monthly inspection of riggers, pins, and stays to catch movement, cracking, or c
 
 **Common failure modes:** Missing washers → crushed deck; corrosion under paint; hidden cracks at welds.
 
-**Escalation:** Any crack, bend, or movement → stop-use; do not “row it gently”.
+> [!WARNING] Escalation
+> Any crack, bend, or movement → stop-use; do not "row it gently". Do this after transport or any impact/bridge strike.
 [!/PROCEDURE]
 
 ## Fin, rudder, and fin box
@@ -131,7 +148,7 @@ Monthly inspection of riggers, pins, and stays to catch movement, cracking, or c
 Fins/rudders are frequently damaged during launching, shallow water, and transport. Fin box damage is high-risk for water ingress.
 
 [!PROCEDURE:Beginner] Fin + rudder quick check
-Pre-outing check that the fin and rudder are secure and aligned. This prevents damage during rowing and ensures steering responsiveness. Looseness, binding, or new cracks around fin box: stop-use. Suspected structural fin box damage: escalate to professional repair (common cause of repeat leaks).
+Pre-outing check that the fin and rudder are secure and aligned. Do this before every outing in steered boats.
 
 **Tools:** None
 
@@ -142,7 +159,11 @@ Pre-outing check that the fin and rudder are secure and aligned. This prevents d
 3. Centre the rudder and confirm alignment with the fin.
 4. Check for play: fin/rudder should not wobble relative to the hull.
 
-**Check:** Secure; aligned; smooth travel. Do this before every outing in steered boats.
+**Check:** Secure; aligned; smooth travel.
+
+
+> [!WARNING] Stop-use criteria
+> Looseness, binding, or new cracks around fin box: stop-use. Suspected structural fin box damage: escalate to professional repair.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Fin box leak check (after damage)
@@ -157,6 +178,9 @@ After a fin strike or when unexplained water appears in buoyancy compartments, c
 3. Mark any cracks; do not launch until sealed and assessed.
 
 **Check:** Any damage found should be escalated to professional repair.
+
+> [!INFO] Note
+> Fin box damage is a common cause of repeat leaks.
 [!/PROCEDURE]
 
 ## Inspection and damage triage
@@ -197,7 +221,8 @@ Assess damage after any impact or when new damage is observed to decide if it is
 
 **Common failure modes:** Underestimating hidden delamination; ignoring water ingress.
 
-**Escalation:** Uncertain classification → treat as structural and escalate.
+> [!WARNING] Escalation
+> Uncertain classification → treat as structural and escalate.
 [!/PROCEDURE]
 
 ## Composite construction primer
@@ -208,11 +233,11 @@ Most racing shells are sandwich structures:
 - **Core:** often Nomex honeycomb.
 - **Finish:** 2K automotive-style paint (common in high-end shells) or gelcoat (older/cheaper builds).
 
-Repair implications:
+**Repair implications:**
 
 - You can do strong wet layups and vacuum-bagging in-house.
 - You generally **cannot** replicate factory 2K paint safely without proper spray/ventilation.
-- You typically **cannot** oven-cure a whole boat; cure at ambient and avoid heat damage.
+- You **cannot** oven-cure a whole boat; cure at ambient and avoid heat damage.
 
 ## Composite repairs (overview)
 
@@ -247,7 +272,10 @@ Useful reading:
 ## Composite repairs (procedures)
 
 [!PROCEDURE:Beginner] Cosmetic scratch/chip seal
-Quick seal of minor paint damage and scratches to prevent water ingress and further deterioration. If fibres are broken or area feels soft: treat as structural and escalate. Do not clamp too hard or dent hull; if delam is large or near structural attachments: scarf repair or professional.
+Quick seal of minor paint damage and scratches to prevent water ingress and further deterioration.
+
+> [!WARNING] Escalation
+> If fibres are broken or area feels soft: treat as structural and escalate.
 
 **Tools:** Fine sandpaper (400–800), IPA, small brush, epoxy or clearcoat/paint touch-up, gloves
 
@@ -259,7 +287,10 @@ Quick seal of minor paint damage and scratches to prevent water ingress and furt
 4. Apply a thin seal coat (epoxy or matching touch-up) over exposed fibre/primer.
 5. Allow to cure; lightly sand and blend if needed.
 
-**Check:** No exposed fibre; no sharp edges. Do as soon as practical to prevent water ingress. Avoid breathing sanding dust.
+**Check:** No exposed fibre; no sharp edges. Do as soon as practical to prevent water ingress.
+
+> [!WARNING] Safety
+> Avoid breathing sanding dust. Do not clamp too hard or dent hull; if delam is large or near structural attachments: scarf repair or professional.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Small delamination stabilisation (inject + clamp)
@@ -276,15 +307,19 @@ Early intervention on small delaminations to prevent them from growing and becom
 5. Cover with release film/wax paper and clamp/weight to restore shape.
 6. Cure fully; sand/finish cosmetically.
 
-**Check:** Tap test sounds uniform; no flex by hand. Watch for not enough epoxy penetration or clamping denting the hull.
+**Check:** Tap test sounds uniform; no flex by hand.
+
+> [!WARNING] Common failures
+> Watch for not enough epoxy penetration or clamping denting the hull.
 [!/PROCEDURE]
 
 [!PROCEDURE:Advanced] Scarf repair (structural skin + core)
-Structural repair for punctures, core crush, and structural cracks. This is advanced work; if you cannot restore shape/alignment, stop and send out.
+Structural repair for punctures, core crush, and structural cracks.
+
+> [!WARNING] Safety
+> This is advanced work requiring: Respirator, goggles, gloves, ventilation
 
 **Tools:** Grinder/sander, vacuum, carbon cloth/tape, core, epoxy, peel ply, perforated film, breather, bag film, tacky tape, vacuum pump, fairing filler, primers/paint
-
-**Safety:** Respirator, goggles, gloves, ventilation
 
 **Steps:**
 
@@ -302,7 +337,8 @@ Structural repair for punctures, core crush, and structural cracks. This is adva
 
 **Common failure modes:** Leaving damaged laminate; too-steep scarf; starving laminate under vacuum; creating a stiff “hard patch” edge.
 
-**Escalation:** If you cannot restore shape/alignment, stop and send out.
+> [!WARNING] Escalation
+> If you cannot restore shape/alignment, stop and send out.
 [!/PROCEDURE]
 
 ## Supplies and suppliers
@@ -313,4 +349,4 @@ We keep supplies mainly from:
 - [EasyComposites](https://www.easycomposites.co.uk)
 - [EC Fibreglass Supplies](https://www.ecfibreglasssupplies.co.uk)
 
-Stock list is in Appendix C.
+**Stock list is in Appendix C.**

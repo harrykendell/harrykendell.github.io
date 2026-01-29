@@ -23,7 +23,10 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
 [!PROCEDURE:Intermediate] Replace suede patch
-Replace worn or torn suede grip patches to maintain comfort and prevent blisters. Use gentle heat and keep the gun moving to avoid overheating the carbon.
+Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
+
+> [!INFO] Tip
+> Use gentle heat and keep the gun moving to avoid overheating the handle.
 
 **Tools:** Heat gun, IPA, replacement patches
 
@@ -41,7 +44,10 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Replace green rubber grip
-Replace a torn, slippery, or loose green grip to restore comfort and control. If the end cap comes off with the grip, epoxy it back in place with the correct rotational alignment before fitting the new grip.
+Replace a torn, slippery, or loose green grip to restore comfort and control.
+
+> [!INFO] Note
+> If the end cap comes off with the grip, epoxy it back in place with the correct rotational alignment before fitting the new grip.
 
 **Tools:** Replacement grip, epoxy (e.g., Araldite) for end cap if needed
 
@@ -80,7 +86,10 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
 
 [!PROCEDURE:Advanced] Sleeve replacement and pitch alignment
-Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment. Pitch errors ruin rigging consistency; if you cannot restore alignment or the shaft is damaged, send to the manufacturer.
+Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment.
+
+> [!WARNING] Important
+> Pitch errors ruin rigging consistency; if you cannot restore alignment ask for help.
 
 **Tools:** Sleeve kit, epoxy/adhesive per manufacturer, pitch jig or flat reference
 
@@ -123,7 +132,10 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 For delamination or breakage, stabilise with epoxy:
 
 [!PROCEDURE:Intermediate] Stabilise spoon delamination (inject epoxy)
-Early intervention on spoon delamination to prevent blade failure and structural damage. For large delamination, structural cracks, or blade-to-shaft joint issues, arrange manufacturer repair.
+Early intervention on spoon delamination to prevent blade failure and structural damage.
+
+> [!WARNING] Escalation
+> For large delamination, structural cracks, or blade-to-shaft joint issues, arrange manufacturer repair.
 
 **Tools:** Epoxy, syringe, clamps/weights, release film
 
@@ -146,9 +158,12 @@ Concept2 also runs **Regatta Service** at select events (complimentary repairs/m
 
 - [Concept2 Regatta Service](https://www.concept2.com/support/oars/about-regatta-service)
 
+**Send to manufacturer for:**
+
 - Large shaft damage.
 - Blade-to-shaft joint failure.
 - Major spoon structural damage.
 - Any repair that would materially change stiffness/weight balance.
 
-Note: Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a replacement pair.
+> [!INFO] Note
+> Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a replacement pair.

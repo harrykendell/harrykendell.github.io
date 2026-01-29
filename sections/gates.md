@@ -33,7 +33,10 @@ Daily pre-outing check that the gate latch is secure and the gate cannot pop out
 ## Clean and rebuild
 
 [!PROCEDURE:Intermediate] Disassemble, clean, rebuild gate stack
-Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate salt corrosion and squeaking. Do not oil plastic parts (attracts grit); watch for missing washer (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body: replace parts/escalate. If you cannot match pitch across sides, replace pin/gate components.
+Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate corrosion and squeaking.
+
+> [!WARNING] Important
+> Do not oil anything on a boat asa it attracts grit; watch for missing washers (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body: replace parts/escalate. If you cannot match pitch across sides, replace pin/gate components.
 
 **Tools:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
 

@@ -25,14 +25,17 @@ Quick pre-rowing adjustment of stretcher position to the athlete's preferred set
 >
 > Do not use **laces** or **cable ties** as heel restraints; use durable cord/strap designed for the job.
 >
-> References:
+> **References:**
 >
 > - [British Rowing heel restraint guidance](https://www.britishrowing.org/2016/04/do-you-check-your-heel-restraints/)
 > - [British Rowing Rules of Racing (current edition)](https://www.britishrowing.org/wp-content/uploads/2025/03/2025-British-Rowing-Rules-of-Racing.pdf)
 > - [British Rowing safety alert (heel restraints)](https://www.britishrowing.org/wp-content/uploads/2022/05/Safety-Alert-Heel-Restraints.pdf)
 
 [!PROCEDURE:Beginner] Heel restraint inspection and replacement
-Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize. If any heel restraint is broken or missing, stop-use until corrected.
+Safety-critical check and replacement of heel ties to ensure foot retention in case of capsize.
+
+> [!WARNING] Stop-use
+> If any heel restraint is broken or missing, stop-use until corrected.
 
 **Tools:** Suitable cord/strap, scissors, lighter/heat to seal ends
 
@@ -43,7 +46,10 @@ Safety-critical check and replacement of heel ties to ensure foot retention in c
 3. Replace using durable cord/strap; tie securely and seal/finish ends so they cannot fray.
 4. Confirm the shoe releases freely without intervention (self-acting).
 
-**Check:** Both shoes restrained; heel lift within limit; release is self-acting. Do before every outing and replace immediately if worn.
+**Check:** Both shoes restrained; heel lift less than 5cm; release is self-acting.
+
+> [!INFO] Frequency
+> Do before every outing and replace immediately if worn.
 [!/PROCEDURE]
 
 ## Steering wire
@@ -63,7 +69,7 @@ Quick pre-outing check that steering is centred and moves freely. If steering bi
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Replace steering cable
-Replace a frayed or snapped steering cable to restore full steering responsiveness. Cable ends are sharp when cut; handle with gloves and eye protection and tape ends immediately.
+Replace a frayed or snapped steering cable to restore full steering responsiveness.
 
 **Tools:** Cable, cutters, clamps/stops, crimping tool (if using ferrules), tape/heatshrink
 
