@@ -9,7 +9,7 @@ This document attempts to provide all the references you need to look after our 
 | Transport/Racking | Trestles/slings; Trailers; Roof topping |
 | Electronics | Speakers; Magnets/Implellers |
 
-While performing repairs/maintenance it is important to be aware of your limitations, as a guide we provide estimated experience levels required as follows:
+While performing repairs/maintenance it is important to be aware of your abilities, as a guide we provide estimated experience levels required as follows:
 
 <div class="intro-skill-levels">
  <div class="intro-skill-level">
