@@ -497,6 +497,10 @@ blockquote p {
     border: 1px solid var(--border-subtle);
     margin-left: auto;
     white-space: nowrap;
+    min-width: 100px;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
 }
 
 .procedure-header {
@@ -528,6 +532,10 @@ blockquote p {
     border: 1px solid var(--border-subtle);
     margin-left: auto;
     white-space: nowrap;
+    min-width: 100px;
+    text-align: center;
+    display: inline-flex;
+    justify-content: center;
 }
 
 .procedure-skill-badge[data-skill="beginner"] {
