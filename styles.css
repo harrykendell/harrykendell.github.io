@@ -96,6 +96,8 @@ body {
     justify-content: space-between;
     gap: 10px;
     margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 .sidebar h2 {
@@ -104,6 +106,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-soft);
+    text-align: left;
 }
 
 .toc-controls select {
@@ -118,6 +121,33 @@ body {
 }
 
 .sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar .toc-group {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar .toc-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.sidebar .toc-group-title {
+    margin: 8px 0 6px;
+    padding: 0 4px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-soft);
+}
+
+.sidebar .toc-group-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -236,6 +266,26 @@ main {
     box-shadow: var(--shadow-soft);
     border: 1px solid var(--border-subtle);
     padding: var(--gap);
+}
+
+.section-group {
+    margin: 28px 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.section-group-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-soft);
+}
+
+.section-group-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    width: 100%;
 }
 
 .table-scroll {
@@ -551,6 +601,18 @@ blockquote p {
 .procedure-skill-badge[data-skill="advanced"] {
     border-color: #ef4444;
     color: #b91c1c;
+}
+
+.intro-skill-levels {
+    display: grid;
+    gap: 10px;
+}
+
+.intro-skill-level {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    column-gap: 10px;
 }
 
 .procedure[data-skill="beginner"] {

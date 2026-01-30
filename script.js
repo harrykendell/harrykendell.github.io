@@ -1,5 +1,4 @@
 const sectionFiles = [
-  "introduction",
   "hardware",
   "boats",
   "oars",
@@ -7,7 +6,10 @@ const sectionFiles = [
   "footplates",
   "seats",
   "coxbox-wiring",
-  "test",
+  "supplement/QuickReferenceChecklists",
+  "supplement/ToolsAndConsumables",
+  "supplement/test",
+  "supplement/guides",
 ];
 
 const DEFAULT_TOC_DEPTH = 4;
@@ -16,6 +18,14 @@ const MAX_TOC_DEPTH = 5;
 let tocDepth = DEFAULT_TOC_DEPTH;
 let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
+
+const SECTION_GROUPS = {
+  order: ["main", "supplement"],
+  labels: {
+    main: "Guides",
+    supplement: "Supplement",
+  },
+};
 
 function escapeHtml(value) {
   return String(value)
@@ -36,6 +46,8 @@ function getEffectiveTocLevel() {
 
 async function loadSections() {
   const container = document.getElementById("sections-container");
+  let currentGroup = null;
+  const groupLabels = SECTION_GROUPS.labels;
 
   for (const section of sectionFiles) {
     try {
@@ -45,6 +57,20 @@ async function loadSections() {
       }
       const markdown = await response.text();
       const sectionEl = markdownToSection(markdown, section);
+      const groupKey = getSectionGroup(section);
+      if (groupKey !== currentGroup) {
+        currentGroup = groupKey;
+        const groupLabel = groupLabels[groupKey];
+        if (groupLabel) {
+          const groupEl = document.createElement("div");
+          groupEl.className = "section-group";
+          groupEl.innerHTML = `
+          <div class="section-group-divider" aria-hidden="true"></div>
+          <div class="section-group-title">${escapeHtml(groupLabel)}</div>
+          `;
+          container.appendChild(groupEl);
+        }
+      }
       container.appendChild(sectionEl);
 
       // Set initial state immediately after insertion to prevent flash
@@ -65,6 +91,26 @@ async function loadSections() {
 
   // Restore scroll position after sections are loaded
   restoreScrollPosition();
+}
+
+async function loadPreface() {
+  const preface = document.getElementById("preface-content");
+  if (!preface) {
+    return;
+  }
+
+  try {
+    const response = await fetch("sections/supplement/introduction.md");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const markdown = await response.text();
+    const { content } = extractTitleAndContentFromMarkdown(markdown);
+    preface.innerHTML = marked.parse(content);
+    wrapTables(preface);
+  } catch (error) {
+    console.error("Failed to load preface introduction", error);
+  }
 }
 
 function initTocDepth() {
@@ -143,43 +189,41 @@ function setupTocToggle() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadSections();
-});
+function getSectionGroup(sectionId) {
+  if (sectionId.startsWith("supplement/")) {
+    return "supplement";
+  }
+  return "main";
+}
 
-function generateSidebar() {
-  const sections = document.querySelectorAll(".section");
-  const sidebarList = document.querySelector(".sidebar ul");
+function renderSectionNavItem(section, effectiveDepth) {
+  const sectionId = section.id;
+  const sectionTitle = section.querySelector("h2").textContent;
+  const safeSectionId = escapeAttribute(sectionId);
+  const safeSectionTitle = escapeHtml(sectionTitle);
 
-  const effectiveDepth = getEffectiveTocLevel();
-  const sidebarHtml = Array.from(sections).map((section) => {
-    const sectionId = section.id;
-    const sectionTitle = section.querySelector("h2").textContent;
-    const safeSectionId = escapeAttribute(sectionId);
-    const safeSectionTitle = escapeHtml(sectionTitle);
+  const headings = section.querySelectorAll(
+    ".section-content h2[id], .section-content h3[id], .section-content h4[id], .section-content h5[id], .section-content h6[id]",
+  );
+  const visibleHeadings = Array.from(headings).filter((heading) => {
+    const level = parseInt(heading.tagName.slice(1), 10);
+    return !Number.isNaN(level) && level <= effectiveDepth;
+  });
 
-    const headings = section.querySelectorAll(
-      ".section-content h2[id], .section-content h3[id], .section-content h4[id], .section-content h5[id], .section-content h6[id]",
-    );
-    const visibleHeadings = Array.from(headings).filter((heading) => {
+  if (visibleHeadings.length > 0) {
+    const subItems = visibleHeadings.map((heading) => {
+      const headingId = escapeAttribute(heading.id);
+      const headingText = escapeHtml(heading.textContent);
       const level = parseInt(heading.tagName.slice(1), 10);
-      return !Number.isNaN(level) && level <= effectiveDepth;
-    });
-
-    if (visibleHeadings.length > 0) {
-      const subItems = visibleHeadings.map((heading) => {
-        const headingId = escapeAttribute(heading.id);
-        const headingText = escapeHtml(heading.textContent);
-        const level = parseInt(heading.tagName.slice(1), 10);
-        const levelClass = !Number.isNaN(level) ? ` toc-level-${level}` : "";
-        return `
+      const levelClass = !Number.isNaN(level) ? ` toc-level-${level}` : "";
+      return `
             <li class="sub${levelClass}">
                 <a href="#${headingId}" data-parent="${safeSectionId}">${headingText}</a>
             </li>
         `;
-      }).join("");
+    }).join("");
 
-      return `
+    return `
         <li>
             <div class="nav-row">
                 <button class="nav-arrow" type="button" data-section="${safeSectionId}" aria-label="Toggle section">▼</button>
@@ -190,14 +234,67 @@ function generateSidebar() {
             </ul>
         </li>
       `;
-    }
+  }
 
-    return `
+  return `
       <li>
           <div class="nav-row">
               <button class="nav-arrow" type="button" data-section="${safeSectionId}" aria-hidden="true" disabled>⚫︎</button>
               <a href="#${safeSectionId}" data-section="${safeSectionId}">${safeSectionTitle}</a>
           </div>
+      </li>
+    `;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadPreface();
+  loadSections();
+});
+
+function generateSidebar() {
+  const sections = document.querySelectorAll(".section");
+  const sidebarList = document.querySelector(".sidebar ul");
+
+  const effectiveDepth = getEffectiveTocLevel();
+
+  const groupOrder = SECTION_GROUPS.order;
+  const groupLabels = SECTION_GROUPS.labels;
+
+  const groupedSections = groupOrder.reduce((acc, groupKey) => {
+    acc[groupKey] = [];
+    return acc;
+  }, {});
+
+  Array.from(sections).forEach((section) => {
+    const groupKey = getSectionGroup(section.id);
+    if (!groupedSections[groupKey]) {
+      groupedSections[groupKey] = [];
+    }
+    groupedSections[groupKey].push(section);
+  });
+
+  const sidebarHtml = groupOrder.map((groupKey) => {
+    const groupSections = groupedSections[groupKey] || [];
+    if (groupSections.length === 0) {
+      return "";
+    }
+
+    const groupItemsHtml = groupSections
+      .map((section) => renderSectionNavItem(section, effectiveDepth))
+      .join("");
+
+    const groupLabel = groupLabels[groupKey];
+    const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
+    const titleHtml = safeGroupLabel
+      ? `<div class="toc-group-title">${safeGroupLabel}</div>`
+      : "";
+
+    return `
+      <li class="toc-group">
+        ${titleHtml}
+        <ul class="toc-group-list">
+          ${groupItemsHtml}
+        </ul>
       </li>
     `;
   }).join("");
@@ -293,7 +390,7 @@ function setupActiveTracking() {
     "scroll",
     () => {
       clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateActiveLink, 50);
+      scrollTimeout = setTimeout(updateActiveLink, 10);
     },
     { passive: true },
   );
