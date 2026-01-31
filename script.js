@@ -1,15 +1,17 @@
 const sectionFiles = [
   "guides",
-  "boats",
-  "oars",
-  "gates",
-  "footplates",
-  "seats",
-  "coxbox-wiring",
+  "maintenance/boats",
+  "maintenance/oars",
+  "maintenance/gates",
+  "maintenance/footplates",
+  "maintenance/seats",
+  "maintenance/coxbox-wiring",
+  "maintenance/hardware",
+  "repairs/boats-composites",
+  "repairs/oars",
+  "repairs/electronics-harness",
   "supplement/QuickReferenceChecklists",
-  "supplement/hardware",
   "supplement/ToolsAndConsumables",
-  "supplement/test",
 ];
 
 const DEFAULT_TOC_DEPTH = 4;
@@ -20,9 +22,11 @@ let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
 
 const SECTION_GROUPS = {
-  order: ["main", "supplement"],
+  order: ["guides", "maintenance", "repairs", "supplement"],
   labels: {
-    main: "Guides",
+    guides: "Guides",
+    maintenance: "Maintenance",
+    repairs: "Repairs",
     supplement: "Supplement",
   },
 };
@@ -190,10 +194,16 @@ function setupTocToggle() {
 }
 
 function getSectionGroup(sectionId) {
+  if (sectionId.startsWith("maintenance/")) {
+    return "maintenance";
+  }
+  if (sectionId.startsWith("repairs/")) {
+    return "repairs";
+  }
   if (sectionId.startsWith("supplement/")) {
     return "supplement";
   }
-  return "main";
+  return "guides";
 }
 
 function renderSectionNavItem(section, effectiveDepth) {
