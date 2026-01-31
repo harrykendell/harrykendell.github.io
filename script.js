@@ -1,5 +1,4 @@
 const sectionFiles = [
-  "guides",
   "maintenance/boats",
   "maintenance/oars",
   "maintenance/gates",
@@ -22,9 +21,8 @@ let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
 
 const SECTION_GROUPS = {
-  order: ["guides", "maintenance", "repairs", "supplement"],
+  order: ["maintenance", "repairs", "supplement"],
   labels: {
-    guides: "Guides",
     maintenance: "Maintenance",
     repairs: "Repairs",
     supplement: "Supplement",
