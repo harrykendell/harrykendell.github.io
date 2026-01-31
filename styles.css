@@ -294,19 +294,10 @@ main {
 }
 
 /* Tables adapt to content width, but don't wrap cell content by default */
+/* Tables take full container width, columns adapt to content */
 .table-scroll table {
-        width: 100%;
-        table-layout: auto;
-}
-
-@media (min-width: 820px) {
-    .section-content,
-    .table-scroll {
-        max-width: 820px;
-    }
-    .table-scroll table {
-        table-layout: fixed;
-    }
+    width: 100%;
+    table-layout: auto;
 }
 
 .table-scroll th,
@@ -315,7 +306,6 @@ main {
     max-width: 320px;
     white-space: normal;
     word-break: break-word;
-}
 }
 
 header.page-header {
