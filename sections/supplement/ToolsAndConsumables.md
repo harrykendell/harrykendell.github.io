@@ -1,4 +1,4 @@
-# Tools, consumables, and shop setup
+# Tools and consumables
 
 ## Core hand tools
 

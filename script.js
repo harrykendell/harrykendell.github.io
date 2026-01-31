@@ -1,5 +1,5 @@
 const sectionFiles = [
-  "hardware",
+  "guides",
   "boats",
   "oars",
   "gates",
@@ -7,9 +7,9 @@ const sectionFiles = [
   "seats",
   "coxbox-wiring",
   "supplement/QuickReferenceChecklists",
+  "supplement/hardware",
   "supplement/ToolsAndConsumables",
   "supplement/test",
-  "supplement/guides",
 ];
 
 const DEFAULT_TOC_DEPTH = 4;

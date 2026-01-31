@@ -1,6 +1,8 @@
 # Introduction
 
-This document attempts to provide all the references you need to look after our boats, while linking out to useful external resources. The scope of this document is as follows:
+This document attempts to provide all the references you need to look after our boats, while linking out to external resources where helpful. The document is split into two sections, guides and supplement. The supplement contains a quick reference guide for checking over a boat, as well as details on hardware/tools.
+
+The scope of this document is as follows:
 
 | | Items |
 | --- | --- |
