@@ -59,7 +59,7 @@ When rigging changes or mismatched heights are observed, adjust the washer stack
 
 **Steps:**
 
-1. Measure current height (club method). Record.
+1. Measure current height https://lindig.github.io/pitch/ , Record.
 2. Add/remove washers **symmetrically** to achieve target.
 
 **Check:** Gate height matches rigging sheet; sides match.
