@@ -1,4 +1,4 @@
-# Rigging overview (boats + oars)
+# Rigging
 
 Rigging is spread across several components (riggers, pins, gates, oars, footplates). This page is the **hub**: it defines what “rigging” means, what you’re allowed to change, and where the detailed adjustment procedures live.
 
