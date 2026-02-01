@@ -57,21 +57,6 @@ Follow this process to identify a Concept2 blade's type:
 | No | — | Yes | **Comp** | ![Comp](/imgs/blades/Comp.jpg) |
 | | — | No | **Fat2** | ![Fat2](imgs/blades/Fat2.jpg) |
 
----
-
-#### Blade Reference Table
-
-| Name           | Bottom Edge | Front Rib | Vortex Edge | Notes                  |
-|----------------|-------------|-----------|-------------|------------------------|
-| Big Blade      | Straight    | Yes       | No          | Large, older design    |
-| Smoothie       | Straight    | No        | Yes         | Classic elliptical     |
-| Smoothie2      | Straight    | No        | Yes         | Flatter front, newer   |
-| Fat2           | Curved      | No        | Yes         | Large, elliptical      |
-| Fat Smoothie   | Curved      | No        | Yes         | Fat2 shape, elliptical |
-| Comp           | Curved      | No        | No          | Short, stubby          |
-
-For images and more details, see [Concept2's blade guide](https://www.concept2.com/oars/sculls/blades).
-
 [!PROCEDURE:Intermediate] Replace green rubber grip
 Replace a torn, slippery, or loose green grip to restore comfort and control.
 
