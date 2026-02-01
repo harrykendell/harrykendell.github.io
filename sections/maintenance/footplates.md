@@ -89,3 +89,8 @@ Replace a frayed or snapped steering cable to restore full steering responsivene
 > - Broken or missing heel restraint.
 > - Steering cable frayed or rudder linkage loose.
 > - Footplate mount loose or cracked.
+
+## Related
+
+- See **[Rigging overview](rigging.md)** for the full rigging audit workflow.
+- If you are changing gate height/pitch as part of a re-rig, use **[Gates](gates.md)**.

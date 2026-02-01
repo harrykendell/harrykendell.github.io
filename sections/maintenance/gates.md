@@ -85,3 +85,8 @@ After bushing replacement or suspected pitch drift, verify that both sides have 
 > - Gate latch does not fully close or opens under load.
 > - Cracked gate body, missing retainer, or bent pin.
 > - Severe rattle you cannot eliminate with correct washer stack.
+
+## Related
+
+- See **[Rigging overview](rigging.md)** for the full rigging audit workflow and what’s allowed at each capability tier.
+- If pins/riggers move or crack, follow **[Boats → Rigger and stay inspection](boats.md#riggers-stays-and-structural-attachments)**.

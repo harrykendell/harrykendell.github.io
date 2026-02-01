@@ -227,4 +227,5 @@ Assess damage after any impact or when new damage is observed to decide if it is
 
 ## Related
 
+- See **[Rigging overview](rigging.md)** for where rigging checks/adjustments live.
 - See **[Boat composite repairs](../repairs/boats-composites.md)** for scratch sealing and structural composite repairs.

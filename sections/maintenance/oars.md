@@ -111,4 +111,5 @@ Concept2 also runs **Regatta Service** at select events (complimentary repairs/m
 
 ## Related
 
+- See **[Rigging overview](rigging.md)** for how oar inboard and boat geometry fit together.
 - See **[Oar repairs](../repairs/oars.md)** for sleeve replacement, spoon delamination stabilisation, and fixed-handle replacement.

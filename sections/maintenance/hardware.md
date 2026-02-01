@@ -99,3 +99,7 @@ Stainless-on-stainless threads can **gall** (cold-weld) without warning, especia
 > - Any rigger/pin attachment that moves relative to the hull.
 > - Any cracked/bent rigger, pin, or pin mount.
 > - Any stripped/loose fastener on steering or footplate safety components.
+
+## Related
+
+- See **[Rigging overview](rigging.md)** for how this hardware audit fits into full rigging verification.

@@ -1,4 +1,5 @@
 const sectionFiles = [
+  "maintenance/rigging",
   "maintenance/boats",
   "maintenance/oars",
   "maintenance/gates",
