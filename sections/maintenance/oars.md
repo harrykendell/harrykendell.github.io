@@ -1,15 +1,13 @@
-# Oars and blades
+# Oars
 
-## Oars
+Nearly all new blades are Skinny, with older ones generally being Ultralight or Low I, and a range of blade shapes. Standardising over time improves mix-and-match and reduces spares complexity.
 
-Nearly all new blades are Skinnies, with older ones generally being Ultralight or Low I, and a range of blade shapes. Standardising over time improves mix-and-match and reduces spares complexity.
-
-### Handling rules (prevents 80% of damage)
+The following handling rules help to prevent 90% of damage:
 
 - Never push off a dock with the blade.
 - Avoid scraping spoon tips; use protective vortex tips/edge protection if available.
-- Store oars on racks with support at approved points; avoid direct sun long-term.
-- Rinse after saltwater; wipe grips and sleeves.
+- Store oars securely on racks; avoid direct sun long-term.
+- Rinse after use; wipe grips and sleeves.
 
 > [!WARNING] Stop-use criteria (oars)
 >
@@ -17,10 +15,10 @@ Nearly all new blades are Skinnies, with older ones generally being Ultralight o
 > - Blade-to-shaft joint damage.
 > - Major delamination that can be flexed by hand.
 
-### Handles
+## Handles
 
 > [!INFO] Handle Types
-> There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinnies/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
+> There are two incompatible types of handle. Old Ultralights use the [larger handle](https://www.concept2.co.uk/product/168), while new oars or Skinny/sculls need the [standard handle](https://www.concept2.co.uk/product/62).
 
 [!PROCEDURE:Intermediate] Replace suede patch
 Replace worn or torn suede grip patches to maintain comfort and prevent blisters.
@@ -65,7 +63,6 @@ Replace a torn, slippery, or loose green grip to restore comfort and control.
 
 ## Sleeves
 
-
 **Repairs note:** sleeve replacement and pitch alignment is an advanced repair. See **[Oar repairs](../repairs/oars.md)**.
 
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
@@ -91,7 +88,6 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 [!/PROCEDURE]
 
 ## Spoons
-
 
 **Repairs note:** structural spoon delamination repair is an advanced repair. See **[Oar repairs](../repairs/oars.md)**.
 
