@@ -20,3 +20,15 @@
 - When changing JS/CSS behavior, bump the `?v=11` cache string in [index.html](index.html) for GitHub Pages cache busting.
 - Anchors: sidebar links use generated IDs combining section slug + heading slug; prefer standard Markdown headings over manual `<a>` tags.
 - Content examples to follow: intro safety checklists in [sections/introduction.md](sections/introduction.md); hardware callouts and procedures in [sections/hardware.md](sections/hardware.md) illustrate custom syntax.
+
+## Quick Reference for AI Agents
+- Add a Section: Create `sections/<slug>.md` (start with `# Title`), register in `sectionFiles` ([script.js](script.js)), update cache-busting version in [index.html](index.html).
+- Update Styles/JS: Edit [styles.css](styles.css) or [script.js](script.js); bump cache version in [index.html](index.html).
+- Custom Markdown: Use `[!INFO]`, `[!WARNING]`, `[!DANGER]` for callouts; `[!PROCEDURE:<skill>]] <Title>` for procedures.
+- Media: Store in `imgs/`; use `.figure` classes for captions/grids.
+- Preview: Open [index.html](index.html) or run `python -m http.server` from repo root.
+- No Build Step: All files are static; changes are live on refresh.
+- External Dependencies: Only `marked` via CDN; do not add new dependencies unless essential.
+
+---
+For unclear or incomplete sections, ask for feedback to iterate and improve these instructions.
