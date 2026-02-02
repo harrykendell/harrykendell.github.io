@@ -1,7 +1,7 @@
 # Gates (oarlocks), pins, pitch bushings
 
 <figure class="figure figure--wide">
-  <img src="imgs/overviews/gate_overview.jpg" alt="Gate and pin assembly on a rigged rowing shell" />
+  <img src="imgs/overviews/pin_overview.jpg" alt="Gate and pin assembly on a rigged rowing shell" />
   <div class="figure-body">
     <p class="figure-title">Typical gate and pin layout</p>
     <p class="figure-caption">
@@ -59,7 +59,7 @@ When rigging changes or mismatched heights are observed, adjust the washer stack
 
 **Steps:**
 
-1. Measure current height https://lindig.github.io/pitch/ , Record.
+1. Measure current height <https://lindig.github.io/pitch/> , Record.
 2. Add/remove washers **symmetrically** to achieve target.
 
 **Check:** Gate height matches rigging sheet; sides match.

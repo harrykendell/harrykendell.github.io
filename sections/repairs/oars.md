@@ -6,7 +6,6 @@
 
 - If you cannot restore correct **pitch/geometry** after a sleeve job, stop and escalate.
 
-
 ## Spoon delamination stabilisation
 
 [!PROCEDURE:Intermediate] Stabilise spoon delamination (inject epoxy)
@@ -46,7 +45,6 @@ Concept2 also runs **Regatta Service** at select events (complimentary repairs/m
 > [!INFO] Note
 > Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a replacement pair.
 
-
 ## Sleeve replacement and pitch alignment
 
 [!PROCEDURE:Advanced] Sleeve replacement and pitch alignment
@@ -77,7 +75,6 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment.
 > - [Sleeve replacement PDF (includes P/S alignment wording)](https://www.concept2.at/files/pdf/us/oars/Oar_SleeveReplacement.pdf)
 > - [Rigging and pitch checking notes](https://www.concept2.com/support/oars/how-to-videos-and-information)
 
-
 ## Fixed handle replacement (legacy)
 
 [!PROCEDURE:Advanced] Fixed handle replacement (legacy)
@@ -101,9 +98,3 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 ## Sleeves
 
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
-
-
-## Related
-
-- See **[Oars and blades maintenance](../maintenance/oars.md)** for handling rules and consumable replacements (suede/grip/collar checks).
-

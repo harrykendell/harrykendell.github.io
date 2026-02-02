@@ -43,19 +43,17 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
 
 ## Concept2 Blade Types
 
-Concept2 offers several blade shapes many of which are difficult to distinguish. They are all functionally the same, with the distinction that the fat2 blades must be geared with a 6cm shorter outboard to perform the same as any other. They are also available with a Vortex Edge (and now come with it as standard), a curved plastic strip at the tip designed to improve efficiency. While they were designed for this their main function is actually protecting the blades as a replaceable wear surface.
+Concept2 offers several blade shapes many of which are difficult to distinguish. They are also available with a Vortex Edge (and now come with it as standard), a curved plastic strip at the tip designed to improve efficiency but realistically is just a useful wear surface.
 
-## Blade Identification
+| Blade type  | Image  | Description  | Identification  |
+|--- |--- |--- |--- |
+| **Big Blade**  | ![Big Blade](imgs/blades/BigBlade.jpg)  | Original hatchet blade shape and the only one with a front ridge, no longer produced  | Has a front rib and a mostly straight bottom edge  |
+| **Smoothie2**  | ![Smoothie2](imgs/blades/Smoothie2.jpg)  | Successor of Big Blades with a softer catch  | No front rib, bottom edge mostly straight  |
+| **Smoothie2 Vortex**  | ![Smoothie2 Vortex](imgs/blades/Smoothie2Vortex.jpg)  | Smoothie2 with added Vortex Edge. The corners are routed off to match the shape  | Like Smoothie2, but with a rounded tip  |
+| **Fat2**  | ![Fat2](imgs/blades/Fat2.jpg)  | The step between the Smoothie and Comp, which should be rigged with a 5cm shorter outboard than other oars  | More of a rounded belly than previous designs  |
+| **Comp**  | ![Comp](/imgs/blades/Comp.jpg)  | Newest shorter design with an aggressive catch and easy release  | Much shorter and rounder than others  |
 
-Follow this process to identify a Concept2 blade's type:
-
-| Bottom edge mostly straight? | Front rib? | Short & stubby? | Blade type | Image |
-|---|---|---|---|---|
-| Yes | Yes | — | **Big Blade** | ![Big Blade](imgs/blades/BigBlade.jpg) |
-| | No | — | **Smoothie2** | ![Smoothie2](imgs/blades/Smoothie2.jpg) |
-| |  | — | **Smoothie2 Vortex** | ![Smoothie2 Vortex](imgs/blades/Smoothie2Vortex.jpg) |
-| No | — | Yes | **Comp** | ![Comp](/imgs/blades/Comp.jpg) |
-| | — | No | **Fat2** | ![Fat2](imgs/blades/Fat2.jpg) |
+The standard for sculls is to get 284-289cm (278-283cm for Fat2) total length with 79-91cm inboard. This is paired with skinny shafts with a medium flex, and 0 degrees of blade pitch. We then rig around a fixed point of 88cm inboard with a 160cm span for sculls.
 
 [!PROCEDURE:Intermediate] Replace green rubber grip
 Replace a torn, slippery, or loose green grip to restore comfort and control.

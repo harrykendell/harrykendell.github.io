@@ -2,6 +2,7 @@ td > img {
     display: block;
     width: 100%;
     height: auto;
+    max-height: 15dvh;
     border-radius: var(--radius);
     overflow: hidden;
     border: 1px solid var(--border-subtle);

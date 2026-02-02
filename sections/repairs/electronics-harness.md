@@ -1,9 +1,5 @@
 # Harness build and repair
 
-## Related
-
-- See **[Coxbox wiring (maintenance)](../maintenance/coxbox-wiring.md)** for troubleshooting and pinout reference.
-
 ## Harness build/repair procedure
 
 [!PROCEDURE:Advanced] Build or repair a harness segment
@@ -25,3 +21,7 @@ Build a new or repair a damaged boat harness to restore electrical continuity an
 
 **Check:** Correct pinout; no shorts between pins; mechanical strain relief effective.
 [!/PROCEDURE]
+
+## Related
+
+- See **[Coxbox wiring (maintenance)](../maintenance/coxbox-wiring.md)** for troubleshooting and pinout reference.

@@ -1,9 +1,5 @@
 # Boat composite repairs
 
-## Related
-
-- See **[Boat maintenance](../maintenance/boats.md)** for cleaning, storage, and inspection.
-
 ## Composite construction primer
 
 Most racing shells are sandwich structures:
@@ -129,3 +125,7 @@ We keep supplies mainly from:
 - [EC Fibreglass Supplies](https://www.ecfibreglasssupplies.co.uk)
 
 **Stock list is in Appendix C.**
+
+## Related
+
+- See **[Boat maintenance](../maintenance/boats.md)** for cleaning, storage, and inspection.
