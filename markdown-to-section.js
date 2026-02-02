@@ -29,14 +29,10 @@ function renderProcedureNode(node) {
     const skillRaw = (node.skillRaw || "").trim();
     const title = (node.title || "Procedure").trim() || "Procedure";
 
-    console.groupCollapsed(`🔨 Rendering: "${title}"`);
-
     const blockContent = node.content
         .map((part) => (typeof part === "string" ? part : part.html))
         .join("\n")
         .trim();
-
-    console.log('📝 Markdown content:', blockContent);
 
     const chunks = blockContent
         ? blockContent.split(/\n\s*\n/).filter(Boolean)
@@ -69,15 +65,11 @@ function renderProcedureNode(node) {
         `</div>`,
     ].filter(Boolean).join("\n");
 
-    console.log('✅ Rendered HTML:', html);
-    console.groupEnd();
-
     return html;
 }
 
 function transformProcedureBlocks(markdown, documentTitle) {
     const titleInfo = documentTitle ? ` in "${documentTitle}"` : '';
-    console.group(`📋 PROCEDURE TRANSFORM${titleInfo}`);
     const lines = markdown.split(/\r?\n/);
     const output = [];
     const stack = [];
@@ -91,13 +83,6 @@ function transformProcedureBlocks(markdown, documentTitle) {
             const prefix = startMatch[1];
             const skillRaw = (startMatch[2] || "").trim();
             const title = (startMatch[3] || "Procedure").trim() || "Procedure";
-
-            console.groupCollapsed(`▶️ START "${title}" [${skillRaw}] at line ${idx}`);
-            if (prefix.trim()) {
-                console.log('Prefix text:', prefix);
-            }
-            console.log('Stack depth:', stack.length, '→', stack.length + 1);
-            console.groupEnd();
 
             // Output any text before the tag
             if (prefix.trim()) {
@@ -118,28 +103,19 @@ function transformProcedureBlocks(markdown, documentTitle) {
 
             if (!stack.length) {
                 // Unmatched close; treat as plain text
-                console.warn('⚠️ Unmatched [!/PROCEDURE] at line', idx);
+                console.error('⚠️ Unmatched [!/PROCEDURE] at line', idx);
                 output.push(line);
                 continue;
             }
 
             const completed = stack[stack.length - 1];
-            console.groupCollapsed(`⏹️ END "${completed.title}" [Line ${idx}]`);
 
             // Add any text before the closing tag to the procedure content
             if (prefix.trim()) {
-                console.log('Prefix text:', prefix);
                 stack[stack.length - 1].content.push(prefix.trimEnd());
             }
-            if (suffix.trim()) {
-                console.log('Suffix text:', suffix);
-            }
-            console.log('Content lines captured:', completed.content.length);
-            console.log('Stack depth:', stack.length, '→', stack.length - 1);
-
             stack.pop();
             const rendered = { html: renderProcedureNode(completed) };
-            console.groupEnd();
 
             if (stack.length) {
                 stack[stack.length - 1].content.push(rendered);
@@ -174,8 +150,6 @@ function transformProcedureBlocks(markdown, documentTitle) {
             ...dangling.content.map((part) => typeof part === "string" ? part : part.html));
     }
 
-    console.log('✅ Transform complete. Output items:', output.length);
-    console.groupEnd();
     return output.join("\n");
 }
 
@@ -260,7 +234,7 @@ function addHeadingIds(rootEl, sectionId) {
         }
         const text = h.textContent || "";
         const baseId = slugify(text);
-        const prefix = sectionId ? `${sectionId}-` : "";
+        const prefix = sectionId ? `${sectionId}/` : "";
         let id = `${prefix}${baseId}`;
         let counter = 2;
         while (seenIds.has(id)) {
@@ -268,6 +242,7 @@ function addHeadingIds(rootEl, sectionId) {
             counter += 1;
         }
         seenIds.add(id);
+        console.log(`🆔 Setting heading id: ${prefix} and ${text} with ${counter}→ "${id}"`);
         h.id = id;
     });
 }
@@ -307,34 +282,29 @@ function wrapTables(rootEl) {
 }
 
 function extractYouTubeId(src) {
-    console.log('🔍 Extracting video ID from:', src);
     try {
         const url = new URL(src);
         if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
-            console.log('❌ Not a YouTube URL');
+            console.error(`❌ Not a YouTube URL ${url.hostname}`);
             return null;
         }
         const match = url.pathname.match(/\/embed\/([^/?]+)/);
         const videoId = match ? match[1] : null;
-        console.log('✅ Extracted video ID:', videoId);
         return videoId;
     } catch (error) {
-        console.log('⚠️ URL parse failed, trying fallback regex');
+        console.error('⚠️ URL parse failed, trying fallback regex');
         const fallback = /youtube(?:-nocookie)?\.com\/embed\/([^?&]+)/.exec(
             src);
         const videoId = fallback ? fallback[1] : null;
-        console.log(videoId ? '✅ Fallback extracted:' : '❌ Fallback failed:', videoId);
         return videoId;
     }
 }
 
 function buildYouTubeEmbed(iframe, videoId) {
-    const title = iframe.getAttribute("title") || "YouTube video";
-    console.groupCollapsed(`📺 Building embed: "${title}" [${videoId}]`);
-    const safeTitle = escapeHtml(title);
+    var title = iframe.getAttribute("title") || "YouTube video";
+    title = escapeHtml(title);
 
     let dataSrc = iframe.getAttribute("src") || "";
-    console.log('Original src:', dataSrc);
     try {
         dataSrc = new URL(dataSrc);
         dataSrc.searchParams.set("autoplay", "1");
@@ -342,7 +312,6 @@ function buildYouTubeEmbed(iframe, videoId) {
     } catch (error) {
         dataSrc += dataSrc.includes("?") ? "&autoplay=1" : "?autoplay=1";
     }
-    console.log('Data-src with autoplay:', dataSrc);
 
     const wrapper = document.createElement("div");
     wrapper.className = "youtube-embed";
@@ -379,7 +348,6 @@ function buildYouTubeEmbed(iframe, videoId) {
     thumbnail.decoding = "async";
     thumbnail.alt = title;
     thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
-    console.log('Thumbnail URL:', thumbnail.src);
 
     button.appendChild(icon);
     button.appendChild(thumbnail);
@@ -396,38 +364,26 @@ function buildYouTubeEmbed(iframe, videoId) {
     wrapper.appendChild(button);
     wrapper.appendChild(lazyIframe);
 
-    console.log('✅ Wrapper built');
-    console.groupEnd();
-
     return wrapper;
 }
 
 function transformYouTubeEmbeds(rootEl) {
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
-    console.group(`📺 YOUTUBE TRANSFORM (${iframes.length} iframes found)`);
 
     let transformed = 0;
     iframes.forEach((iframe, index) => {
         const src = iframe.getAttribute("src") || "";
-        console.groupCollapsed(`🎬 iframe ${index + 1}/${iframes.length}`);
-        console.log('Source:', src);
 
         const videoId = extractYouTubeId(src);
         if (!videoId) {
-            console.log('⏭️ Skipping (not a YouTube embed)');
-            console.groupEnd();
+            console.warn('⏭️ Skipping (not a YouTube embed)');
             return;
         }
 
         const wrapper = buildYouTubeEmbed(iframe, videoId);
         iframe.replaceWith(wrapper);
         transformed++;
-        console.log('✅ Replaced with lazy-load wrapper');
-        console.groupEnd();
     });
-
-    console.log(`✅ Transformation complete. Converted: ${transformed}/${iframes.length}`);
-    console.groupEnd();
 }
 
 /**
@@ -438,8 +394,6 @@ function transformYouTubeEmbeds(rootEl) {
  */
 function markdownToSection(markdown, sectionId) {
     const { title, content } = extractTitleAndContentFromMarkdown(markdown);
-
-    console.groupCollapsed(`📄 Processing markdown: "${title || sectionId}" (${sectionId}.md)`);
 
     const html = marked.parse(transformProcedureBlocks(content, title));
 
@@ -472,9 +426,6 @@ function markdownToSection(markdown, sectionId) {
 
     // Set ids for sidebar linking without changing heading levels
     addHeadingIds(contentEl, sectionId);
-
-    console.log('✅ Section complete');
-    console.groupEnd();
 
     return sectionEl;
 }

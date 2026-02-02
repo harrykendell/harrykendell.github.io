@@ -99,8 +99,6 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
 
-
 ## Related
 
 - See **[Oars and blades maintenance](../maintenance/oars.md)** for handling rules and consumable replacements (suede/grip/collar checks).
-
