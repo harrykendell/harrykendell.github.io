@@ -24,4 +24,4 @@ Build a new or repair a damaged boat harness to restore electrical continuity an
 
 ## Related
 
-- See **[Coxbox wiring (maintenance)](../maintenance/coxbox-wiring.md)** for troubleshooting and pinout reference.
+- See **[Coxbox wiring (maintenance)](/#maintenance/coxbox-wiring)** for troubleshooting and pinout reference.

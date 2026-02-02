@@ -128,4 +128,4 @@ We keep supplies mainly from:
 
 ## Related
 
-- See **[Boat maintenance](../maintenance/boats.md)** for cleaning, storage, and inspection.
+- See **[Boat maintenance](/#maintenance/boats)** for cleaning, storage, and inspection.

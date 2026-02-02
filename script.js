@@ -1,3 +1,5 @@
+// Prevent hash updates until after initial scroll restoration
+let hashUpdateEnabled = false;
 const sectionFiles = [
   "maintenance/rigging",
   "maintenance/boats",
@@ -249,6 +251,12 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPreface();
   loadSections();
 });
+document.addEventListener("click", function (e) {
+  if (e.target.hash && document.getElementById(e.target.hash.slice(1))) {
+    scrollToSection(e.target.hash);
+    e.preventDefault();
+  }
+});
 
 function generateSidebar() {
   const sections = document.querySelectorAll(".section");
@@ -353,23 +361,16 @@ function setupActiveTracking() {
 
     if (activeElement) {
       let activeLink;
-      if (
-        activeElement.tagName === "H2" ||
-        activeElement.tagName === "H3" ||
-        activeElement.tagName === "H4" ||
-        activeElement.tagName === "H5" ||
-        activeElement.tagName === "H6"
-      ) {
-        activeLink = document.querySelector(
-          `.sidebar a[href="#${activeElement.id}"]`,
-        );
-      } else {
-        activeLink = document.querySelector(
-          `.sidebar a[data-section="${activeElement.id}"]`,
-        );
-      }
+      activeLink = document.querySelector(
+        `.sidebar a[href="#${activeElement.id}"]`,
+      );
+
       if (activeLink) {
         activeLink.classList.add("active");
+        // Update the URL hash to match the active heading, but only if it changed and hash updates are enabled
+        if (hashUpdateEnabled && window.location.hash !== `#${activeElement.id}`) {
+          history.replaceState(null, document.title, `#${activeElement.id}`);
+        }
       }
     } else {
       const contentsLink = document.querySelector(
@@ -377,6 +378,9 @@ function setupActiveTracking() {
       );
       if (contentsLink) {
         contentsLink.classList.add("active");
+        if (hashUpdateEnabled && window.location.hash !== "#top") {
+          history.replaceState(null, document.title, `#top`);
+        }
       }
     }
   }
@@ -397,6 +401,15 @@ function setupActiveTracking() {
 }
 
 function scrollToSection(hash) {
+  console.log("Scrolling to section:", hash);
+  // click the arrow to expand the section if it's collapsed
+  const targetSection = document.getElementById(hash.slice(1));
+  if (targetSection && targetSection.classList.contains("collapsed")) {
+    const header = targetSection.querySelector(".section-header");
+    if (header) {
+      header.click();
+    }
+  }
 
   const targetTop = document
     .getElementById(hash.slice(1))
@@ -490,39 +503,11 @@ function setupSidebarLinks() {
       if (href && href.startsWith("#")) {
         e.preventDefault();
 
-        const targetSectionId =
-          link.getAttribute("data-parent") ||
-          link.getAttribute("data-section");
-
-        if (targetSectionId) {
-          const section = document.getElementById(targetSectionId);
-          if (section && section.classList.contains("section")) {
-            const wasCollapsed =
-              section.classList.contains("collapsed");
-
-            if (wasCollapsed) {
-              section.classList.remove("collapsed");
-              localStorage.setItem(
-                `section-${targetSectionId}`,
-                "expanded",
-              );
-              updateSidebarArrow(targetSectionId, false);
-            }
-
-            if (typeof window.updateActiveLink === "function") {
-              // Always refresh highlight after navigation
-              window.updateActiveLink();
-            }
-          }
-        }
-
         if (window.matchMedia("(max-width: 860px)").matches) {
           if (typeof window.setTocOpen === "function") {
             window.setTocOpen(false);
           }
         }
-
-        scrollToSection(href);
       }
     });
   });
@@ -535,18 +520,13 @@ function setupSidebarLinks() {
   });
 }
 
-// Save scroll position before unload
-window.addEventListener("beforeunload", () => {
-  sessionStorage.setItem("scrollPosition", window.scrollY);
-});
-
 // Restore scroll position
 function restoreScrollPosition() {
-  const scrollPosition = sessionStorage.getItem("scrollPosition");
-
   document.documentElement.style.scrollBehavior = "auto";
-  if (scrollPosition !== null) {
-    window.scrollTo(0, parseInt(scrollPosition));
+  // if we have a hash, scroll to it
+  if (window.location.hash) {
+    scrollToSection(window.location.hash);
   }
-  document.documentElement.style.scrollBehavior = "auto";
+  // Now allow hash updates
+  hashUpdateEnabled = true;
 }

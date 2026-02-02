@@ -227,22 +227,28 @@ function extractTitleAndContentFromMarkdown(md) {
 function addHeadingIds(rootEl, sectionId) {
     const headings = rootEl.querySelectorAll("h2, h3, h4, h5, h6");
     const seenIds = new Set();
+    // Track the slug at each heading level (h2=0, h3=1, ...)
+    const slugStack = [];
     headings.forEach((h) => {
         if (h.id) {
             seenIds.add(h.id);
             return;
         }
         const text = h.textContent || "";
-        const baseId = slugify(text);
-        const prefix = sectionId ? `${sectionId}/` : "";
-        let id = `${prefix}${baseId}`;
+        const baseSlug = slugify(text);
+        const level = parseInt(h.tagName.slice(1), 10) - 2; // h2=0, h3=1, ...
+        slugStack.length = level + 1;
+        slugStack[level] = baseSlug;
+        // Build hierarchical id: sectionId + all parent slugs up to this level
+        const idParts = [sectionId, ...slugStack.slice(0, level + 1)].filter(Boolean);
+        let id = idParts.join("/");
         let counter = 2;
         while (seenIds.has(id)) {
-            id = `${prefix}${baseId}-${counter}`;
+            id = idParts.join("/") + "-" + counter;
             counter += 1;
         }
         seenIds.add(id);
-        console.log(`🆔 Setting heading id: ${prefix} and ${text} with ${counter}→ "${id}"`);
+
         h.id = id;
     });
 }
@@ -401,7 +407,7 @@ function markdownToSection(markdown, sectionId) {
     const safeSectionId = escapeAttribute(sectionId);
     const template = document.createElement("template");
     template.innerHTML = `
-        <section class="section" id="${safeSectionId}">
+        <section class="section collapsed" id="${safeSectionId}">
             <div class="section-header">
                 <span class="section-toggle">▼</span>
                 <h2>${safeTitle}</h2>

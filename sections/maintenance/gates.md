@@ -88,5 +88,5 @@ After bushing replacement or suspected pitch drift, verify that both sides have 
 
 ## Related
 
-- See **[Rigging overview](rigging.md)** for the full rigging audit workflow and what’s allowed at each capability tier.
-- If pins/riggers move or crack, follow **[Boats → Rigger and stay inspection](boats.md#riggers-stays-and-structural-attachments)**.
+- See **[Rigging overview](/#maintenance/rigging)** for the full rigging audit workflow and what’s allowed at each capability tier.
+- If pins/riggers move or crack, follow **[Boats → Rigger and stay inspection](/#maintenance/boats/riggers-stays-and-structural-attachments)**.

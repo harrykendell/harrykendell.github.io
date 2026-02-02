@@ -39,11 +39,11 @@ Stop-use and escalate immediately if any of the following are true:
 
 ## Where the detailed procedures live
 
-- Riggers/stays inspection: **[Boats → Rigger and stay inspection](boats.md#riggers-stays-and-structural-attachments)**
-- Gate disassembly / gate height / pitch: **[Gates](gates.md)**
-- Oar collar (inboard) check and reset: **[Oars → Collar inspection and re-set](oars.md#sleeves)**
-- Footplate setup + steering: **[Footplates and steering](footplates.md)**
-- Hardware standards + audit (washers, nylocs, seized fasteners): **[Hardware](hardware.md)**
+- Riggers/stays inspection: **[Boats → Rigger and stay inspection](/#maintenance/boats/riggers-stays-and-structural-attachments)**
+- Gate disassembly / gate height / pitch: **[Gates](/#maintenance/gates)**
+- Oar collar (inboard) check and reset: **[Oars → Collar inspection and re-set](/#maintenance/oars/sleeves)**
+- Footplate setup + steering: **[Footplates and steering](/#maintenance/footplates)**
+- Hardware standards + audit (washers, nylocs, seized fasteners): **[Hardware](/#maintenance/hardware)**
 
 ## Procedure: full rigging audit and record
 
@@ -56,14 +56,14 @@ Systematic check that a boat matches its rigging sheet, and that left/right symm
 
 1. **Get the rigging sheet** for that boat (paper in boathouse or digital).
 2. **Visual/fastener check (stop-use triggers):**
-   - Run **[Rigger and stay inspection](boats.md#riggers-stays-and-structural-attachments)**.
-   - Run **[Gate safety check](gates.md#daily-checks)**.
+   - Run **[Rigger and stay inspection](/#maintenance/boats/riggers-stays-and-structural-attachments)**.
+   - Run **[Gate safety check](/#maintenance/gates/daily-checks)**.
 3. **Match measured geometry to the sheet:**
-   - **Gate height:** if off, use **[Adjust gate height](gates.md#clean-and-rebuild)**.
-   - **Pitch:** if off, use **[Set/verify pitch](gates.md#clean-and-rebuild)**.
+   - **Gate height:** if off, use **[Adjust gate height](/#maintenance/gates/clean-and-rebuild)**.
+   - **Pitch:** if off, use **[Set/verify pitch](/#maintenance/gates/clean-and-rebuild)**.
    - **Span/spread:** measure pin-centre to pin-centre. If wrong, **do not adjust** unless you are Advanced (this usually means moving riggers/pins).
-   - **Oar inboard:** measure and match across the set using **[Collar inspection and re-set](oars.md#sleeves)**.
-4. **Footplate/steering:** confirm the athlete adjustment system is sound using **[Footplate set-up](footplates.md#footplate-adjustment-and-inspection)** and **[Steering functional check](footplates.md#steering-wire)**.
+   - **Oar inboard:** measure and match across the set using **[Collar inspection and re-set](/#maintenance/oars/sleeves)**.
+4. **Footplate/steering:** confirm the athlete adjustment system is sound using **[Footplate set-up](/#maintenance/footplates/footplate-adjustment-and-inspection)** and **[Steering functional check](/#maintenance/footplates/steering-wire)**.
 5. **Witness marks:** add witness marks to key nuts/bolts (rigger bolts, top nuts) so loosening is obvious.
 6. **Record:** date + who checked + measurements (or “matches sheet”) + any parts replaced.
 

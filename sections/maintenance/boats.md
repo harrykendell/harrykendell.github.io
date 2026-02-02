@@ -160,8 +160,6 @@ Pre-outing check that the fin and rudder are secure and aligned. Do this before 
 4. Check for play: fin/rudder should not wobble relative to the hull.
 
 **Check:** Secure; aligned; smooth travel.
-
-
 > [!WARNING] Stop-use criteria
 > Looseness, binding, or new cracks around fin box: stop-use. Suspected structural fin box damage: escalate to professional repair.
 [!/PROCEDURE]
@@ -227,5 +225,5 @@ Assess damage after any impact or when new damage is observed to decide if it is
 
 ## Related
 
-- See **[Rigging overview](rigging.md)** for where rigging checks/adjustments live.
-- See **[Boat composite repairs](../repairs/boats-composites.md)** for scratch sealing and structural composite repairs.
+- See **[Rigging overview](/#maintenance/rigging)** for where rigging checks/adjustments live.
+- See **[Boat composite repairs](/#repairs/boats-composites)** for scratch sealing and structural composite repairs.

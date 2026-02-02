@@ -101,4 +101,4 @@ Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concep
 
 ## Related
 
-- See **[Oars and blades maintenance](../maintenance/oars.md)** for handling rules and consumable replacements (suede/grip/collar checks).
+- See **[Oars and blades maintenance](/#maintenance/oars)** for handling rules and consumable replacements (suede/grip/collar checks).

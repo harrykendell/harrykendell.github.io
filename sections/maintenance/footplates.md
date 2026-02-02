@@ -92,5 +92,5 @@ Replace a frayed or snapped steering cable to restore full steering responsivene
 
 ## Related
 
-- See **[Rigging overview](rigging.md)** for the full rigging audit workflow.
-- If you are changing gate height/pitch as part of a re-rig, use **[Gates](gates.md)**.
+- See **[Rigging overview](/#maintenance/rigging)** for the full rigging audit workflow.
+- If you are changing gate height/pitch as part of a re-rig, use **[Gates](/#maintenance/gates)**.

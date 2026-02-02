@@ -102,4 +102,4 @@ Stainless-on-stainless threads can **gall** (cold-weld) without warning, especia
 
 ## Related
 
-- See **[Rigging overview](rigging.md)** for how this hardware audit fits into full rigging verification.
+- See **[Rigging overview](/#maintenance/rigging)** for how this hardware audit fits into full rigging verification.

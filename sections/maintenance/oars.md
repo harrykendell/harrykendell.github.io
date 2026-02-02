@@ -77,7 +77,7 @@ Replace a torn, slippery, or loose green grip to restore comfort and control.
 
 ## Sleeves
 
-**Repairs note:** sleeve replacement and pitch alignment is an advanced repair. See **[Oar repairs](../repairs/oars.md)**.
+**Repairs note:** sleeve replacement and pitch alignment is an advanced repair. See **[Oar repairs](/#repairs/oars)**.
 
 Sleeves are epoxied on and must be oriented correctly to set blade pitch. Concept2 provide a pitch jig, but you can also use a flat reference surface. In practice, the back face of the blade should align with the P/S marking (port/starboard). Ensure the sleeve is positioned at the correct distance from the spoon for the desired gearing.
 
@@ -103,7 +103,7 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 
 ## Spoons
 
-**Repairs note:** structural spoon delamination repair is an advanced repair. See **[Oar repairs](../repairs/oars.md)**.
+**Repairs note:** structural spoon delamination repair is an advanced repair. See **[Oar repairs](/#repairs/oars)**.
 
 For delamination or breakage, stabilise with epoxy:
 
@@ -125,5 +125,5 @@ Concept2 also runs **Regatta Service** at select events (complimentary repairs/m
 
 ## Related
 
-- See **[Rigging overview](rigging.md)** for how oar inboard and boat geometry fit together.
-- See **[Oar repairs](../repairs/oars.md)** for sleeve replacement, spoon delamination stabilisation, and fixed-handle replacement.
+- See **[Rigging overview](/#maintenance/rigging)** for how oar inboard and boat geometry fit together.
+- See **[Oar repairs](/#repairs/oars)** for sleeve replacement, spoon delamination stabilisation, and fixed-handle replacement.
