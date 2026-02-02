@@ -219,20 +219,19 @@ function renderSectionNavItem(section, effectiveDepth) {
     return !Number.isNaN(level) && level <= effectiveDepth;
   });
 
-  if (visibleHeadings.length > 0) {
-    const subItems = visibleHeadings.map((heading) => {
-      const headingId = escapeAttribute(heading.id);
-      const headingText = escapeHtml(heading.textContent);
-      const level = parseInt(heading.tagName.slice(1), 10);
-      const levelClass = !Number.isNaN(level) ? ` toc-level-${level}` : "";
-      return `
+  const subItems = visibleHeadings.map((heading) => {
+    const headingId = escapeAttribute(heading.id);
+    const headingText = escapeHtml(heading.textContent);
+    const level = parseInt(heading.tagName.slice(1), 10);
+    const levelClass = !Number.isNaN(level) ? ` toc-level-${level}` : "";
+    return `
             <li class="sub${levelClass}">
                 <a href="#${headingId}" data-parent="${safeSectionId}">${headingText}</a>
             </li>
         `;
-    }).join("");
+  }).join("");
 
-    return `
+  return `
         <li>
             <div class="nav-row">
                 <button class="nav-arrow" type="button" data-section="${safeSectionId}" aria-label="Toggle section">▼</button>
@@ -243,16 +242,7 @@ function renderSectionNavItem(section, effectiveDepth) {
             </ul>
         </li>
       `;
-  }
 
-  return `
-      <li>
-          <div class="nav-row">
-              <button class="nav-arrow" type="button" data-section="${safeSectionId}" aria-hidden="true" disabled>⚫︎</button>
-              <a href="#${safeSectionId}" data-section="${safeSectionId}">${safeSectionTitle}</a>
-          </div>
-      </li>
-    `;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
