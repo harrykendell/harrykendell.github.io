@@ -51,10 +51,14 @@ function getEffectiveTocLevel() {
 
 async function loadSections() {
   const container = document.getElementById("sections-container");
+  if (!container) {
+    return;
+  }
+
   let currentGroup = null;
   const groupLabels = SECTION_GROUPS.labels;
 
-  for (const section of sectionFiles) {
+  const loadedSections = await Promise.all(sectionFiles.map(async (section) => {
     try {
       const response = await fetch(`sections/${section}.md`);
       if (!response.ok) {
@@ -62,28 +66,39 @@ async function loadSections() {
       }
       const markdown = await response.text();
       const sectionEl = markdownToSection(markdown, section);
-      const groupKey = getSectionGroup(section);
-      if (groupKey !== currentGroup) {
-        currentGroup = groupKey;
-        const groupLabel = groupLabels[groupKey];
-        if (groupLabel) {
-          const groupEl = document.createElement("div");
-          groupEl.className = "section-group";
-          groupEl.innerHTML = `
-          <div class="section-group-divider" aria-hidden="true"></div>
-          <div class="section-group-title">${escapeHtml(groupLabel)}</div>
-          `;
-          container.appendChild(groupEl);
-        }
-      }
-      container.appendChild(sectionEl);
-
-      // Set initial state immediately after insertion to prevent flash
       setInitialSectionState(sectionEl);
+      return { section, sectionEl };
     } catch (error) {
       console.error(`Failed to load section: ${section}`, error);
+      return null;
     }
-  }
+  }));
+
+  const fragment = document.createDocumentFragment();
+  loadedSections.forEach((loadedSection) => {
+    if (!loadedSection) {
+      return;
+    }
+
+    const { section, sectionEl } = loadedSection;
+    const groupKey = getSectionGroup(section);
+    if (groupKey !== currentGroup) {
+      currentGroup = groupKey;
+      const groupLabel = groupLabels[groupKey];
+      if (groupLabel) {
+        const groupEl = document.createElement("div");
+        groupEl.className = "section-group";
+        groupEl.innerHTML = `
+          <div class="section-group-divider" aria-hidden="true"></div>
+          <div class="section-group-title">${escapeHtml(groupLabel)}</div>
+        `;
+        fragment.appendChild(groupEl);
+      }
+    }
+    fragment.appendChild(sectionEl);
+  });
+
+  container.appendChild(fragment);
 
   // Setup click handlers after all sections are loaded
   setupSectionToggle();
@@ -113,6 +128,9 @@ async function loadPreface() {
     const { content } = extractTitleAndContentFromMarkdown(markdown);
     preface.innerHTML = marked.parse(content);
     wrapTables(preface);
+    if (typeof optimizeSectionMedia === "function") {
+      optimizeSectionMedia(preface);
+    }
   } catch (error) {
     console.error("Failed to load preface introduction", error);
   }
@@ -178,7 +196,10 @@ function setupTocToggle() {
 
   const setExpanded = (expanded) => {
     sidebar.classList.toggle("is-open", expanded);
-    mainContent.classList.toggle("toc-dim", expanded);
+    toggleButton.setAttribute("aria-expanded", String(expanded));
+    if (mainContent) {
+      mainContent.classList.toggle("toc-dim", expanded);
+    }
   };
 
   window.setTocOpen = setExpanded;
@@ -190,6 +211,13 @@ function setupTocToggle() {
     }
     else if (!sidebar.contains(target)) { // Clicked outside sidebar - close it
       setExpanded(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sidebar.classList.contains("is-open")) {
+      setExpanded(false);
+      toggleButton.focus();
     }
   });
 }
@@ -251,10 +279,23 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPreface();
   loadSections();
 });
-document.addEventListener("click", function (e) {
-  if (e.target.hash && document.getElementById(e.target.hash.slice(1))) {
-    scrollToSection(e.target.hash);
-    e.preventDefault();
+
+function getHashFromTarget(target) {
+  if (!target || !(target instanceof Element)) {
+    return null;
+  }
+  const link = target.closest('a[href^="#"]');
+  if (!link) {
+    return null;
+  }
+  const href = link.getAttribute("href");
+  return href && href.startsWith("#") ? href : null;
+}
+
+document.addEventListener("click", function (event) {
+  const hash = getHashFromTarget(event.target);
+  if (hash && scrollToSection(hash)) {
+    event.preventDefault();
   }
 });
 
@@ -400,25 +441,36 @@ function setupActiveTracking() {
   updateActiveLink();
 }
 
-function scrollToSection(hash) {
-  console.log("Scrolling to section:", hash);
-  // click the arrow to expand the section if it's collapsed
-  const targetSection = document.getElementById(hash.slice(1));
-  if (targetSection && targetSection.classList.contains("collapsed")) {
-    const header = targetSection.querySelector(".section-header");
+function scrollToSection(hash, behavior = "smooth") {
+  const targetId = hash.startsWith("#") ? hash.slice(1) : hash;
+  if (!targetId) {
+    return false;
+  }
+
+  const targetElement = document.getElementById(targetId);
+  if (!targetElement) {
+    return false;
+  }
+
+  const parentSection = targetElement.closest(".section");
+  if (parentSection && parentSection.classList.contains("collapsed")) {
+    const header = parentSection.querySelector(".section-header");
     if (header) {
       header.click();
     }
   }
 
-  const targetTop = document
-    .getElementById(hash.slice(1))
-    .getBoundingClientRect().top + window.scrollY;
+  const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({
+    top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0),
+    behavior,
+  });
 
-  window.scrollTo({ top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0), behavior: "smooth" });
+  return true;
 }
 
 function setInitialSectionState(section) {
+  const header = section.querySelector(".section-header");
   const sectionId = section.id;
   if (sectionId) {
     const state = localStorage.getItem(`section-${sectionId}`);
@@ -431,6 +483,13 @@ function setInitialSectionState(section) {
     // If no ID, collapse by default
     section.classList.add("collapsed");
   }
+
+  if (header) {
+    header.setAttribute(
+      "aria-expanded",
+      String(!section.classList.contains("collapsed")),
+    );
+  }
 }
 
 function setupSectionToggle() {
@@ -440,13 +499,14 @@ function setupSectionToggle() {
     const header = section.querySelector(".section-header");
 
     if (header) {
-      header.addEventListener("click", () => {
+      const toggleSection = () => {
         section.classList.toggle("collapsed");
+        const isCollapsed = section.classList.contains("collapsed");
+        header.setAttribute("aria-expanded", String(!isCollapsed));
 
         // Store preference in localStorage
         const sectionId = section.id;
         if (sectionId) {
-          const isCollapsed = section.classList.contains("collapsed");
           localStorage.setItem(
             `section-${sectionId}`,
             isCollapsed ? "collapsed" : "expanded",
@@ -456,6 +516,14 @@ function setupSectionToggle() {
           if (typeof window.updateActiveLink === "function") {
             window.updateActiveLink();
           }
+        }
+      };
+
+      header.addEventListener("click", toggleSection);
+      header.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleSection();
         }
       });
     }
@@ -485,11 +553,19 @@ function setupSidebarLinks() {
 
   sidebarArrows.forEach((arrow) => {
     arrow.addEventListener("click", (e) => {
+      e.preventDefault();
       const sectionId = arrow.getAttribute("data-section");
       const section = document.getElementById(sectionId);
+      if (!section) {
+        return;
+      }
 
       section.classList.toggle("collapsed");
       const isCollapsed = section.classList.contains("collapsed");
+      const header = section.querySelector(".section-header");
+      if (header) {
+        header.setAttribute("aria-expanded", String(!isCollapsed));
+      }
 
       localStorage.setItem(`section-${sectionId}`, isCollapsed ? "collapsed" : "expanded");
       updateSidebarArrow(sectionId, isCollapsed);
@@ -525,8 +601,9 @@ function restoreScrollPosition() {
   document.documentElement.style.scrollBehavior = "auto";
   // if we have a hash, scroll to it
   if (window.location.hash) {
-    scrollToSection(window.location.hash);
+    scrollToSection(window.location.hash, "auto");
   }
+  document.documentElement.style.scrollBehavior = "";
   // Now allow hash updates
   hashUpdateEnabled = true;
 }

@@ -53,7 +53,7 @@ function renderProcedureNode(node) {
 
     const html = [
         `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""}>`,
-        `  <div class="procedure-header">`,
+        `  <div class="procedure-header" role="button" tabindex="0" aria-expanded="false">`,
         `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
         `  </div>`,
         `  <div class="procedure-content">`,
@@ -162,8 +162,20 @@ function initProcedures(rootEl) {
         }
 
         procedure.classList.add("collapsed");
-        header.addEventListener("click", () => {
+        header.setAttribute("aria-expanded", "false");
+        const toggleProcedure = () => {
             procedure.classList.toggle("collapsed");
+            header.setAttribute(
+                "aria-expanded",
+                String(!procedure.classList.contains("collapsed")),
+            );
+        };
+        header.addEventListener("click", toggleProcedure);
+        header.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                toggleProcedure();
+            }
         });
     });
 }
@@ -287,6 +299,18 @@ function wrapTables(rootEl) {
     });
 }
 
+function optimizeSectionMedia(rootEl) {
+    const images = Array.from(rootEl.querySelectorAll("img"));
+    images.forEach((image) => {
+        if (!image.hasAttribute("loading")) {
+            image.loading = "lazy";
+        }
+        if (!image.hasAttribute("decoding")) {
+            image.decoding = "async";
+        }
+    });
+}
+
 function extractYouTubeId(src) {
     try {
         const url = new URL(src);
@@ -363,8 +387,11 @@ function buildYouTubeEmbed(iframe, videoId) {
     lazyIframe.src = "about:blank";
     lazyIframe.setAttribute("data-src", dataSrc);
     lazyIframe.setAttribute("frameborder", "0");
+    lazyIframe.setAttribute(
+        "allow",
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+    );
     lazyIframe.setAttribute("allowfullscreen", "");
-    // lazyIframe.setAttribute("allow", "autoplay; encrypted-media");
     lazyIframe.loading = "lazy";
 
     wrapper.appendChild(button);
@@ -376,8 +403,7 @@ function buildYouTubeEmbed(iframe, videoId) {
 function transformYouTubeEmbeds(rootEl) {
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
 
-    let transformed = 0;
-    iframes.forEach((iframe, index) => {
+    iframes.forEach((iframe) => {
         const src = iframe.getAttribute("src") || "";
 
         const videoId = extractYouTubeId(src);
@@ -388,7 +414,31 @@ function transformYouTubeEmbeds(rootEl) {
 
         const wrapper = buildYouTubeEmbed(iframe, videoId);
         iframe.replaceWith(wrapper);
-        transformed++;
+    });
+}
+
+function initYouTubeEmbeds(rootEl) {
+    const buttons = Array.from(rootEl.querySelectorAll(".youtube-embed__button"));
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const wrapper = button.closest(".youtube-embed");
+            if (!wrapper || wrapper.classList.contains("is-playing")) {
+                return;
+            }
+
+            const iframe = wrapper.querySelector("iframe[data-src]");
+            if (!iframe) {
+                return;
+            }
+
+            const dataSrc = iframe.getAttribute("data-src");
+            if (!dataSrc) {
+                return;
+            }
+
+            iframe.src = dataSrc;
+            wrapper.classList.add("is-playing");
+        });
     });
 }
 
@@ -408,7 +458,7 @@ function markdownToSection(markdown, sectionId) {
     const template = document.createElement("template");
     template.innerHTML = `
         <section class="section collapsed" id="${safeSectionId}">
-            <div class="section-header">
+            <div class="section-header" role="button" tabindex="0" aria-expanded="false">
                 <span class="section-toggle">▼</span>
                 <h2>${safeTitle}</h2>
             </div>
@@ -426,9 +476,12 @@ function markdownToSection(markdown, sectionId) {
     transformCallouts(contentEl);
 
     transformYouTubeEmbeds(contentEl);
+    initYouTubeEmbeds(contentEl);
 
     // Wrap tables for mobile horizontal scrolling
     wrapTables(contentEl);
+
+    optimizeSectionMedia(contentEl);
 
     // Set ids for sidebar linking without changing heading levels
     addHeadingIds(contentEl, sectionId);

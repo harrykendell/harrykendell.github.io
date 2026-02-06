@@ -359,9 +359,14 @@ header.page-header {
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
+    border: 0;
     padding: 12px 16px;
     background: var(--bg);
+    color: inherit;
     cursor: pointer;
+    font: inherit;
+    text-align: left;
     user-select: none;
     transition: background 0.1s;
     border-bottom: 1px solid var(--border-subtle);
@@ -454,6 +459,16 @@ a {
 
 a:hover {
     color: var(--info-strong);
+}
+
+a:focus-visible,
+.toc-toggle:focus-visible,
+.sidebar .nav-arrow:focus-visible,
+.section-header:focus-visible,
+.procedure-header:focus-visible,
+.youtube-embed__button:focus-visible {
+    outline: 2px solid var(--info);
+    outline-offset: 2px;
 }
 
 ul,
@@ -558,10 +573,16 @@ blockquote p {
 }
 
 .procedure-header {
+    display: block;
+    width: 100%;
+    border: 0;
     background: var(--bg);
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-subtle);
+    color: inherit;
     cursor: pointer;
+    font: inherit;
+    text-align: left;
     user-select: none;
     transition: background 0.1s;
 }
@@ -817,6 +838,7 @@ hr {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
     padding: 0;
     border: 0;
     cursor: pointer;
