@@ -25,7 +25,7 @@ Early intervention on spoon delamination to prevent blade failure and structural
 
 **Check:** No flex; sealed edges. Do when early delamination or edge damage is observed.
 <div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/Z5Vee-V-pO8" title="Spoon repair"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/Z5Vee-V-pO8" title="Spoon repair"></iframe>
 </div>
 [!/PROCEDURE]
 
@@ -65,7 +65,7 @@ Replace a worn, rotated, or cracked sleeve and restore correct pitch alignment.
 
 **Check:** Sleeve secure; pitch alignment correct; distance correct for gearing.
 <div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/VKEmhbisczM" title="Sleeves"></iframe>
 </div>
 [!/PROCEDURE]
 
@@ -91,7 +91,7 @@ Replace a fixed handle or inner grip on legacy oars. This is higher risk than sc
 
 **Check:** Handle alignment correct; no play or twist after cure.
 <div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/OvrIL5SpyT4" title="Fixed handle replacement"></iframe>
 </div>
 [!/PROCEDURE]
 

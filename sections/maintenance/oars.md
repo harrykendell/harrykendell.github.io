@@ -37,7 +37,7 @@ Replace worn or torn suede grip patches to maintain comfort and prevent blisters
 
 **Check:** Patch fully bonded; seam placement acceptable. Do when suede is worn, torn, or lifting.
 <div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/BxoXXjtqYGc" title="Suede replacement"></iframe>
 </div>
 [!/PROCEDURE]
 
@@ -71,7 +71,7 @@ Replace a torn, slippery, or loose green grip to restore comfort and control.
 
 **Check:** No rotation under load. Replace when grip is torn, slippery, or loose.
 <div class="video-wrapper">
-  <iframe src="https://www.youtube.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
+  <iframe src="https://www.youtube-nocookie.com/embed/wTvUfytJGFY" title="Green rubber replacement"></iframe>
 </div>
 [!/PROCEDURE]
 
