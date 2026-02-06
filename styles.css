@@ -665,16 +665,6 @@ blockquote p {
     overflow: hidden;
 }
 
-.procedure-description {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    font-style: italic;
-    margin: 0 0 10px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
 /* Tables */
 table {
     width: 100%;

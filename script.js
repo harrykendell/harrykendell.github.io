@@ -280,21 +280,11 @@ document.addEventListener("DOMContentLoaded", () => {
   loadSections();
 });
 
-function getHashFromTarget(target) {
-  if (!target || !(target instanceof Element)) {
-    return null;
-  }
-  const link = target.closest('a[href^="#"]');
-  if (!link) {
-    return null;
-  }
-  const href = link.getAttribute("href");
-  return href && href.startsWith("#") ? href : null;
-}
 
 document.addEventListener("click", function (event) {
-  const hash = getHashFromTarget(event.target);
-  if (hash && scrollToSection(hash)) {
+  const hash = event.target.hash;
+  if (hash) {
+    scrollToSection(hash)
     event.preventDefault();
   }
 });
@@ -465,7 +455,8 @@ function scrollToSection(hash, behavior = "smooth") {
     top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0),
     behavior,
   });
-
+  console.log("Scrolled to section:", targetId);
+  console.groupEnd();
   return true;
 }
 
