@@ -377,7 +377,7 @@ function buildYouTubeEmbed(iframe, videoId) {
     thumbnail.loading = "lazy";
     thumbnail.decoding = "async";
     thumbnail.alt = title;
-    thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+    thumbnail.src = `https://img.youtube-nocookie.com/vi/${videoId}/0.jpg`;
 
     button.appendChild(icon);
     button.appendChild(thumbnail);
@@ -455,12 +455,22 @@ function markdownToSection(markdown, sectionId) {
 
     const safeTitle = escapeHtml(title || sectionId);
     const safeSectionId = escapeAttribute(sectionId);
+    const sectionPath = `sections/${sectionId}.md`;
+    const editUrl = typeof window !== "undefined" && typeof window.getGitHubEditUrl === "function"
+        ? window.getGitHubEditUrl(sectionPath)
+        : null;
+    const editLinkHtml = editUrl
+        ? `<a class="section-edit-link" data-source-path="${escapeAttribute(sectionPath)}" href="${escapeAttribute(editUrl)}" target="_blank" rel="noopener noreferrer">Edit</a>`
+        : "";
     const template = document.createElement("template");
     template.innerHTML = `
-        <section class="section collapsed" id="${safeSectionId}">
+        <section class="section collapsed" id="${safeSectionId}" data-source-path="${escapeAttribute(sectionPath)}">
             <div class="section-header" role="button" tabindex="0" aria-expanded="false">
-                <span class="section-toggle">▼</span>
-                <h2>${safeTitle}</h2>
+                <div class="section-header-main">
+                    <span class="section-toggle">▼</span>
+                    <h2>${safeTitle}</h2>
+                </div>
+                ${editLinkHtml}
             </div>
             <div class="section-content">${html}</div>
         </section>

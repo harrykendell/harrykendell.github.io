@@ -22,6 +22,9 @@ const MAX_TOC_DEPTH = 5;
 let tocDepth = DEFAULT_TOC_DEPTH;
 let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
+let activeTrackingObserver = null;
+let activeTrackingResizeHandler = null;
+let activeTrackingScrollHandler = null;
 
 const SECTION_GROUPS = {
   order: ["maintenance", "repairs", "supplement"],
@@ -31,6 +34,10 @@ const SECTION_GROUPS = {
     supplement: "Supplement",
   },
 };
+
+const CONTENT_REPO_OWNER = "harrykendell";
+const CONTENT_REPO_NAME = "harrykendell.github.io";
+const CONTENT_REPO_BRANCH = "dev";
 
 function escapeHtml(value) {
   return String(value)
@@ -44,6 +51,25 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, "&#96;");
 }
+
+function getGitHubEditUrl(relativePath) {
+  const cleanPath = String(relativePath || "").replace(/^\/+/, "");
+  if (!cleanPath) {
+    return null;
+  }
+
+  const owner = encodeURIComponent(CONTENT_REPO_OWNER);
+  const repo = encodeURIComponent(CONTENT_REPO_NAME);
+  const branch = encodeURIComponent(CONTENT_REPO_BRANCH);
+  const path = cleanPath
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+
+  return `https://github.com/${owner}/${repo}/edit/${branch}/${path}`;
+}
+
+window.getGitHubEditUrl = getGitHubEditUrl;
 
 function getEffectiveTocLevel() {
   return Math.min(6, tocDepth + 1);
@@ -127,6 +153,21 @@ async function loadPreface() {
     }
     const markdown = await response.text();
     const { content } = extractTitleAndContentFromMarkdown(markdown);
+    const introEditUrl = getGitHubEditUrl("sections/supplement/introduction.md");
+    const introEditLink = document.getElementById("intro-edit-link");
+    if (introEditLink) {
+      introEditLink.setAttribute("data-source-path", "sections/supplement/introduction.md");
+      if (introEditUrl) {
+        introEditLink.setAttribute("href", introEditUrl);
+        introEditLink.setAttribute("target", "_blank");
+        introEditLink.setAttribute("rel", "noopener noreferrer");
+      } else {
+        introEditLink.removeAttribute("href");
+        introEditLink.removeAttribute("target");
+        introEditLink.removeAttribute("rel");
+      }
+    }
+
     preface.innerHTML = marked.parse(content);
     normalizeInternalHashLinks(preface);
     wrapTables(preface);
@@ -429,6 +470,19 @@ function generateSidebar() {
 }
 
 function setupActiveTracking() {
+  if (activeTrackingObserver) {
+    activeTrackingObserver.disconnect();
+    activeTrackingObserver = null;
+  }
+  if (activeTrackingResizeHandler) {
+    window.removeEventListener("resize", activeTrackingResizeHandler);
+    activeTrackingResizeHandler = null;
+  }
+  if (activeTrackingScrollHandler) {
+    window.removeEventListener("scroll", activeTrackingScrollHandler);
+    activeTrackingScrollHandler = null;
+  }
+
   const headings = Array.from(document.querySelectorAll(
     ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]",
   ));
@@ -513,7 +567,7 @@ function setupActiveTracking() {
   window.updateActiveLink = updateActiveLink;
 
   if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(
+    activeTrackingObserver = new IntersectionObserver(
       () => {
         updateActiveLink();
       },
@@ -523,20 +577,18 @@ function setupActiveTracking() {
         threshold: [0, 0.25, 0.5, 0.75, 1],
       },
     );
-    headings.forEach((heading) => observer.observe(heading));
-    window.addEventListener("resize", updateActiveLink, { passive: true });
+    headings.forEach((heading) => activeTrackingObserver.observe(heading));
+    activeTrackingResizeHandler = updateActiveLink;
+    window.addEventListener("resize", activeTrackingResizeHandler, { passive: true });
   } else {
     console.warn("IntersectionObserver not supported - active link tracking may be less accurate and more resource-intensive.");
     // Fallback for very old browsers without IntersectionObserver.
     let scrollTimeout;
-    window.addEventListener(
-      "scroll",
-      () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(updateActiveLink, 10);
-      },
-      { passive: true },
-    );
+    activeTrackingScrollHandler = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateActiveLink, 10);
+    };
+    window.addEventListener("scroll", activeTrackingScrollHandler, { passive: true });
   }
 
   updateActiveLink();
@@ -604,6 +656,10 @@ function setupSectionToggle() {
     const header = section.querySelector(".section-header");
 
     if (header) {
+      if (header.dataset.toggleBound === "true") {
+        return;
+      }
+
       const toggleSection = () => {
         section.classList.toggle("collapsed");
         const isCollapsed = section.classList.contains("collapsed");
@@ -624,13 +680,22 @@ function setupSectionToggle() {
         }
       };
 
-      header.addEventListener("click", toggleSection);
+      header.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest(".section-edit-link")) {
+          return;
+        }
+        toggleSection();
+      });
       header.addEventListener("keydown", (event) => {
+        if (event.target instanceof Element && event.target.closest(".section-edit-link")) {
+          return;
+        }
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           toggleSection();
         }
       });
+      header.dataset.toggleBound = "true";
     }
   });
 }

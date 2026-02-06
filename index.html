@@ -11,10 +11,11 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Boat Repairs" />
   <link rel="manifest" href="/favicon/site.webmanifest" />
-  <link rel="stylesheet" href="styles.css?v=25" />
-  <script defer src="script.js?v=26"></script>
+  <link rel="stylesheet" href="styles.css?v=26" />
+  <script defer src="script.js?v=27"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script defer src="markdown-to-section.js?v=25"></script>
+  <script defer src="markdown-to-section.js?v=26"></script>
+  <script defer src="inline-editor.js?v=1"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
@@ -42,7 +43,10 @@
       <article class="page">
         <header class="page-header">
           <h1 class="page-title">Rowing Repairs Manual</h1>
-          <span class="page-subtitle">Harry Kendell</span>
+          <div class="page-subtitle-row">
+            <span class="page-subtitle">Harry Kendell</span>
+            <a id="intro-edit-link" class="section-edit-link" data-source-path="sections/supplement/introduction.md" href="https://github.com/harrykendell/harrykendell.github.io/edit/main/sections/supplement/introduction.md" target="_blank" rel="noopener noreferrer">Edit</a>
+          </div>
         </header>
 
         <div id="preface-content">
