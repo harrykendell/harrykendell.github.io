@@ -1,6 +1,6 @@
 # Coxbox wiring and boat harnesses
 
-<figure class="figure figure--float-right">
+<figure class="figure figure-float-right">
   <img src="imgs/wiring/coxbox_plug.jpg" alt="Close-up of a coxbox plug showing pin layout" />
   <div class="figure-body">
     <p class="figure-title">Pin allocation of a coxbox plug</p>

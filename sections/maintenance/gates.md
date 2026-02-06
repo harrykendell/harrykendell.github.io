@@ -1,6 +1,6 @@
 # Gates (oarlocks), pins, pitch bushings
 
-<figure class="figure figure--wide">
+<figure class="figure">
   <img src="imgs/overviews/pin_overview.jpg" alt="Gate and pin assembly on a rigged rowing shell" />
   <div class="figure-body">
     <p class="figure-title">Typical gate and pin layout</p>
