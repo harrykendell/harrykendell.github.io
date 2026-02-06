@@ -429,9 +429,9 @@ function generateSidebar() {
 }
 
 function setupActiveTracking() {
-  const headings = document.querySelectorAll(
+  const headings = Array.from(document.querySelectorAll(
     ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id], .section .section-content h5[id], .section .section-content h6[id]",
-  );
+  ));
   function isCollapsedHeading(heading) {
     if (heading.classList && heading.classList.contains("section")) {
       return false;
@@ -443,8 +443,7 @@ function setupActiveTracking() {
       : false;
   }
 
-  function updateActiveLink() {
-    const sidebarLinks = sidebarLinksCache;
+  function resolveActiveElement() {
     const targetLine = window.scrollY + ACTIVATION_OFFSET;
     let activeElement = null;
     let nearestTop = -Infinity;
@@ -473,12 +472,17 @@ function setupActiveTracking() {
       }
     });
 
+    return activeElement;
+  }
+
+  function setActiveLink(activeElement) {
+    const sidebarLinks = sidebarLinksCache;
     sidebarLinks.forEach((link) => link.classList.remove("active"));
 
     if (activeElement) {
-      let activeLink;
-      activeLink = document.querySelector(
-        `.sidebar a[href="#${activeElement.id}"]`,
+      const activeHash = `#${activeElement.id}`;
+      const activeLink = sidebarLinks.find(
+        (link) => link.getAttribute("href") === activeHash,
       );
 
       if (activeLink) {
@@ -501,18 +505,40 @@ function setupActiveTracking() {
     }
   }
 
+  function updateActiveLink() {
+    console.log("Updating active link...");
+    setActiveLink(resolveActiveElement());
+  }
+
   window.updateActiveLink = updateActiveLink;
 
-  // Debounce scroll listener for better performance
-  let scrollTimeout;
-  window.addEventListener(
-    "scroll",
-    () => {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateActiveLink, 10);
-    },
-    { passive: true },
-  );
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      () => {
+        updateActiveLink();
+      },
+      {
+        root: null,
+        rootMargin: `-${ACTIVATION_OFFSET}px 0px -60% 0px`,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      },
+    );
+    headings.forEach((heading) => observer.observe(heading));
+    window.addEventListener("resize", updateActiveLink, { passive: true });
+  } else {
+    console.warn("IntersectionObserver not supported - active link tracking may be less accurate and more resource-intensive.");
+    // Fallback for very old browsers without IntersectionObserver.
+    let scrollTimeout;
+    window.addEventListener(
+      "scroll",
+      () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateActiveLink, 10);
+      },
+      { passive: true },
+    );
+  }
+
   updateActiveLink();
 }
 
