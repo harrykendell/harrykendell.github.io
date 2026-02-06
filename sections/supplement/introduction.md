@@ -1,6 +1,6 @@
 # Introduction
 
-This document provides the references you need to look after our boats, with links to external resources where helpful. The content is split into **Maintenance** (routine care, troubleshooting, and replacement), **Repairs** (structural/adhesive work and rebuilds), and **Supplement** (quick reference and tooling).
+This little document provides the references you need to look after our boats, with links to external resources where helpful. The content is split into **Maintenance** (routine care, troubleshooting, and replacement), **Repairs** (structural/adhesive work and rebuilds), and **Supplement** (quick reference and tooling).
 
 If a procedure includes a **Stop-use** or **Escalation** warning, treat it as mandatory.
 
