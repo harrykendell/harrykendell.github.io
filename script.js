@@ -99,6 +99,7 @@ async function loadSections() {
   });
 
   container.appendChild(fragment);
+  normalizeInternalHashLinks(container);
 
   // Setup click handlers after all sections are loaded
   setupSectionToggle();
@@ -127,6 +128,7 @@ async function loadPreface() {
     const markdown = await response.text();
     const { content } = extractTitleAndContentFromMarkdown(markdown);
     preface.innerHTML = marked.parse(content);
+    normalizeInternalHashLinks(preface);
     wrapTables(preface);
     if (typeof optimizeSectionMedia === "function") {
       optimizeSectionMedia(preface);
@@ -281,10 +283,93 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+function normalizeHashValue(hash) {
+  if (!hash || typeof hash !== "string") {
+    return null;
+  }
+
+  const rawValue = hash.startsWith("#") ? hash.slice(1) : hash;
+  if (!rawValue) {
+    return null;
+  }
+
+  let decodedValue = rawValue;
+  try {
+    decodedValue = decodeURIComponent(rawValue);
+  } catch (error) {
+    decodedValue = rawValue;
+  }
+
+  return decodedValue ? `#${decodedValue}` : null;
+}
+
+function getInternalHashFromLink(link) {
+  if (!link) {
+    return null;
+  }
+
+  const href = link.getAttribute("href");
+  if (!href) {
+    return null;
+  }
+
+  if (href.startsWith("#") || href.startsWith("/#")) {
+    const hashIndex = href.indexOf("#");
+    return normalizeHashValue(href.slice(hashIndex));
+  }
+
+  try {
+    const url = new URL(href, window.location.href);
+    if (!url.hash || url.origin !== window.location.origin) {
+      return null;
+    }
+
+    const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+    const targetPath = url.pathname.replace(/\/+$/, "") || "/";
+    if (targetPath !== currentPath) {
+      return null;
+    }
+
+    return normalizeHashValue(url.hash);
+  } catch (error) {
+    return null;
+  }
+}
+
+function normalizeInternalHashLinks(rootEl) {
+  if (!rootEl) {
+    return;
+  }
+
+  const links = Array.from(rootEl.querySelectorAll("a[href]"));
+  links.forEach((link) => {
+    const hash = getInternalHashFromLink(link);
+    if (hash) {
+      link.setAttribute("href", hash);
+    }
+  });
+}
+
 document.addEventListener("click", function (event) {
-  const hash = event.target.hash;
-  if (hash) {
-    scrollToSection(hash)
+  if (event.defaultPrevented || event.button !== 0) {
+    return;
+  }
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return;
+  }
+
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return;
+  }
+
+  const link = target.closest("a[href]");
+  if (!link) {
+    return;
+  }
+
+  const hash = getInternalHashFromLink(link);
+  if (hash && scrollToSection(hash)) {
     event.preventDefault();
   }
 });
@@ -432,7 +517,12 @@ function setupActiveTracking() {
 }
 
 function scrollToSection(hash, behavior = "smooth") {
-  const targetId = hash.startsWith("#") ? hash.slice(1) : hash;
+  const normalizedHash = normalizeHashValue(hash);
+  if (!normalizedHash) {
+    return false;
+  }
+
+  const targetId = normalizedHash.slice(1);
   if (!targetId) {
     return false;
   }
@@ -455,8 +545,6 @@ function scrollToSection(hash, behavior = "smooth") {
     top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0),
     behavior,
   });
-  console.log("Scrolled to section:", targetId);
-  console.groupEnd();
   return true;
 }
 
@@ -566,14 +654,14 @@ function setupSidebarLinks() {
 
   sidebarLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
-      const href = link.getAttribute("href");
-      if (href && href.startsWith("#")) {
-        e.preventDefault();
+      const hash = getInternalHashFromLink(link);
+      if (!hash) {
+        return;
+      }
 
-        if (window.matchMedia("(max-width: 860px)").matches) {
-          if (typeof window.setTocOpen === "function") {
-            window.setTocOpen(false);
-          }
+      if (window.matchMedia("(max-width: 860px)").matches) {
+        if (typeof window.setTocOpen === "function") {
+          window.setTocOpen(false);
         }
       }
     });
