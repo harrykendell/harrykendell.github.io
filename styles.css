@@ -444,12 +444,14 @@ header.page-header {
     z-index: 1000;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     background: rgba(17, 24, 39, 0.95);
     color: #f9fafb;
     padding: 10px 12px;
     border-radius: 12px;
     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
+    max-width: min(96vw, 760px);
 }
 
 #inline-editor-toolbar button {
@@ -460,6 +462,30 @@ header.page-header {
     color: #f9fafb;
     cursor: pointer;
     font-size: 0.78rem;
+}
+
+#inline-editor-toolbar .inline-editor-auth {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 8px;
+    margin-right: 2px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 0;
+}
+
+#inline-auth-user {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: #cbd5e1;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#inline-auth-action[data-auth-state="signed-in"] {
+    border-color: rgba(134, 239, 172, 0.35);
 }
 
 #inline-editor-toolbar button:hover:not(:disabled) {
@@ -1357,6 +1383,26 @@ hr {
         width: calc(100vw - 12px);
         max-height: calc(100vh - 12px);
         margin: 6px auto;
+    }
+
+    #inline-editor-toolbar {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    #inline-editor-toolbar .inline-editor-auth {
+        border-right: none;
+        width: 100%;
+        justify-content: center;
+        padding-right: 0;
+        margin-right: 0;
+    }
+
+    #inline-auth-user {
+        max-width: 52vw;
     }
 
     .inline-editor-format-toolbar {

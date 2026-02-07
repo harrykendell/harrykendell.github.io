@@ -14,8 +14,14 @@
     warning: "Warning",
     danger: "Danger",
   };
+  const AUTH_WORKER_ORIGIN = resolveAuthWorkerOrigin();
+  const AUTH_POPUP_NAME = "github-auth-popup";
+  const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
+  const AUTH_MESSAGE_TYPE = "github-auth-complete";
+  const AUTH_PROFILE_STORAGE_KEY = "inline-editor-github-profile";
   const state = {
     busy: false,
+    authBusy: false,
     editMode: false,
     drafts: new Map(),
     sourceMarkdown: new Map(),
@@ -26,10 +32,17 @@
     applyingHistoryEntry: false,
     selectedProcedureLevel: PROCEDURE_LEVELS[0],
     selectedCalloutKind: CALLOUT_KINDS[0],
+    authSession: null,
+    authRefreshPromise: null,
+    authPopupPollId: null,
+    authPopupWindow: null,
+    authBusyMessage: "",
   };
 
   const elements = {
     toolbar: null,
+    authButton: null,
+    authUser: null,
     toggleButton: null,
     submitButton: null,
     clearButton: null,
@@ -40,22 +53,6 @@
     modalSave: null,
     modalReset: null,
   };
-
-  function encodeRepoPath(path) {
-    return String(path)
-      .split("/")
-      .map((segment) => encodeURIComponent(segment))
-      .join("/");
-  }
-
-  function toBase64(value) {
-    const bytes = new TextEncoder().encode(value);
-    let binary = "";
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-    return btoa(binary);
-  }
 
   function normalizeSourcePath(path) {
     if (!path) {
@@ -89,35 +86,342 @@
     return { owner, name, baseBranch };
   }
 
-  async function githubRequest(urlPath, options) {
-    const { method = "GET", token, body } = options || {};
-    const response = await fetch(`https://api.github.com${urlPath}`, {
-      method,
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+  function resolveAuthWorkerOrigin() {
+    const meta = document.querySelector("meta[name='github-auth-origin']");
+    const fromMeta = meta ? meta.getAttribute("content") : "";
+    const fromWindow = typeof window.GITHUB_AUTH_ORIGIN === "string"
+      ? window.GITHUB_AUTH_ORIGIN
+      : "";
+    const fallback = "https://github-auth.kendell.uk";
+    return String(fromMeta || fromWindow || fallback).replace(/\/+$/, "");
+  }
 
-    if (!response.ok) {
-      let message = `GitHub API ${response.status}`;
-      try {
-        const payload = await response.json();
-        if (payload && payload.message) {
-          message = payload.message;
-        }
-      } catch (error) {
-        // Keep generic message when body is not JSON.
+  function readStoredAuthProfile() {
+    try {
+      const raw = localStorage.getItem(AUTH_PROFILE_STORAGE_KEY);
+      if (!raw) {
+        return null;
       }
-      throw new Error(message);
-    }
-
-    if (response.status === 204) {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch (error) {
       return null;
     }
-    return response.json();
+  }
+
+  function storeAuthProfile(sessionPayload) {
+    if (!sessionPayload || !sessionPayload.user || !sessionPayload.user.login) {
+      return;
+    }
+    const profile = {
+      login: sessionPayload.user.login,
+      name: sessionPayload.user.name || "",
+      avatarUrl: sessionPayload.user.avatarUrl || "",
+      lastSeenAt: Date.now(),
+    };
+    try {
+      localStorage.setItem(AUTH_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+    } catch (error) {
+      // Ignore storage errors (privacy mode / quota).
+    }
+  }
+
+  function clearAuthProfile() {
+    try {
+      localStorage.removeItem(AUTH_PROFILE_STORAGE_KEY);
+    } catch (error) {
+      // Ignore storage errors.
+    }
+  }
+
+  async function authRequest(path, options) {
+    const { method = "GET", body } = options || {};
+    const response = await fetch(`${AUTH_WORKER_ORIGIN}${path}`, {
+      method,
+      credentials: "include",
+      headers: body === undefined
+        ? undefined
+        : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (error) {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      const message = payload && payload.error
+        ? payload.error
+        : `Auth request failed (${response.status})`;
+      const err = new Error(message);
+      err.status = response.status;
+      err.payload = payload;
+      throw err;
+    }
+
+    return payload;
+  }
+
+  function setAuthBusy(isBusy, message) {
+    state.authBusy = isBusy;
+    state.authBusyMessage = isBusy ? String(message || "") : "";
+    updateToolbar();
+    updateAuthUi();
+  }
+
+  function getAuthAccessLabel(sessionPayload) {
+    const repoAccess = sessionPayload && sessionPayload.repoAccess
+      ? sessionPayload.repoAccess
+      : null;
+    if (!repoAccess) {
+      return "publish";
+    }
+    return repoAccess.canPush ? "direct commit" : "PR fallback";
+  }
+
+  function updateAuthUi() {
+    if (!elements.authButton || !elements.authUser) {
+      return;
+    }
+
+    const sessionPayload = state.authSession;
+    if (state.authBusy) {
+      elements.authButton.textContent = "Working...";
+      elements.authButton.disabled = true;
+      elements.authUser.textContent = state.authBusyMessage || "Checking GitHub session...";
+      return;
+    }
+
+    if (sessionPayload && sessionPayload.authenticated) {
+      const login = sessionPayload.user && sessionPayload.user.login
+        ? sessionPayload.user.login
+        : "";
+      elements.authButton.textContent = "Sign Out";
+      elements.authButton.disabled = state.busy;
+      elements.authButton.setAttribute("data-auth-state", "signed-in");
+      elements.authUser.textContent = login
+        ? `@${login} (${getAuthAccessLabel(sessionPayload)})`
+        : "Signed in";
+      return;
+    }
+
+    const cached = readStoredAuthProfile();
+    elements.authButton.textContent = "Sign In";
+    elements.authButton.disabled = state.busy;
+    elements.authButton.setAttribute("data-auth-state", "signed-out");
+    elements.authUser.textContent = cached && cached.login
+      ? `Signed out (last: @${cached.login})`
+      : "Not signed in";
+  }
+
+  async function refreshAuthSession() {
+    if (state.authRefreshPromise) {
+      return state.authRefreshPromise;
+    }
+
+    const repo = resolveRepoConfig();
+    if (!repo) {
+      state.authSession = null;
+      updateAuthUi();
+      return null;
+    }
+
+    state.authRefreshPromise = (async () => {
+      try {
+        const query = new URLSearchParams({
+          owner: repo.owner,
+          repo: repo.name,
+        });
+        const sessionPayload = await authRequest(`/api/session?${query.toString()}`);
+        state.authSession = sessionPayload;
+        if (sessionPayload && sessionPayload.authenticated) {
+          storeAuthProfile(sessionPayload);
+        }
+      } catch (error) {
+        if (error && error.status === 401) {
+          state.authSession = null;
+        } else {
+          console.error(error);
+        }
+      } finally {
+        updateAuthUi();
+      }
+      return state.authSession;
+    })();
+
+    try {
+      return await state.authRefreshPromise;
+    } finally {
+      state.authRefreshPromise = null;
+    }
+  }
+
+  function startAuthPopupPolling(popupWindow) {
+    if (state.authPopupPollId) {
+      window.clearInterval(state.authPopupPollId);
+      state.authPopupPollId = null;
+    }
+
+    state.authPopupPollId = window.setInterval(() => {
+      if (!popupWindow || popupWindow.closed) {
+        window.clearInterval(state.authPopupPollId);
+        state.authPopupPollId = null;
+        state.authPopupWindow = null;
+        setAuthBusy(false);
+        refreshAuthSession().then((sessionPayload) => {
+          if (!sessionPayload || !sessionPayload.authenticated) {
+            setStatus("GitHub sign-in was cancelled or did not complete.", true);
+          }
+        });
+      }
+    }, 600);
+  }
+
+  function buildAuthLoginUrl(mode) {
+    const authUrl = new URL(`${AUTH_WORKER_ORIGIN}/auth/login`);
+    authUrl.searchParams.set("origin", window.location.origin);
+    authUrl.searchParams.set("return_to", window.location.href);
+    authUrl.searchParams.set("mode", mode || "popup");
+    return authUrl.toString();
+  }
+
+  function startGitHubSignIn() {
+    if (state.authBusy) {
+      return;
+    }
+
+    if (state.authPopupWindow && !state.authPopupWindow.closed) {
+      try {
+        state.authPopupWindow.focus();
+      } catch (error) {
+        // Ignore focus failures.
+      }
+      setStatus("GitHub sign-in is already in progress.");
+      return;
+    }
+
+    setAuthBusy(true, "Complete GitHub sign-in in the popup.");
+
+    const popupWindow = window.open(
+      buildAuthLoginUrl("popup"),
+      AUTH_POPUP_NAME,
+      AUTH_POPUP_FEATURES,
+    );
+
+    if (!popupWindow || popupWindow.closed || typeof popupWindow.closed === "undefined") {
+      setAuthBusy(false);
+      window.location.href = buildAuthLoginUrl("redirect");
+      return;
+    }
+
+    state.authPopupWindow = popupWindow;
+    try {
+      popupWindow.focus();
+    } catch (error) {
+      // Ignore focus failures.
+    }
+    setStatus("Complete GitHub sign-in in the popup.");
+    startAuthPopupPolling(popupWindow);
+  }
+
+  async function signOutGitHub() {
+    setAuthBusy(true, "Signing out...");
+    try {
+      await authRequest("/api/logout", { method: "POST" });
+      state.authSession = null;
+      clearAuthProfile();
+      setStatus("Signed out.");
+    } catch (error) {
+      console.error(error);
+      setStatus(error.message || "Could not sign out.", true);
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleAuthButtonClick() {
+    if (state.authBusy || state.busy) {
+      return;
+    }
+
+    if (state.authSession && state.authSession.authenticated) {
+      await signOutGitHub();
+      return;
+    }
+
+    startGitHubSignIn();
+  }
+
+  function handleAuthPopupMessage(event) {
+    if (event.origin !== AUTH_WORKER_ORIGIN) {
+      return;
+    }
+
+    const payload = event.data;
+    if (!payload || payload.type !== AUTH_MESSAGE_TYPE) {
+      return;
+    }
+
+    if (state.authPopupPollId) {
+      window.clearInterval(state.authPopupPollId);
+      state.authPopupPollId = null;
+    }
+    state.authPopupWindow = null;
+
+    if (!payload.ok) {
+      setAuthBusy(false);
+      setStatus(payload.message || "GitHub sign-in failed.", true);
+      return;
+    }
+
+    setAuthBusy(false);
+    refreshAuthSession().then(() => {
+      if (state.authSession && state.authSession.authenticated) {
+        setStatus("GitHub sign-in complete.");
+      } else {
+        setStatus("GitHub sign-in completed but session was not available. Retry once.", true);
+      }
+    });
+  }
+
+  async function ensureSignedIn() {
+    if (state.authBusy) {
+      setStatus("GitHub sign-in is already in progress.");
+      return false;
+    }
+
+    if (state.authSession && state.authSession.authenticated) {
+      return true;
+    }
+
+    await refreshAuthSession();
+    if (state.authSession && state.authSession.authenticated) {
+      return true;
+    }
+
+    const shouldSignIn = window.confirm("Sign in with GitHub to publish your drafts?");
+    if (!shouldSignIn) {
+      return false;
+    }
+
+    startGitHubSignIn();
+    setStatus("Sign in, then click Publish again.", true);
+    return false;
+  }
+
+  function showAuthErrorFromUrl() {
+    const url = new URL(window.location.href);
+    const authError = url.searchParams.get("auth_error");
+    if (!authError) {
+      return;
+    }
+
+    setStatus(`GitHub sign-in failed: ${authError}`, true);
+    url.searchParams.delete("auth_error");
+    window.history.replaceState({}, document.title, url.toString());
   }
 
   function setStatus(message, isError) {
@@ -150,17 +454,21 @@
 
   function setBusy(isBusy) {
     state.busy = isBusy;
+    const disableToolbarActions = isBusy || state.authBusy;
     if (elements.toggleButton) {
-      elements.toggleButton.disabled = isBusy;
+      elements.toggleButton.disabled = disableToolbarActions;
     }
     if (elements.submitButton) {
-      elements.submitButton.disabled = isBusy || state.drafts.size === 0;
+      elements.submitButton.disabled = disableToolbarActions || state.drafts.size === 0;
     }
     if (elements.clearButton) {
-      elements.clearButton.disabled = isBusy || state.drafts.size === 0;
+      elements.clearButton.disabled = disableToolbarActions || state.drafts.size === 0;
+    }
+    if (elements.authButton) {
+      elements.authButton.disabled = disableToolbarActions;
     }
     if (elements.modalSave) {
-      elements.modalSave.disabled = isBusy;
+      elements.modalSave.disabled = disableToolbarActions;
     }
   }
 
@@ -173,11 +481,12 @@
     elements.toggleButton.textContent = state.editMode
       ? "Disable Edit Mode"
       : "Enable Edit Mode";
-    elements.submitButton.textContent = `Commit (${state.drafts.size})`;
+    elements.submitButton.textContent = `Publish (${state.drafts.size})`;
     elements.submitButton.hidden = !hasDrafts;
     elements.clearButton.hidden = !hasDrafts;
-    elements.submitButton.disabled = state.busy || !hasDrafts;
-    elements.clearButton.disabled = state.busy || !hasDrafts;
+    elements.submitButton.disabled = state.busy || state.authBusy || !hasDrafts;
+    elements.clearButton.disabled = state.busy || state.authBusy || !hasDrafts;
+    updateAuthUi();
   }
 
   function renderPreface(markdown) {
@@ -1241,8 +1550,8 @@
       return;
     }
 
-    const token = window.prompt("GitHub token (fine-grained: Contents read/write):");
-    if (!token) {
+    const authenticated = await ensureSignedIn();
+    if (!authenticated) {
       return;
     }
 
@@ -1255,41 +1564,46 @@
     }
 
     setBusy(true);
-    setStatus(`Committing drafts to ${repo.baseBranch}...`);
-
-    const repoPrefix = `/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}`;
+    setStatus(`Publishing drafts to ${repo.baseBranch}...`);
 
     try {
-      for (const path of changedPaths) {
-        const encodedPath = encodeRepoPath(path);
-        const existing = await githubRequest(
-          `${repoPrefix}/contents/${encodedPath}?ref=${encodeURIComponent(repo.baseBranch)}`,
-          { token },
-        );
-        const draftContent = state.drafts.get(path);
+      const files = {};
+      changedPaths.forEach((path) => {
+        files[path] = state.drafts.get(path);
+      });
 
-        await githubRequest(`${repoPrefix}/contents/${encodedPath}`, {
-          method: "PUT",
-          token,
-          body: {
-            message: changedPaths.length === 1
-              ? commitMessage
-              : `${commitMessage} (${path})`,
-            content: toBase64(draftContent),
-            sha: existing.sha,
-            branch: repo.baseBranch,
-          },
-        });
+      const result = await authRequest("/api/submit", {
+        method: "POST",
+        body: {
+          owner: repo.owner,
+          repo: repo.name,
+          baseBranch: repo.baseBranch,
+          commitMessage,
+          files,
+        },
+      });
+
+      if (result && result.mode === "pull_request") {
+        setStatus(`Opened PR #${result.pullRequestNumber} for ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"}.`);
+        alert(`Pull request created:\n${result.url}`);
+      } else {
+        setStatus(`Committed ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"} to ${repo.baseBranch}.`);
+        if (result && result.url) {
+          alert(`Commit created:\n${result.url}`);
+        }
       }
 
       state.drafts.clear();
       updateToolbar();
-      setStatus(`Committed ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"} to ${repo.baseBranch}.`);
     } catch (error) {
       console.error(error);
+      if (error && error.status === 401) {
+        state.authSession = null;
+        updateAuthUi();
+      }
       const message = error && error.message
         ? error.message
-        : "Could not commit drafts.";
+        : "Could not publish drafts.";
       setStatus(message, true);
       alert(message);
     } finally {
@@ -1301,8 +1615,12 @@
     const toolbar = document.createElement("div");
     toolbar.id = "inline-editor-toolbar";
     toolbar.innerHTML = `
+      <div class="inline-editor-auth">
+        <button id="inline-auth-action" type="button">Sign In</button>
+        <span id="inline-auth-user">Not signed in</span>
+      </div>
       <button id="inline-edit-toggle" type="button">Enable Edit Mode</button>
-      <button id="inline-edit-submit" type="button" disabled>Commit (0)</button>
+      <button id="inline-edit-submit" type="button" disabled>Publish (0)</button>
       <button id="inline-edit-clear" type="button" disabled>Discard Drafts</button>
       <span id="inline-editor-status"></span>
     `;
@@ -1458,6 +1776,8 @@
     document.body.appendChild(modal);
 
     elements.toolbar = toolbar;
+    elements.authButton = toolbar.querySelector("#inline-auth-action");
+    elements.authUser = toolbar.querySelector("#inline-auth-user");
     elements.toggleButton = toolbar.querySelector("#inline-edit-toggle");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
@@ -1473,6 +1793,12 @@
   function setupEvents() {
     if (!elements.toggleButton || !elements.submitButton || !elements.clearButton || !elements.modal) {
       return;
+    }
+
+    if (elements.authButton) {
+      elements.authButton.addEventListener("click", () => {
+        handleAuthButtonClick();
+      });
     }
 
     elements.toggleButton.addEventListener("click", () => {
@@ -1551,6 +1877,14 @@
       updateFormatToolbarScrollState();
     });
 
+    window.addEventListener("message", handleAuthPopupMessage);
+
+    window.addEventListener("focus", () => {
+      if (!state.authSession || !state.authSession.authenticated) {
+        refreshAuthSession();
+      }
+    });
+
     document.addEventListener("keydown", (event) => {
       if (handleEditorShortcut(event)) {
         return;
@@ -1586,6 +1920,9 @@
     buildUi();
     setupEvents();
     updateToolbar();
+    updateAuthUi();
+    showAuthErrorFromUrl();
+    refreshAuthSession();
   }
 
   if (document.readyState === "loading") {
