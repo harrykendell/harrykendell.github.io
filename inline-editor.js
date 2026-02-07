@@ -18,6 +18,7 @@
   const AUTH_POPUP_NAME = "github-auth-popup";
   const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
   const AUTH_MESSAGE_TYPE = "github-auth-complete";
+  const AUTH_SESSION_HEADER_NAME = "X-GHA-Session";
   const AUTH_PROFILE_STORAGE_KEY = "inline-editor-github-profile";
   const EDITOR_STATE_STORAGE_KEY = "inline-editor-state";
   const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -37,6 +38,7 @@
     selectedProcedureLevel: PROCEDURE_LEVELS[0],
     selectedCalloutKind: CALLOUT_KINDS[0],
     authSession: null,
+    authHeaderSessionToken: "",
     authRefreshPromise: null,
     authPopupPollId: null,
     authPopupWindow: null,
@@ -349,7 +351,9 @@
         repo: repo.name,
         branch: repo.baseBranch,
       });
-      const activity = await authRequest(`/api/repo-status?${query.toString()}`);
+      const activity = await authRequest(`/api/repo-status?${query.toString()}`, {
+        includeSessionHeader: false,
+      });
       if (!activity || typeof activity !== "object") {
         throw new Error("Invalid repo status response.");
       }
@@ -527,6 +531,23 @@
     return String(fromMeta || fromWindow || fallback).replace(/\/+$/, "");
   }
 
+  function isLoopbackHost(hostname) {
+    const value = String(hostname || "").toLowerCase();
+    return value === "localhost" || value === "127.0.0.1" || value === "::1" || value === "[::1]";
+  }
+
+  function storeAuthHeaderSessionToken(value) {
+    state.authHeaderSessionToken = typeof value === "string" ? value : "";
+  }
+
+  function stopAuthPopupTracking() {
+    if (state.authPopupPollId) {
+      window.clearInterval(state.authPopupPollId);
+      state.authPopupPollId = null;
+    }
+    state.authPopupWindow = null;
+  }
+
   function readStoredAuthProfile() {
     try {
       const raw = localStorage.getItem(AUTH_PROFILE_STORAGE_KEY);
@@ -625,13 +646,22 @@
   }
 
   async function authRequest(path, options) {
-    const { method = "GET", body } = options || {};
+    const {
+      method = "GET",
+      body,
+      includeSessionHeader = true,
+    } = options || {};
+    const headers = {};
+    if (body !== undefined) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (includeSessionHeader && state.authHeaderSessionToken && isLoopbackHost(window.location.hostname)) {
+      headers[AUTH_SESSION_HEADER_NAME] = state.authHeaderSessionToken;
+    }
     const response = await fetch(`${AUTH_WORKER_ORIGIN}${path}`, {
       method,
       credentials: "include",
-      headers: body === undefined
-        ? undefined
-        : { "Content-Type": "application/json" },
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
       body: body === undefined ? undefined : JSON.stringify(body),
     });
 
@@ -788,6 +818,7 @@
       } catch (error) {
         if (error && error.status === 401) {
           state.authSession = null;
+          storeAuthHeaderSessionToken("");
         } else {
           console.error(error);
         }
@@ -805,16 +836,15 @@
   }
 
   function startAuthPopupPolling(popupWindow) {
-    if (state.authPopupPollId) {
-      window.clearInterval(state.authPopupPollId);
-      state.authPopupPollId = null;
-    }
+    stopAuthPopupTracking();
+    state.authPopupWindow = popupWindow;
 
     state.authPopupPollId = window.setInterval(() => {
+      if (state.authPopupWindow !== popupWindow) {
+        return;
+      }
       if (!popupWindow || popupWindow.closed) {
-        window.clearInterval(state.authPopupPollId);
-        state.authPopupPollId = null;
-        state.authPopupWindow = null;
+        stopAuthPopupTracking();
         setAuthBusy(false);
         refreshAuthSession().then((sessionPayload) => {
           if (!sessionPayload || !sessionPayload.authenticated) {
@@ -862,7 +892,6 @@
       return;
     }
 
-    state.authPopupWindow = popupWindow;
     try {
       popupWindow.focus();
     } catch (error) {
@@ -877,6 +906,7 @@
     try {
       await authRequest("/api/logout", { method: "POST" });
       state.authSession = null;
+      storeAuthHeaderSessionToken("");
       clearAuthProfile();
       setStatus("Signed out.");
       refreshRepoActivity(true);
@@ -911,11 +941,7 @@
       return;
     }
 
-    if (state.authPopupPollId) {
-      window.clearInterval(state.authPopupPollId);
-      state.authPopupPollId = null;
-    }
-    state.authPopupWindow = null;
+    stopAuthPopupTracking();
 
     if (!payload.ok) {
       setAuthBusy(false);
@@ -923,15 +949,40 @@
       return;
     }
 
-    setAuthBusy(false);
-    refreshAuthSession().then(() => {
+    const finalizeSignIn = async () => {
+      const sessionExchangeToken = typeof payload.sessionExchangeToken === "string"
+        ? payload.sessionExchangeToken
+        : "";
+      if (!sessionExchangeToken) {
+        throw new Error("Missing session exchange token.");
+      }
+
+      const exchangePayload = await authRequest("/api/session/exchange", {
+        method: "POST",
+        body: { token: sessionExchangeToken },
+      });
+      if (exchangePayload && typeof exchangePayload.sessionHeaderToken === "string" && isLoopbackHost(window.location.hostname)) {
+        storeAuthHeaderSessionToken(exchangePayload.sessionHeaderToken);
+      }
+
+      await refreshAuthSession();
       if (state.authSession && state.authSession.authenticated) {
         setStatus("GitHub sign-in complete.");
         refreshRepoActivity(true);
       } else {
         setStatus("GitHub sign-in completed but session was not available. Retry once.", true);
       }
-    });
+    };
+
+    setAuthBusy(true, "Finalizing GitHub sign-in...");
+    finalizeSignIn()
+      .catch((error) => {
+        console.error(error);
+        setStatus(error.message || "GitHub sign-in failed while finalizing session.", true);
+      })
+      .finally(() => {
+        setAuthBusy(false);
+      });
   }
 
   async function ensureSignedIn() {
@@ -2632,10 +2683,7 @@
 
     window.addEventListener("beforeunload", () => {
       stopRepoActivityPolling();
-      if (state.authPopupPollId) {
-        window.clearInterval(state.authPopupPollId);
-        state.authPopupPollId = null;
-      }
+      stopAuthPopupTracking();
     });
 
     document.addEventListener("keydown", (event) => {

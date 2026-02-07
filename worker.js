@@ -1,7 +1,9 @@
 const SESSION_COOKIE_NAME = "gha_session";
 const OAUTH_COOKIE_NAME = "gha_oauth";
+const SESSION_HEADER_NAME = "X-GHA-Session";
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_EXCHANGE_MAX_AGE_SECONDS = 60 * 2;
 const OAUTH_MAX_AGE_SECONDS = 60 * 10;
 const REPO_STATUS_MIN_POLL_MS = 10 * 1000;
 
@@ -39,6 +41,7 @@ export default {
                         "GET /auth/login",
                         "GET /auth/callback",
                         "GET /api/session",
+                        "POST /api/session/exchange",
                         "GET /api/repo-status",
                         "POST /api/logout",
                         "POST /api/submit",
@@ -56,6 +59,10 @@ export default {
 
             if (url.pathname === "/api/session" && request.method === "GET") {
                 return handleApiSession(request, env, corsHeaders);
+            }
+
+            if (url.pathname === "/api/session/exchange" && request.method === "POST") {
+                return handleApiSessionExchange(request, env, corsHeaders);
             }
 
             if (url.pathname === "/api/repo-status" && request.method === "GET") {
@@ -124,7 +131,7 @@ async function handleAuthLogin(request, env) {
             serializeCookie(
                 OAUTH_COOKIE_NAME,
                 signedOauthPayload,
-                cookieOptionsForRequest(request, env, {
+                oauthCookieOptionsForRequest(env, {
                     maxAge: OAUTH_MAX_AGE_SECONDS,
                 }),
             ),
@@ -194,12 +201,23 @@ async function handleAuthCallback(request, env) {
     };
 
     const signedSessionPayload = await encodeSignedPayload(sessionPayload, sessionSecret);
+    const sessionExchangeToken = await encodeSignedPayload(
+        {
+            createdAt: Date.now(),
+            origin: oauthPayload.origin || "",
+            signedSessionPayload,
+        },
+        sessionSecret,
+    );
 
     if (oauthPayload.mode === "popup") {
         const html = buildPopupCompletionHtml(
             true,
             "Authentication complete. You can close this window.",
             oauthPayload.origin,
+            {
+                sessionExchangeToken,
+            },
         );
         const response = new Response(html, {
             status: 200,
@@ -208,23 +226,12 @@ async function handleAuthCallback(request, env) {
                 "Cache-Control": "no-store",
             },
         });
-
-        response.headers.append(
-            "Set-Cookie",
-            serializeCookie(
-                SESSION_COOKIE_NAME,
-                signedSessionPayload,
-                cookieOptionsForRequest(request, env, {
-                    maxAge: SESSION_MAX_AGE_SECONDS,
-                }),
-            ),
-        );
         response.headers.append(
             "Set-Cookie",
             serializeCookie(
                 OAUTH_COOKIE_NAME,
                 "",
-                cookieOptionsForRequest(request, env, {
+                oauthCookieOptionsForRequest(env, {
                     maxAge: 0,
                 }),
             ),
@@ -248,14 +255,14 @@ async function handleAuthCallback(request, env) {
             serializeCookie(
                 SESSION_COOKIE_NAME,
                 signedSessionPayload,
-                cookieOptionsForRequest(request, env, {
+                cookieOptionsForRequest(env, {
                     maxAge: SESSION_MAX_AGE_SECONDS,
                 }),
             ),
             serializeCookie(
                 OAUTH_COOKIE_NAME,
                 "",
-                cookieOptionsForRequest(request, env, {
+                oauthCookieOptionsForRequest(env, {
                     maxAge: 0,
                 }),
             ),
@@ -288,7 +295,7 @@ async function handleApiSession(request, env, corsHeaders) {
         } catch (error) {
             if (error.status === 401) {
                 const response = jsonResponse({ authenticated: false, error: "GitHub session expired." }, 401, corsHeaders);
-                clearSessionCookie(response, request, env);
+                clearSessionCookie(response, env);
                 return response;
             }
             throw error;
@@ -306,6 +313,64 @@ async function handleApiSession(request, env, corsHeaders) {
         accessTokenScope: session.scope || "",
         repoAccess,
     }, 200, corsHeaders);
+}
+
+async function handleApiSessionExchange(request, env, corsHeaders) {
+    const sessionSecret = mustGetEnv(env, "SESSION_SECRET");
+
+    let body;
+    try {
+        body = await request.json();
+    } catch (error) {
+        return jsonResponse({ error: "Request body must be valid JSON." }, 400, corsHeaders);
+    }
+
+    const token = body && typeof body.token === "string" ? body.token : "";
+    if (!token) {
+        return jsonResponse({ error: "token is required." }, 400, corsHeaders);
+    }
+
+    const exchangePayload = await decodeSignedPayload(token, sessionSecret);
+    if (
+        !exchangePayload
+        || typeof exchangePayload !== "object"
+        || typeof exchangePayload.signedSessionPayload !== "string"
+    ) {
+        return jsonResponse({ error: "Invalid session exchange token." }, 401, corsHeaders);
+    }
+
+    const createdAt = Number(exchangePayload.createdAt || 0);
+    if (!createdAt || Date.now() - createdAt > SESSION_EXCHANGE_MAX_AGE_SECONDS * 1000) {
+        return jsonResponse({ error: "Session exchange token expired. Please sign in again." }, 401, corsHeaders);
+    }
+
+    const requestOrigin = normalizeOrigin(request.headers.get("Origin"));
+    const expectedOrigin = chooseAllowedOrigin(exchangePayload.origin, env);
+    if (requestOrigin && expectedOrigin && requestOrigin !== expectedOrigin) {
+        return jsonResponse({ error: "Session exchange origin mismatch." }, 403, corsHeaders);
+    }
+
+    const signedSessionPayload = exchangePayload.signedSessionPayload;
+    if (!await decodeSessionPayloadIfValid(signedSessionPayload, sessionSecret)) {
+        return jsonResponse({ error: "Session exchange payload is invalid or expired." }, 401, corsHeaders);
+    }
+
+    const responseBody = { ok: true };
+    if (isLoopbackOrigin(requestOrigin)) {
+        responseBody.sessionHeaderToken = signedSessionPayload;
+    }
+    const response = jsonResponse(responseBody, 200, corsHeaders);
+    response.headers.append(
+        "Set-Cookie",
+        serializeCookie(
+            SESSION_COOKIE_NAME,
+            signedSessionPayload,
+            cookieOptionsForRequest(env, {
+                maxAge: SESSION_MAX_AGE_SECONDS,
+            }),
+        ),
+    );
+    return response;
 }
 
 async function handleApiRepoStatus(request, env, corsHeaders) {
@@ -338,7 +403,7 @@ async function handleApiRepoStatus(request, env, corsHeaders) {
 
 async function handleApiLogout(request, env, corsHeaders) {
     const response = jsonResponse({ ok: true }, 200, corsHeaders);
-    clearSessionCookie(response, request, env);
+    clearSessionCookie(response, env);
     return response;
 }
 
@@ -403,7 +468,7 @@ async function handleApiSubmit(request, env, corsHeaders) {
     } catch (error) {
         if (error.status === 401) {
             const response = jsonResponse({ error: "GitHub session expired." }, 401, corsHeaders);
-            clearSessionCookie(response, request, env);
+            clearSessionCookie(response, env);
             return response;
         }
         throw error;
@@ -1198,38 +1263,46 @@ async function readSession(request, env) {
     }
 
     const cookies = parseCookies(request.headers.get("Cookie"));
-    const signed = cookies[SESSION_COOKIE_NAME];
-    if (!signed) {
+    const cookiePayload = await decodeSessionPayloadIfValid(
+        cookies[SESSION_COOKIE_NAME],
+        sessionSecret,
+    );
+    if (cookiePayload) {
+        return cookiePayload;
+    }
+
+    const headerOrigin = normalizeOrigin(request.headers.get("Origin"));
+    if (!isLoopbackOrigin(headerOrigin)) {
         return null;
     }
 
-    const payload = await decodeSignedPayload(signed, sessionSecret);
-    if (!payload || !payload.token || !payload.createdAt) {
+    const headerToken = request.headers.get(SESSION_HEADER_NAME);
+    if (!headerToken) {
         return null;
     }
 
-    if (Date.now() - Number(payload.createdAt) > SESSION_MAX_AGE_SECONDS * 1000) {
-        return null;
-    }
-
-    return payload;
+    return decodeSessionPayloadIfValid(headerToken, sessionSecret);
 }
 
-function clearSessionCookie(response, request, env) {
+function clearSessionCookie(response, env) {
     response.headers.append(
         "Set-Cookie",
         serializeCookie(
             SESSION_COOKIE_NAME,
             "",
-            cookieOptionsForRequest(request, env, { maxAge: 0 }),
+            cookieOptionsForRequest(env, { maxAge: 0 }),
         ),
     );
 }
 
-function buildPopupCompletionHtml(ok, message, origin) {
+function buildPopupCompletionHtml(ok, message, origin, extraPayload) {
     const safeMessage = escapeHtml(message || "Authentication complete.");
     const targetOrigin = JSON.stringify(origin || "*");
-    const payload = JSON.stringify({ type: "github-auth-complete", ok, message: message || "" });
+    const popupPayload = { type: "github-auth-complete", ok, message: message || "" };
+    if (extraPayload && typeof extraPayload === "object" && !Array.isArray(extraPayload)) {
+        Object.assign(popupPayload, extraPayload);
+    }
+    const payload = JSON.stringify(popupPayload);
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -1285,7 +1358,7 @@ function popupOrRedirectError(request, env, message, oauthPayload) {
             serializeCookie(
                 OAUTH_COOKIE_NAME,
                 "",
-                cookieOptionsForRequest(request, env, { maxAge: 0 }),
+                oauthCookieOptionsForRequest(env, { maxAge: 0 }),
             ),
         );
         return response;
@@ -1304,7 +1377,7 @@ function popupOrRedirectError(request, env, message, oauthPayload) {
             serializeCookie(
                 OAUTH_COOKIE_NAME,
                 "",
-                cookieOptionsForRequest(request, env, { maxAge: 0 }),
+                oauthCookieOptionsForRequest(env, { maxAge: 0 }),
             ),
         ],
     );
@@ -1339,7 +1412,7 @@ function buildPreflightHeaders(corsHeaders) {
 
     if (corsHeaders["Access-Control-Allow-Origin"]) {
         headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        headers.set("Access-Control-Allow-Headers", "Content-Type");
+        headers.set("Access-Control-Allow-Headers", `Content-Type, ${SESSION_HEADER_NAME}`);
         headers.set("Access-Control-Max-Age", "86400");
     }
 
@@ -1363,18 +1436,17 @@ function jsonResponse(payload, status, corsHeaders) {
 }
 
 function resolveCorsHeaders(request, env) {
-    const origin = request.headers.get("Origin");
-    if (!origin) {
+    const normalizedOrigin = normalizeOrigin(request.headers.get("Origin"));
+    if (!normalizedOrigin) {
         return {};
     }
 
-    const allowedOrigins = getAllowedOrigins(env);
-    if (!allowedOrigins.includes(origin)) {
+    if (!isOriginAllowed(normalizedOrigin, env)) {
         return {};
     }
 
     return {
-        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Origin": normalizedOrigin,
         "Access-Control-Allow-Credentials": "true",
         Vary: "Origin",
     };
@@ -1393,12 +1465,49 @@ function getAllowedOrigins(env) {
     return DEFAULT_ALLOWED_ORIGINS;
 }
 
+function isLoopbackOrigin(origin) {
+    const normalized = normalizeOrigin(origin);
+    if (!normalized) {
+        return false;
+    }
+
+    try {
+        const parsed = new URL(normalized);
+        const hostname = String(parsed.hostname || "").toLowerCase();
+        return hostname === "localhost"
+            || hostname === "127.0.0.1"
+            || hostname === "::1"
+            || hostname === "[::1]";
+    } catch (error) {
+        return false;
+    }
+}
+
+function isOriginAllowed(origin, env) {
+    const normalized = normalizeOrigin(origin);
+    if (!normalized) {
+        return false;
+    }
+
+    const allowedOrigins = getAllowedOrigins(env);
+    if (allowedOrigins.includes(normalized)) {
+        return true;
+    }
+
+    if (isLoopbackOrigin(normalized)) {
+        return true;
+    }
+
+    return false;
+}
+
 function chooseAllowedOrigin(origin, env) {
     const normalized = normalizeOrigin(origin);
-    const allowedOrigins = getAllowedOrigins(env);
-    if (normalized && allowedOrigins.includes(normalized)) {
+    if (normalized && isOriginAllowed(normalized, env)) {
         return normalized;
     }
+
+    const allowedOrigins = getAllowedOrigins(env);
     return allowedOrigins.length > 0 ? allowedOrigins[0] : null;
 }
 
@@ -1447,51 +1556,48 @@ function getRedirectUri(request, env) {
     return `${requestUrl.origin}/auth/callback`;
 }
 
-function cookieOptionsForRequest(request, env, overrides) {
-    const requestUrl = new URL(request.url);
-    const secureByDefault = requestUrl.protocol === "https:";
-    const partitioned = String(env.COOKIE_PARTITIONED || "").toLowerCase() === "true";
-    let sameSite = resolveCookieSameSite(env.COOKIE_SAME_SITE);
-    let secure = env.COOKIE_SECURE === "false" ? false : secureByDefault;
-
-    if (partitioned) {
-        // CHIPS cookies are cross-site by design and need SameSite=None.
-        sameSite = "None";
-    }
-
-    if (sameSite === "None") {
-        // Browsers require Secure when SameSite=None.
-        secure = true;
-    }
-
+function cookieOptionsForRequest(env, overrides) {
+    // This worker is intentionally cross-site to the main app origin.
+    // Keep one stable policy: SameSite=None + Secure + Partitioned (CHIPS).
+    // oauthCookieOptionsForRequest overrides partitioning for transient OAuth state.
     return {
         path: "/",
         httpOnly: true,
-        secure,
-        sameSite,
-        partitioned,
+        secure: true,
+        sameSite: "None",
+        partitioned: true,
         domain: env.COOKIE_DOMAIN || undefined,
         ...overrides,
     };
 }
 
+function oauthCookieOptionsForRequest(env, overrides) {
+    return cookieOptionsForRequest(env, {
+        sameSite: "None",
+        partitioned: false,
+        ...(overrides || {}),
+    });
+}
+
 function buildMissingSessionHint(request) {
     const origin = request.headers.get("Origin") || "";
-    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
-        return "Localhost is cross-site to github-auth.kendell.uk. Set COOKIE_SAME_SITE=None and COOKIE_PARTITIONED=true, keep COOKIE_SECURE enabled, and clear gha_session/gha_oauth cookies before retrying.";
+    if (/^http:\/\/(localhost|127\.0\.0\.1|\[::1\]|::1)(:\d+)?$/i.test(origin)) {
+        return "Localhost is cross-site to github-auth.kendell.uk. Clear gha_session/gha_oauth cookies and retry.";
     }
     return "No session cookie was received. Clear gha_session/gha_oauth cookies and sign in again.";
 }
 
-function resolveCookieSameSite(value) {
-    const normalized = String(value || "").trim().toLowerCase();
-    if (normalized === "none") {
-        return "None";
+async function decodeSessionPayloadIfValid(signedValue, sessionSecret) {
+    const payload = await decodeSignedPayload(signedValue, sessionSecret);
+    if (!payload || !payload.token || !payload.createdAt) {
+        return null;
     }
-    if (normalized === "strict") {
-        return "Strict";
+
+    if (Date.now() - Number(payload.createdAt) > SESSION_MAX_AGE_SECONDS * 1000) {
+        return null;
     }
-    return "Lax";
+
+    return payload;
 }
 
 function serializeCookie(name, value, options) {
