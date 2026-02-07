@@ -267,7 +267,7 @@
     return { owner, name, baseBranch };
   }
 
-  function formatRelativeTime(isoString) {
+  function formatCompactCommitAge(isoString) {
     if (!isoString) {
       return "";
     }
@@ -275,18 +275,31 @@
     if (Number.isNaN(timestamp)) {
       return "";
     }
-    const deltaMs = Date.now() - timestamp;
-    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+
+    const deltaMs = Math.max(0, Date.now() - timestamp);
     const minute = 60 * 1000;
     const hour = 60 * minute;
     const day = 24 * hour;
-    if (Math.abs(deltaMs) < hour) {
-      return rtf.format(-Math.round(deltaMs / minute), "minute");
+    const week = 7 * day;
+    const month = 30 * day;
+    const year = 365 * day;
+
+    if (deltaMs < hour) {
+      return `${Math.floor(deltaMs / minute)}m`;
     }
-    if (Math.abs(deltaMs) < day) {
-      return rtf.format(-Math.round(deltaMs / hour), "hour");
+    if (deltaMs < day) {
+      return `${Math.floor(deltaMs / hour)}h`;
     }
-    return rtf.format(-Math.round(deltaMs / day), "day");
+    if (deltaMs < week) {
+      return `${Math.floor(deltaMs / day)}d`;
+    }
+    if (deltaMs < month) {
+      return `${Math.floor(deltaMs / week)}w`;
+    }
+    if (deltaMs < year) {
+      return `${Math.floor(deltaMs / month)}mo`;
+    }
+    return `${Math.floor(deltaMs / year)}y`;
   }
 
   function shortenSha(sha) {
@@ -447,8 +460,9 @@
       return;
     }
 
+    const commitAge = formatCompactCommitAge(activity.commitTime);
     const commitText = activity.commitSha
-      ? shortenSha(activity.commitSha)
+      ? `${shortenSha(activity.commitSha)}${commitAge ? ` | ${commitAge}` : ""}`
       : "—";
     setActivityLink(
       elements.repoCommit,
@@ -457,7 +471,6 @@
       activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted"),
     );
     if (activity.commitSha) {
-      const commitAge = formatRelativeTime(activity.commitTime);
       const commitTitle = commitAge
         ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
         : `Latest commit ${shortenSha(activity.commitSha)}`;
@@ -970,7 +983,8 @@
       ? "Done"
       : "Edit";
     elements.submitButton.textContent = `Push (${totalStaged})`;
-    elements.clearButton.textContent = "Clear";
+    elements.clearButton.textContent = "Reset";
+    elements.toggleButton.hidden = hasDrafts;
     elements.submitButton.hidden = !hasDrafts;
     elements.clearButton.hidden = !hasDrafts;
     elements.submitButton.disabled = state.busy || state.authBusy || !hasDrafts;
@@ -2239,7 +2253,7 @@
         </div>
         <button id="inline-edit-toggle" type="button">Edit</button>
         <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
-        <button id="inline-edit-clear" type="button" disabled>Clear</button>
+        <button id="inline-edit-clear" type="button" disabled>Reset</button>
       </div>
       <span id="inline-editor-status"></span>
     `;
