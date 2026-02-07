@@ -439,44 +439,50 @@ header.page-header {
 
 #inline-editor-toolbar {
     position: fixed;
-    right: 16px;
-    bottom: 16px;
+    right: 8px;
+    bottom: 8px;
     z-index: 1000;
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
-    background: linear-gradient(170deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+    gap: 5px;
+    background: linear-gradient(
+        170deg,
+        rgba(15, 23, 42, 0.96),
+        rgba(30, 41, 59, 0.96)
+    );
     color: #f9fafb;
-    padding: 8px 9px;
+    padding: 7px 8px;
     border-radius: 12px;
     border: 1px solid rgba(148, 163, 184, 0.22);
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
-    width: min(96vw, 780px);
 }
 
 #inline-editor-toolbar .inline-toolbar-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    min-width: 0;
-    width: 100%;
 }
 
 #inline-editor-toolbar .inline-toolbar-row-main {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    gap: 5px;
 }
 
 #inline-editor-toolbar button {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 999px;
-    padding: 5px 10px;
+    padding: 4px 8px;
     background: #111827;
     color: #f9fafb;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     line-height: 1.2;
+    min-height: 28px;
+}
+
+#inline-editor-toolbar
+    .inline-toolbar-row-main
+    > button:not(.inline-auth-icon-button) {
+    flex: 0 0 auto;
+    min-width: 52px;
 }
 
 #inline-editor-toolbar .inline-auth-icon-button {
@@ -510,34 +516,46 @@ header.page-header {
     stroke-linejoin: round;
 }
 
+#inline-editor-toolbar .inline-auth-icon-button.has-avatar img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 999px;
+    object-fit: cover;
+}
+
 #inline-editor-toolbar .inline-auth-icon-button.is-busy {
     animation: inline-auth-pulse 0.9s ease-in-out infinite;
 }
 
 #inline-auth-action[data-auth-state="signed-in"] {
-    border-color: rgba(134, 239, 172, 0.35);
+    border-color: var(--info-strong);
+}
+#inline-auth-action[data-auth-state="signed-out"] {
+    border-color: var(--danger);
 }
 
 #inline-editor-toolbar .inline-editor-repo {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     min-width: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     margin-right: auto;
 }
 
 #inline-editor-toolbar .inline-repo-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: rgba(15, 23, 42, 0.35);
     color: #cbd5e1;
     text-decoration: none;
-    padding: 4px 9px;
-    font-size: 0.7rem;
+    padding: 4px 7px;
+    font-size: 0.66rem;
+    min-height: 24px;
     line-height: 1.2;
     white-space: nowrap;
 }
@@ -566,11 +584,53 @@ header.page-header {
 }
 
 #inline-editor-toolbar .inline-repo-link.is-running {
-    color: #fde68a;
-    border-color: rgba(250, 204, 21, 0.35);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.35);
 }
 
-#inline-editor-toolbar .inline-repo-link.is-running::before {
+#inline-editor-toolbar .inline-repo-link.inline-action-indicator {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: 0;
+    background: rgba(148, 163, 184, 0.08);
+}
+
+#inline-repo-commit {
+    min-width: 52px;
+}
+
+#inline-editor-toolbar .inline-repo-link.inline-action-indicator.is-failed {
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+#inline-editor-toolbar .inline-repo-link.inline-action-indicator.is-success {
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#inline-editor-toolbar .inline-repo-link.inline-action-indicator.is-running {
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+#inline-editor-toolbar .inline-repo-link.inline-action-indicator::before {
+    content: "✕";
+    font-size: 12px;
+    line-height: 1;
+    color: #94a3b8;
+}
+
+#inline-editor-toolbar
+    .inline-repo-link.inline-action-indicator.is-success::before {
+    content: "✓";
+    color: #22c55e;
+}
+
+#inline-editor-toolbar
+    .inline-repo-link.inline-action-indicator.is-running::before {
     content: "";
     width: 9px;
     height: 9px;
@@ -579,12 +639,6 @@ header.page-header {
     border-right-color: transparent;
     display: inline-block;
     animation: inline-deploy-spin 0.75s linear infinite;
-}
-
-#inline-editor-toolbar .inline-repo-link.is-neutral,
-#inline-editor-toolbar .inline-repo-link.is-unknown {
-    color: #bfdbfe;
-    border-color: rgba(147, 197, 253, 0.35);
 }
 
 #inline-editor-toolbar .inline-repo-link[aria-disabled="true"] {
@@ -1500,124 +1554,5 @@ hr {
 
     .sidebar .nav-arrow {
         margin-right: 6px;
-    }
-
-    #inline-editor-toolbar {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-        width: auto;
-        gap: 6px;
-        padding: 7px 8px;
-    }
-
-    #inline-editor-toolbar .inline-toolbar-row-main {
-        gap: 6px;
-    }
-
-    #inline-editor-toolbar .inline-toolbar-row-main > button:not(.inline-auth-icon-button) {
-        flex: 1 1 auto;
-        justify-content: center;
-    }
-
-    #inline-editor-toolbar .inline-auth-icon-button {
-        flex: 0 0 auto;
-    }
-
-    #inline-editor-toolbar .inline-editor-repo {
-        margin-right: 0;
-        order: 10;
-        width: 100%;
-        gap: 5px;
-    }
-
-    #inline-editor-toolbar .inline-repo-link {
-        flex: 1 1 auto;
-        justify-content: center;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    #inline-editor-status {
-        width: 100%;
-    }
-
-    .inline-editor-dialog {
-        width: calc(100vw - 12px);
-        max-height: calc(100vh - 12px);
-        margin: 6px auto;
-    }
-
-    .inline-editor-format-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        position: relative;
-        gap: 10px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-    }
-
-    .inline-editor-format-toolbar.is-centered {
-        justify-content: center;
-    }
-
-    .inline-editor-format-toolbar.is-scrollable {
-        box-shadow: inset -18px 0 14px -14px rgba(15, 23, 42, 0.24);
-    }
-
-    .inline-editor-format-toolbar.is-scrollable:not(.at-start):not(.at-end) {
-        box-shadow:
-            inset 18px 0 14px -14px rgba(15, 23, 42, 0.24),
-            inset -18px 0 14px -14px rgba(15, 23, 42, 0.24);
-    }
-
-    .inline-editor-format-toolbar.is-scrollable.at-end {
-        box-shadow: inset 18px 0 14px -14px rgba(15, 23, 42, 0.24);
-    }
-
-    .inline-editor-format-group {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: nowrap;
-        flex: 0 0 auto;
-    }
-
-    .inline-editor-format-group-structures {
-        display: inline-flex;
-        min-width: 0;
-    }
-
-    .inline-editor-format-group + .inline-editor-format-group {
-        padding-left: 6px;
-        border-left: 1px solid var(--border-subtle);
-    }
-
-    .inline-editor-format-toolbar button {
-        width: 32px;
-        min-width: 32px;
-        padding: 0;
-        gap: 0;
-        flex: 0 0 32px;
-    }
-
-    .inline-editor-tool-label {
-        display: none;
-    }
-
-    .inline-editor-variant-control button[data-format-action] {
-        width: 32px;
-        min-width: 32px;
-        padding: 0;
-        flex: 0 0 32px;
-    }
-
-    .inline-editor-variant-control .inline-editor-variant-swap {
-        flex: 0 0 32px;
-        min-width: 32px;
     }
 }

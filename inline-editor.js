@@ -19,12 +19,14 @@
   const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
   const AUTH_MESSAGE_TYPE = "github-auth-complete";
   const AUTH_PROFILE_STORAGE_KEY = "inline-editor-github-profile";
+  const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
   const state = {
     busy: false,
     authBusy: false,
     repoActivityBusy: false,
     editMode: false,
     drafts: new Map(),
+    imageDrafts: new Map(),
     sourceMarkdown: new Map(),
     currentPath: null,
     statusTimeoutId: null,
@@ -56,6 +58,7 @@
     modalTextarea: null,
     modalSave: null,
     modalReset: null,
+    modalImageInput: null,
   };
   const AUTH_USER_ICON = `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -71,31 +74,172 @@
     return String(path).replace(/^\/+/, "");
   }
 
-  async function githubPublicRequest(urlPath) {
-    const response = await fetch(`https://api.github.com${urlPath}`, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    });
+  function sanitizeFileStem(value) {
+    const stem = String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\.[a-z0-9]+$/i, "")
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return stem || "image";
+  }
 
-    let payload = null;
+  function normalizeImageRepoPath(value) {
+    if (!value) {
+      return null;
+    }
+
+    const normalized = String(value)
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")
+      .trim();
+
+    if (!normalized.startsWith("imgs/")) {
+      return null;
+    }
+    if (normalized.includes("..") || normalized.endsWith("/") || normalized.includes("//")) {
+      return null;
+    }
+
+    const valid = /^imgs\/[A-Za-z0-9._/-]+\.(png|jpe?g|gif|webp|svg|avif)$/i.test(normalized);
+    return valid ? normalized : null;
+  }
+
+  function normalizeImageReferencePath(value) {
+    if (!value) {
+      return null;
+    }
+
+    const raw = String(value).trim();
+    if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) {
+      return null;
+    }
+
+    if (raw.startsWith("imgs/")) {
+      return normalizeImageRepoPath(raw);
+    }
+
+    if (raw.startsWith("/imgs/")) {
+      return normalizeImageRepoPath(raw.slice(1));
+    }
+
     try {
-      payload = await response.json();
+      const parsed = new URL(raw, window.location.href);
+      if (parsed.origin !== window.location.origin) {
+        return null;
+      }
+      return normalizeImageRepoPath(parsed.pathname.replace(/^\/+/, ""));
     } catch (error) {
-      payload = null;
+      return null;
+    }
+  }
+
+  function buildSuggestedImagePath(fileName) {
+    const extensionMatch = String(fileName || "").toLowerCase().match(/\.([a-z0-9]+)$/);
+    const extension = extensionMatch ? extensionMatch[1] : "png";
+    const now = new Date();
+    const stamp = [
+      now.getUTCFullYear(),
+      String(now.getUTCMonth() + 1).padStart(2, "0"),
+      String(now.getUTCDate()).padStart(2, "0"),
+    ].join("");
+    return `imgs/uploads/${stamp}-${sanitizeFileStem(fileName)}.${extension}`;
+  }
+
+  function inferAltTextFromFileName(fileName) {
+    const stem = sanitizeFileStem(fileName).replace(/[._-]+/g, " ").trim();
+    if (!stem) {
+      return "Image description";
+    }
+    return stem.charAt(0).toUpperCase() + stem.slice(1);
+  }
+
+  function formatFileSize(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 1024) {
+      return `${Math.max(0, Math.round(bytes || 0))} B`;
+    }
+    const kib = bytes / 1024;
+    if (kib < 1024) {
+      return `${kib.toFixed(1)} KB`;
+    }
+    return `${(kib / 1024).toFixed(2)} MB`;
+  }
+
+  function pickImageFile() {
+    if (!elements.modalImageInput) {
+      return Promise.resolve(null);
     }
 
-    if (!response.ok) {
-      const message = payload && payload.message
-        ? payload.message
-        : `GitHub API ${response.status}`;
-      const err = new Error(message);
-      err.status = response.status;
-      throw err;
+    return new Promise((resolve) => {
+      const input = elements.modalImageInput;
+      const handleChange = () => {
+        const file = input.files && input.files.length > 0
+          ? input.files[0]
+          : null;
+        input.removeEventListener("change", handleChange);
+        input.value = "";
+        resolve(file);
+      };
+      input.addEventListener("change", handleChange, { once: true });
+      input.click();
+    });
+  }
+
+  function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => {
+        reject(new Error(`Could not read ${file.name}.`));
+      };
+      reader.onload = () => {
+        const result = typeof reader.result === "string" ? reader.result : "";
+        const commaIndex = result.indexOf(",");
+        if (commaIndex === -1) {
+          reject(new Error(`Could not read ${file.name}.`));
+          return;
+        }
+        resolve(result.slice(commaIndex + 1));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function buildPreviewImageDataUrl(imageDraft, path) {
+    if (!imageDraft || !imageDraft.contentBase64) {
+      return "";
     }
 
-    return payload;
+    const type = imageDraft.contentType
+      || (path && path.toLowerCase().endsWith(".svg") ? "image/svg+xml" : "application/octet-stream");
+    return `data:${type};base64,${imageDraft.contentBase64}`;
+  }
+
+  function applyStagedImagePreviews(root) {
+    if (!root || state.imageDrafts.size === 0) {
+      return;
+    }
+
+    root.querySelectorAll("img[src]").forEach((img) => {
+      const source = img.getAttribute("src");
+      const repoPath = normalizeImageReferencePath(source);
+      if (!repoPath) {
+        return;
+      }
+
+      const imageDraft = state.imageDrafts.get(repoPath);
+      if (!imageDraft) {
+        return;
+      }
+
+      const previewUrl = buildPreviewImageDataUrl(imageDraft, repoPath);
+      if (!previewUrl) {
+        return;
+      }
+
+      img.setAttribute("src", previewUrl);
+      img.setAttribute("data-staged-preview-path", repoPath);
+    });
   }
 
   function sectionIdFromPath(path) {
@@ -171,18 +315,6 @@
     return { label: conclusion || "unknown", cssClass: "unknown" };
   }
 
-  function isPagesDeployRun(run) {
-    const name = String(run && run.name ? run.name : "").toLowerCase();
-    const path = String(run && run.path ? run.path : "").toLowerCase();
-    const title = String(run && run.display_title ? run.display_title : "").toLowerCase();
-    const eventName = String(run && run.event ? run.event : "").toLowerCase();
-    const looksLikePages = name.includes("pages")
-      || path.includes("pages")
-      || title.includes("pages")
-      || path.includes("deploy");
-    return looksLikePages && (eventName === "push" || eventName === "workflow_dispatch" || eventName === "schedule" || !eventName);
-  }
-
   async function refreshRepoActivity(force) {
     if (state.repoActivityBusy && !force) {
       return;
@@ -197,50 +329,16 @@
     updateRepoActivityUi();
 
     try {
-      const repoPrefix = `/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}`;
-      const branchRef = encodeURIComponent(repo.baseBranch);
-      const [commitResult, runsResult] = await Promise.allSettled([
-        githubPublicRequest(`${repoPrefix}/commits/${branchRef}`),
-        githubPublicRequest(`${repoPrefix}/actions/runs?branch=${branchRef}&per_page=20`),
-      ]);
-
-      const nextActivity = {
+      const query = new URLSearchParams({
+        owner: repo.owner,
+        repo: repo.name,
         branch: repo.baseBranch,
-        updatedAt: Date.now(),
-      };
-
-      if (commitResult.status === "fulfilled") {
-        const commit = commitResult.value;
-        nextActivity.commitSha = commit && commit.sha ? commit.sha : "";
-        nextActivity.commitTime = commit && commit.commit && commit.commit.author
-          ? commit.commit.author.date
-          : "";
-        nextActivity.commitUrl = commit && commit.html_url ? commit.html_url : "";
-      } else {
-        nextActivity.commitError = commitResult.reason && commitResult.reason.message
-          ? commitResult.reason.message
-          : "Could not load latest commit.";
+      });
+      const activity = await authRequest(`/api/repo-status?${query.toString()}`);
+      if (!activity || typeof activity !== "object") {
+        throw new Error("Invalid repo status response.");
       }
-
-      if (runsResult.status === "fulfilled") {
-        const workflowRuns = runsResult.value;
-        const runs = workflowRuns && Array.isArray(workflowRuns.workflow_runs)
-          ? workflowRuns.workflow_runs
-          : [];
-        const pagesRun = runs.find((run) => isPagesDeployRun(run)) || null;
-        nextActivity.deployRun = pagesRun;
-        nextActivity.fallbackRun = pagesRun ? null : (runs[0] || null);
-      } else {
-        nextActivity.runsError = runsResult.reason && runsResult.reason.message
-          ? runsResult.reason.message
-          : "Could not load deploy workflow runs.";
-      }
-
-      if (!nextActivity.commitSha && !nextActivity.deployRun && !nextActivity.fallbackRun) {
-        nextActivity.error = nextActivity.commitError || nextActivity.runsError || "Could not load repo activity.";
-      }
-
-      state.repoActivity = nextActivity;
+      state.repoActivity = activity;
     } catch (error) {
       console.error(error);
       state.repoActivity = {
@@ -292,61 +390,116 @@
     }
   }
 
+  function setRepoActionIndicator(options) {
+    if (!elements.repoDeploy) {
+      return;
+    }
+
+    const {
+      stateClass = "is-failed",
+      href = "",
+      label = "Workflow status unavailable",
+    } = options || {};
+
+    setActivityLink(
+      elements.repoDeploy,
+      "",
+      href,
+      `inline-action-indicator ${stateClass}`,
+    );
+    elements.repoDeploy.setAttribute("aria-label", label);
+    elements.repoDeploy.setAttribute("title", label);
+  }
+
   function updateRepoActivityUi() {
     if (!elements.repoCommit || !elements.repoDeploy) {
       return;
     }
 
     if (state.repoActivityBusy) {
-      setActivityLink(elements.repoCommit, "Commit …", "", "is-muted");
-      setActivityLink(elements.repoDeploy, "Deploy …", "", "is-muted");
+      setActivityLink(elements.repoCommit, "…", "", "is-muted");
+      setRepoActionIndicator({
+        stateClass: "is-failed",
+        href: "",
+        label: "Checking workflow status",
+      });
       return;
     }
 
     const activity = state.repoActivity;
     if (!activity) {
-      setActivityLink(elements.repoCommit, "Commit unavailable", "", "is-muted");
-      setActivityLink(elements.repoDeploy, "Deploy unavailable", "", "is-muted");
+      setActivityLink(elements.repoCommit, "—", "", "is-muted");
+      setRepoActionIndicator({
+        stateClass: "is-failed",
+        href: "",
+        label: "Workflow status unavailable",
+      });
       return;
     }
 
     if (activity.error) {
-      setActivityLink(elements.repoCommit, "Commit unavailable", "", "is-warning");
-      setActivityLink(elements.repoDeploy, "Deploy unavailable", "", "is-warning");
+      setActivityLink(elements.repoCommit, "—", "", "is-warning");
+      setRepoActionIndicator({
+        stateClass: "is-failed",
+        href: "",
+        label: "Workflow status unavailable",
+      });
       return;
     }
 
-    const branch = activity.branch || "";
-    const branchLabel = branch ? `${branch}:` : "";
     const commitText = activity.commitSha
-      ? `${branchLabel}${shortenSha(activity.commitSha)}${formatRelativeTime(activity.commitTime) ? ` · ${formatRelativeTime(activity.commitTime)}` : ""}`
-      : "Commit unavailable";
+      ? shortenSha(activity.commitSha)
+      : "—";
     setActivityLink(
       elements.repoCommit,
       commitText,
       activity.commitUrl,
       activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted"),
     );
+    if (activity.commitSha) {
+      const commitAge = formatRelativeTime(activity.commitTime);
+      const commitTitle = commitAge
+        ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
+        : `Latest commit ${shortenSha(activity.commitSha)}`;
+      elements.repoCommit.setAttribute("aria-label", commitTitle);
+      elements.repoCommit.setAttribute("title", commitTitle);
+    } else {
+      elements.repoCommit.setAttribute("aria-label", "Latest commit unavailable");
+      elements.repoCommit.setAttribute("title", "Latest commit unavailable");
+    }
 
     const deployRun = activity.deployRun || activity.fallbackRun;
     if (!deployRun) {
-      const deployText = activity.runsError
-        ? "Deploy unavailable"
-        : "Deploy pending";
-      setActivityLink(elements.repoDeploy, deployText, "", activity.runsError ? "is-warning" : "is-muted");
+      setRepoActionIndicator({
+        stateClass: "is-failed",
+        href: "",
+        label: "No recent workflow run",
+      });
       return;
     }
 
     const deployState = classifyDeployState(deployRun);
-    const deployAge = formatRelativeTime(deployRun.updated_at || deployRun.created_at);
-    const deployPrefix = activity.deployRun ? "Pages" : "Action";
-    const deployText = `${deployPrefix} ${deployState.label}${deployAge ? ` · ${deployAge}` : ""}`;
-    setActivityLink(
-      elements.repoDeploy,
-      deployText,
-      deployRun.html_url || "",
-      `is-${deployState.cssClass}`,
-    );
+    if (deployState.cssClass === "running") {
+      setRepoActionIndicator({
+        stateClass: "is-running",
+        href: deployRun.html_url || "",
+        label: "Workflow running",
+      });
+      return;
+    }
+    if (deployState.cssClass === "success") {
+      setRepoActionIndicator({
+        stateClass: "is-success",
+        href: deployRun.html_url || "",
+        label: "Workflow successful",
+      });
+      return;
+    }
+    setRepoActionIndicator({
+      stateClass: "is-failed",
+      href: deployRun.html_url || "",
+      label: "Workflow failed or unavailable",
+    });
   }
 
   function resolveAuthWorkerOrigin() {
@@ -454,14 +607,23 @@
       label = "Sign in with GitHub",
       title = "Sign in with GitHub",
       glyph = "?",
+      avatarUrl = "",
       signedIn = false,
       busy = false,
     } = config || {};
 
     elements.authButton.replaceChildren();
+    elements.authButton.classList.toggle("has-avatar", !!avatarUrl);
     elements.authButton.classList.toggle("is-busy", !!busy);
 
-    if (glyph === "user") {
+    if (avatarUrl) {
+      const image = document.createElement("img");
+      image.src = avatarUrl;
+      image.alt = "";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      elements.authButton.appendChild(image);
+    } else if (glyph === "user") {
       const wrapper = document.createElement("span");
       wrapper.className = "inline-auth-glyph inline-auth-glyph-user";
       wrapper.innerHTML = AUTH_USER_ICON;
@@ -502,6 +664,9 @@
       elements.authButton.disabled = state.busy;
       setAuthButtonVisual({
         glyph: "user",
+        avatarUrl: sessionPayload.user && sessionPayload.user.avatarUrl
+          ? sessionPayload.user.avatarUrl
+          : "",
         signedIn: true,
         label: login ? `Signed in as @${login}. Click to sign out.` : "Signed in. Click to sign out.",
         title: login
@@ -760,17 +925,30 @@
     }, timeoutMs);
   }
 
+  function getStagedFileCounts() {
+    return {
+      markdown: state.drafts.size,
+      images: state.imageDrafts.size,
+    };
+  }
+
+  function getTotalStagedFileCount() {
+    const counts = getStagedFileCounts();
+    return counts.markdown + counts.images;
+  }
+
   function setBusy(isBusy) {
     state.busy = isBusy;
+    const totalStaged = getTotalStagedFileCount();
     const disableToolbarActions = isBusy || state.authBusy;
     if (elements.toggleButton) {
       elements.toggleButton.disabled = disableToolbarActions;
     }
     if (elements.submitButton) {
-      elements.submitButton.disabled = disableToolbarActions || state.drafts.size === 0;
+      elements.submitButton.disabled = disableToolbarActions || totalStaged === 0;
     }
     if (elements.clearButton) {
-      elements.clearButton.disabled = disableToolbarActions || state.drafts.size === 0;
+      elements.clearButton.disabled = disableToolbarActions || totalStaged === 0;
     }
     if (elements.authButton) {
       elements.authButton.disabled = disableToolbarActions;
@@ -785,11 +963,14 @@
       return;
     }
 
-    const hasDrafts = state.drafts.size > 0;
+    const counts = getStagedFileCounts();
+    const totalStaged = counts.markdown + counts.images;
+    const hasDrafts = totalStaged > 0;
     elements.toggleButton.textContent = state.editMode
-      ? "Disable Edit Mode"
-      : "Enable Edit Mode";
-    elements.submitButton.textContent = `Publish (${state.drafts.size})`;
+      ? "Done"
+      : "Edit";
+    elements.submitButton.textContent = `Push (${totalStaged})`;
+    elements.clearButton.textContent = "Clear";
     elements.submitButton.hidden = !hasDrafts;
     elements.clearButton.hidden = !hasDrafts;
     elements.submitButton.disabled = state.busy || state.authBusy || !hasDrafts;
@@ -834,6 +1015,7 @@
     if (typeof optimizeSectionMedia === "function") {
       optimizeSectionMedia(preface);
     }
+    applyStagedImagePreviews(preface);
   }
 
   function renderSectionFromDraft(path, markdown) {
@@ -862,6 +1044,7 @@
     }
 
     existing.replaceWith(replacement);
+    applyStagedImagePreviews(replacement);
 
     if (typeof setupSectionToggle === "function") {
       setupSectionToggle();
@@ -1443,6 +1626,81 @@
     );
   }
 
+  async function stageImageUploadIntoDraft() {
+    if (!elements.modalTextarea) {
+      return;
+    }
+
+    const imageFile = await pickImageFile();
+    if (!imageFile) {
+      return;
+    }
+
+    if (imageFile.size > MAX_STAGED_IMAGE_BYTES) {
+      setStatus(
+        `Image is too large (${formatFileSize(imageFile.size)}). Max ${formatFileSize(MAX_STAGED_IMAGE_BYTES)}.`,
+        true,
+      );
+      return;
+    }
+
+    const suggestedPath = buildSuggestedImagePath(imageFile.name);
+    const chosenPath = window.prompt(
+      "Image path in repo (must start with imgs/):",
+      suggestedPath,
+    );
+    if (!chosenPath) {
+      return;
+    }
+
+    const normalizedPath = normalizeImageRepoPath(chosenPath);
+    if (!normalizedPath) {
+      setStatus("Invalid image path. Use imgs/... with a valid image extension.", true);
+      return;
+    }
+
+    const replacingExisting = state.imageDrafts.has(normalizedPath);
+    if (replacingExisting) {
+      const shouldReplace = window.confirm(`Replace staged image at ${normalizedPath}?`);
+      if (!shouldReplace) {
+        return;
+      }
+    }
+
+    try {
+      const contentBase64 = await readFileAsBase64(imageFile);
+      state.imageDrafts.set(normalizedPath, {
+        contentBase64,
+        contentType: imageFile.type || "application/octet-stream",
+        size: imageFile.size,
+        fileName: imageFile.name || "",
+      });
+
+      const textarea = elements.modalTextarea;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.slice(start, end).trim();
+      const alt = selected || inferAltTextFromFileName(imageFile.name);
+      const markdown = `![${alt}](${normalizedPath})`;
+      const pathStartOffset = markdown.indexOf(normalizedPath);
+      const pathEndOffset = pathStartOffset + normalizedPath.length;
+      replaceTextRange(
+        textarea,
+        start,
+        end,
+        markdown,
+        start + pathStartOffset,
+        start + pathEndOffset,
+      );
+
+      setStatus(`Staged ${normalizedPath} (${formatFileSize(imageFile.size)}).`);
+      updateToolbar();
+    } catch (error) {
+      console.error(error);
+      setStatus(error && error.message ? error.message : "Could not stage image upload.", true);
+    }
+  }
+
   function insertVideoTemplate() {
     const videoId = "VIDEO_ID";
     const embed = `<div class="video-wrapper">
@@ -1621,6 +1879,9 @@
       case "image-inline":
         insertInlineImageTemplate();
         break;
+      case "image-upload":
+        stageImageUploadIntoDraft();
+        break;
       case "image-left":
         insertFigureTemplate("left");
         break;
@@ -1740,6 +2001,8 @@
       action = "callout-cycle";
     } else if (event.altKey && !event.shiftKey && key === "m") {
       action = "image-inline";
+    } else if (event.altKey && !event.shiftKey && key === "u") {
+      action = "image-upload";
     } else if (event.altKey && !event.shiftKey && key === "l") {
       action = "image-left";
     } else if (event.altKey && !event.shiftKey && key === "r") {
@@ -1760,11 +2023,19 @@
   }
 
   async function clearDrafts() {
-    if (state.drafts.size === 0) {
+    const counts = getStagedFileCounts();
+    const totalStaged = counts.markdown + counts.images;
+    if (totalStaged === 0) {
       return;
     }
 
-    const confirmed = window.confirm("Discard all staged markdown drafts?");
+    let confirmMessage = `Discard ${totalStaged} staged file${totalStaged === 1 ? "" : "s"}?`;
+    if (counts.images > 0 && counts.markdown > 0) {
+      confirmMessage = `Discard ${counts.markdown} markdown draft${counts.markdown === 1 ? "" : "s"} and ${counts.images} staged image${counts.images === 1 ? "" : "s"}?`;
+    } else if (counts.images > 0) {
+      confirmMessage = `Discard ${counts.images} staged image${counts.images === 1 ? "" : "s"}?`;
+    }
+    const confirmed = window.confirm(confirmMessage);
     if (!confirmed) {
       return;
     }
@@ -1774,25 +2045,28 @@
 
     const draftPaths = Array.from(state.drafts.keys());
     try {
-      const originalMarkdownByPath = new Map();
-      const originalMarkdownEntries = await Promise.all(
-        draftPaths.map(async (path) => [path, await fetchMarkdownFromSource(path)]),
-      );
-      originalMarkdownEntries.forEach(([path, markdown]) => {
-        originalMarkdownByPath.set(path, markdown);
-      });
+      if (draftPaths.length > 0) {
+        const originalMarkdownByPath = new Map();
+        const originalMarkdownEntries = await Promise.all(
+          draftPaths.map(async (path) => [path, await fetchMarkdownFromSource(path)]),
+        );
+        originalMarkdownEntries.forEach(([path, markdown]) => {
+          originalMarkdownByPath.set(path, markdown);
+        });
 
-      for (const path of draftPaths) {
-        const markdown = originalMarkdownByPath.get(path);
-        const restored = renderSectionFromDraft(path, markdown);
-        if (!restored) {
-          throw new Error(`Unable to restore ${path}`);
+        for (const path of draftPaths) {
+          const markdown = originalMarkdownByPath.get(path);
+          const restored = renderSectionFromDraft(path, markdown);
+          if (!restored) {
+            throw new Error(`Unable to restore ${path}`);
+          }
         }
       }
 
       state.drafts.clear();
+      state.imageDrafts.clear();
       updateToolbar();
-      setStatus("Drafts discarded.");
+      setStatus(`Discarded ${totalStaged} staged file${totalStaged === 1 ? "" : "s"}.`);
     } catch (error) {
       console.error(error);
       setStatus(error.message || "Could not discard drafts.", true);
@@ -1849,7 +2123,9 @@
   }
 
   async function submitDrafts() {
-    if (state.busy || state.drafts.size === 0) {
+    const counts = getStagedFileCounts();
+    const totalStaged = counts.markdown + counts.images;
+    if (state.busy || totalStaged === 0) {
       return;
     }
 
@@ -1864,21 +2140,43 @@
       return;
     }
 
-    const changedPaths = Array.from(state.drafts.keys()).sort();
-    const defaultCommitMessage =
-      `docs: update ${changedPaths.length} markdown file${changedPaths.length === 1 ? "" : "s"}`;
+    const changedMarkdownPaths = Array.from(state.drafts.keys()).sort();
+    const changedImagePaths = Array.from(state.imageDrafts.keys()).sort();
+
+    let defaultCommitMessage = "";
+    if (counts.images > 0 && counts.markdown > 0) {
+      defaultCommitMessage =
+        `docs: update ${totalStaged} files (${counts.markdown} markdown, ${counts.images} images)`;
+    } else if (counts.images > 0) {
+      defaultCommitMessage =
+        `docs: add ${counts.images} image${counts.images === 1 ? "" : "s"}`;
+    } else {
+      defaultCommitMessage =
+        `docs: update ${counts.markdown} markdown file${counts.markdown === 1 ? "" : "s"}`;
+    }
     const commitMessage = window.prompt("Commit message:", defaultCommitMessage);
     if (!commitMessage) {
       return;
     }
 
     setBusy(true);
-    setStatus(`Publishing drafts to ${repo.baseBranch}...`);
+    setStatus(`Publishing ${totalStaged} staged file${totalStaged === 1 ? "" : "s"} to ${repo.baseBranch}...`);
 
     try {
       const files = {};
-      changedPaths.forEach((path) => {
+      changedMarkdownPaths.forEach((path) => {
         files[path] = state.drafts.get(path);
+      });
+      const binaryFiles = {};
+      changedImagePaths.forEach((path) => {
+        const imageDraft = state.imageDrafts.get(path);
+        if (!imageDraft) {
+          return;
+        }
+        binaryFiles[path] = {
+          contentBase64: imageDraft.contentBase64,
+          contentType: imageDraft.contentType || "",
+        };
       });
 
       const result = await authRequest("/api/submit", {
@@ -1889,25 +2187,27 @@
           baseBranch: repo.baseBranch,
           commitMessage,
           files,
+          binaryFiles,
         },
       });
 
       if (result && result.mode === "pull_request") {
-        setStatus(`Opened PR #${result.pullRequestNumber} for ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"}.`);
+        setStatus(`Opened PR #${result.pullRequestNumber} for ${totalStaged} file${totalStaged === 1 ? "" : "s"}.`);
         alert(`Pull request created:\n${result.url}`);
       } else {
-        setStatus(`Committed ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"} to ${repo.baseBranch}.`);
+        setStatus(`Committed ${totalStaged} file${totalStaged === 1 ? "" : "s"} to ${repo.baseBranch}.`);
         if (result && result.url) {
           alert(`Commit created:\n${result.url}`);
         }
       }
 
       state.drafts.clear();
+      state.imageDrafts.clear();
       updateToolbar();
       refreshRepoActivity(true);
       window.setTimeout(() => {
         refreshRepoActivity(true);
-      }, 8000);
+      }, 11000);
     } catch (error) {
       console.error(error);
       if (error && error.status === 401) {
@@ -1917,8 +2217,11 @@
       const message = error && error.message
         ? error.message
         : "Could not publish drafts.";
-      setStatus(message, true);
-      alert(message);
+      const enhancedMessage = counts.images > 0 && /invalid files payload|files must be an object|binary/i.test(String(message).toLowerCase())
+        ? `${message} The worker may need image upload support enabled.`
+        : message;
+      setStatus(enhancedMessage, true);
+      alert(enhancedMessage);
     } finally {
       setBusy(false);
     }
@@ -1931,12 +2234,12 @@
       <div class="inline-toolbar-row inline-toolbar-row-main">
         <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
         <div class="inline-editor-repo" aria-live="polite">
-          <a id="inline-repo-commit" class="inline-repo-link is-muted">Commit …</a>
-          <a id="inline-repo-deploy" class="inline-repo-link is-muted">Deploy …</a>
+          <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
+          <a id="inline-repo-deploy" class="inline-repo-link inline-action-indicator is-failed" aria-label="Workflow status unavailable"></a>
         </div>
-        <button id="inline-edit-toggle" type="button">Enable Edit Mode</button>
-        <button id="inline-edit-submit" type="button" disabled>Publish (0)</button>
-        <button id="inline-edit-clear" type="button" disabled>Discard Drafts</button>
+        <button id="inline-edit-toggle" type="button">Edit</button>
+        <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
+        <button id="inline-edit-clear" type="button" disabled>Clear</button>
       </div>
       <span id="inline-editor-status"></span>
     `;
@@ -2032,6 +2335,16 @@
             </div>
           </div>
           <div class="inline-editor-format-group inline-editor-format-group-media" role="group" aria-label="Media tools">
+            <button type="button" data-format-action="image-upload" title="Upload image to imgs/ (Cmd/Ctrl+Alt+U)" aria-label="Upload image">
+              <span class="inline-editor-tool-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" focusable="false">
+                  <path d="M10 13V4"></path>
+                  <path d="M6.5 7.5L10 4L13.5 7.5"></path>
+                  <path d="M4 12.5V15.5H16V12.5"></path>
+                </svg>
+              </span>
+              <span class="inline-editor-tool-label">Upload</span>
+            </button>
             <button type="button" data-format-action="image-inline" title="Inline image (Cmd/Ctrl+Alt+M)" aria-label="Insert inline image">
               <span class="inline-editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
@@ -2083,6 +2396,7 @@
           </div>
         </div>
         <textarea id="inline-editor-textarea"></textarea>
+        <input id="inline-editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
         <div class="inline-editor-actions">
           <button type="button" id="inline-editor-reset">Reset Section</button>
           <button class="primary" type="button" id="inline-editor-save">Save Draft</button>
@@ -2102,6 +2416,7 @@
     elements.modal = modal;
     elements.modalPath = modal.querySelector("#inline-editor-path");
     elements.modalTextarea = modal.querySelector("#inline-editor-textarea");
+    elements.modalImageInput = modal.querySelector("#inline-editor-image-upload");
     elements.modalSave = modal.querySelector("#inline-editor-save");
     elements.modalReset = modal.querySelector("#inline-editor-reset");
     updateVariantControlState();
