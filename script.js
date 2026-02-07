@@ -560,7 +560,6 @@ function setupActiveTracking() {
   }
 
   function updateActiveLink() {
-    console.log("Updating active link...");
     setActiveLink(resolveActiveElement());
   }
 
