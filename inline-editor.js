@@ -80,11 +80,12 @@
       : "";
     const baseBranch = typeof CONTENT_REPO_BRANCH === "string"
       ? CONTENT_REPO_BRANCH
-      : "main";
+      : "unknown";
 
     if (!owner || !name) {
       return null;
     }
+    console.log(`Resolved content repository: ${owner}/${name} (branch: ${baseBranch})`);
     return { owner, name, baseBranch };
   }
 
@@ -172,7 +173,7 @@
     elements.toggleButton.textContent = state.editMode
       ? "Disable Edit Mode"
       : "Enable Edit Mode";
-    elements.submitButton.textContent = `Submit PR (${state.drafts.size})`;
+    elements.submitButton.textContent = `Commit (${state.drafts.size})`;
     elements.submitButton.hidden = !hasDrafts;
     elements.clearButton.hidden = !hasDrafts;
     elements.submitButton.disabled = state.busy || !hasDrafts;
@@ -1240,56 +1241,25 @@
       return;
     }
 
-    const token = window.prompt(
-      "GitHub token (fine-grained: Contents read/write + Pull requests read/write):",
-    );
+    const token = window.prompt("GitHub token (fine-grained: Contents read/write):");
     if (!token) {
       return;
     }
 
     const changedPaths = Array.from(state.drafts.keys()).sort();
-    const defaultTitle = `docs: update ${changedPaths.length} markdown file${changedPaths.length === 1 ? "" : "s"}`;
-    const title = window.prompt("Pull request title:", defaultTitle);
-    if (!title) {
-      return;
-    }
-
-    const defaultBody = [
-      "Updated from the inline browser markdown editor.",
-      "",
-      "Changed files:",
-      ...changedPaths.map((path) => `- \`${path}\``),
-    ].join("\n");
-    const body = window.prompt("Pull request description:", defaultBody);
-    if (body === null) {
+    const defaultCommitMessage =
+      `docs: update ${changedPaths.length} markdown file${changedPaths.length === 1 ? "" : "s"}`;
+    const commitMessage = window.prompt("Commit message:", defaultCommitMessage);
+    if (!commitMessage) {
       return;
     }
 
     setBusy(true);
-    setStatus("Creating branch and pull request...");
+    setStatus(`Committing drafts to ${repo.baseBranch}...`);
 
     const repoPrefix = `/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}`;
-    const branchName = `content-edit/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
     try {
-      const baseRef = await githubRequest(
-        `${repoPrefix}/git/ref/heads/${encodeURIComponent(repo.baseBranch)}`,
-        { token },
-      );
-      const baseSha = baseRef && baseRef.object ? baseRef.object.sha : null;
-      if (!baseSha) {
-        throw new Error("Could not read base branch SHA.");
-      }
-
-      await githubRequest(`${repoPrefix}/git/refs`, {
-        method: "POST",
-        token,
-        body: {
-          ref: `refs/heads/${branchName}`,
-          sha: baseSha,
-        },
-      });
-
       for (const path of changedPaths) {
         const encodedPath = encodeRepoPath(path);
         const existing = await githubRequest(
@@ -1302,38 +1272,24 @@
           method: "PUT",
           token,
           body: {
-            message: `content: update ${path}`,
+            message: changedPaths.length === 1
+              ? commitMessage
+              : `${commitMessage} (${path})`,
             content: toBase64(draftContent),
             sha: existing.sha,
-            branch: branchName,
+            branch: repo.baseBranch,
           },
         });
       }
 
-      const pullRequest = await githubRequest(`${repoPrefix}/pulls`, {
-        method: "POST",
-        token,
-        body: {
-          title,
-          body,
-          head: branchName,
-          base: repo.baseBranch,
-        },
-      });
-
       state.drafts.clear();
       updateToolbar();
-
-      const prUrl = pullRequest && pullRequest.html_url ? pullRequest.html_url : "";
-      setStatus(prUrl ? `Pull request created: ${prUrl}` : "Pull request created.");
-      if (prUrl) {
-        window.open(prUrl, "_blank", "noopener,noreferrer");
-      }
+      setStatus(`Committed ${changedPaths.length} file${changedPaths.length === 1 ? "" : "s"} to ${repo.baseBranch}.`);
     } catch (error) {
       console.error(error);
       const message = error && error.message
         ? error.message
-        : "Could not submit pull request.";
+        : "Could not commit drafts.";
       setStatus(message, true);
       alert(message);
     } finally {
@@ -1346,7 +1302,7 @@
     toolbar.id = "inline-editor-toolbar";
     toolbar.innerHTML = `
       <button id="inline-edit-toggle" type="button">Enable Edit Mode</button>
-      <button id="inline-edit-submit" type="button" disabled>Submit PR (0)</button>
+      <button id="inline-edit-submit" type="button" disabled>Commit (0)</button>
       <button id="inline-edit-clear" type="button" disabled>Discard Drafts</button>
       <span id="inline-editor-status"></span>
     `;
