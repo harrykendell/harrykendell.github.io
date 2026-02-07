@@ -53,7 +53,6 @@
     authButton: null,
     repoCommit: null,
     repoDeploy: null,
-    toggleButton: null,
     submitButton: null,
     clearButton: null,
     status: null,
@@ -624,8 +623,10 @@
   }
 
   function setEditMode(isEnabled) {
-    state.editMode = !!isEnabled;
+    const shouldEnable = !!isEnabled;
+    state.editMode = shouldEnable && (!elements.toolbar || !elements.toolbar.hidden);
     document.body.classList.toggle("edit-mode", state.editMode);
+    updateToolbarVisibilityButton();
     storeEditorState();
   }
 
@@ -1066,8 +1067,8 @@
     state.busy = isBusy;
     const totalStaged = getTotalStagedFileCount();
     const disableToolbarActions = isBusy || state.authBusy;
-    if (elements.toggleButton) {
-      elements.toggleButton.disabled = disableToolbarActions;
+    if (elements.toolbarVisibilityButton) {
+      elements.toolbarVisibilityButton.disabled = disableToolbarActions;
     }
     if (elements.submitButton) {
       elements.submitButton.disabled = disableToolbarActions || totalStaged === 0;
@@ -1089,8 +1090,9 @@
     }
 
     const isVisible = !elements.toolbar.hidden;
-    const actionLabel = isVisible ? "Hide editor toolbar" : "Show editor toolbar";
+    const actionLabel = state.editMode ? "Done editing" : "Edit manual";
     elements.toolbarVisibilityButton.setAttribute("aria-expanded", String(isVisible));
+    elements.toolbarVisibilityButton.setAttribute("aria-pressed", String(state.editMode));
     elements.toolbarVisibilityButton.setAttribute("aria-label", actionLabel);
     elements.toolbarVisibilityButton.setAttribute("title", actionLabel);
   }
@@ -1100,25 +1102,28 @@
       return;
     }
 
-    elements.toolbar.hidden = !isVisible;
+    const shouldShow = !!isVisible || getTotalStagedFileCount() > 0;
+    elements.toolbar.hidden = !shouldShow;
+    if (!shouldShow && state.editMode) {
+      setEditMode(false);
+    }
     updateToolbarVisibilityButton();
     storeEditorState();
   }
 
   function updateToolbar() {
-    if (!elements.toggleButton || !elements.submitButton || !elements.clearButton) {
+    if (!elements.submitButton || !elements.clearButton) {
       return;
     }
 
     const counts = getStagedFileCounts();
     const totalStaged = counts.markdown + counts.images;
     const hasDrafts = totalStaged > 0;
-    elements.toggleButton.textContent = state.editMode
-      ? "Done"
-      : "Edit";
+    if (hasDrafts && elements.toolbar && elements.toolbar.hidden) {
+      setToolbarVisible(true);
+    }
     elements.submitButton.textContent = `Push (${totalStaged})`;
     elements.clearButton.textContent = "Reset";
-    elements.toggleButton.hidden = hasDrafts;
     elements.submitButton.hidden = !hasDrafts;
     elements.clearButton.hidden = !hasDrafts;
     elements.submitButton.disabled = state.busy || state.authBusy || !hasDrafts;
@@ -1166,9 +1171,20 @@
     applyStagedImagePreviews(preface);
   }
 
+  function refreshSearchIndexAfterRender() {
+    if (typeof refreshSearchBarIndex === "function") {
+      refreshSearchBarIndex();
+      return;
+    }
+    if (window.SearchBar && typeof window.SearchBar.refreshIndex === "function") {
+      window.SearchBar.refreshIndex();
+    }
+  }
+
   function renderSectionFromDraft(path, markdown) {
     if (path === INTRO_PATH) {
       renderPreface(markdown);
+      refreshSearchIndexAfterRender();
       return true;
     }
 
@@ -1209,6 +1225,7 @@
     if (typeof window.updateActiveLink === "function") {
       window.updateActiveLink();
     }
+    refreshSearchIndexAfterRender();
 
     return true;
   }
@@ -2214,6 +2231,7 @@
       state.drafts.clear();
       state.imageDrafts.clear();
       updateToolbar();
+      setToolbarVisible(false);
       setStatus(`Discarded ${totalStaged} staged file${totalStaged === 1 ? "" : "s"}.`);
     } catch (error) {
       console.error(error);
@@ -2386,7 +2404,6 @@
           <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
           <a id="inline-repo-deploy" class="inline-repo-link inline-action-indicator is-failed" aria-label="Workflow status unavailable"></a>
         </div>
-        <button id="inline-edit-toggle" type="button">Edit</button>
         <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
         <button id="inline-edit-clear" type="button" disabled>Reset</button>
       </div>
@@ -2559,7 +2576,6 @@
     elements.authButton = toolbar.querySelector("#inline-auth-action");
     elements.repoCommit = toolbar.querySelector("#inline-repo-commit");
     elements.repoDeploy = toolbar.querySelector("#inline-repo-deploy");
-    elements.toggleButton = toolbar.querySelector("#inline-edit-toggle");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
     elements.status = toolbar.querySelector("#inline-editor-status");
@@ -2574,13 +2590,20 @@
   }
 
   function setupEvents() {
-    if (!elements.toggleButton || !elements.submitButton || !elements.clearButton || !elements.modal) {
+    if (!elements.submitButton || !elements.clearButton || !elements.modal) {
       return;
     }
 
     if (elements.toolbarVisibilityButton) {
       elements.toolbarVisibilityButton.addEventListener("click", () => {
-        setToolbarVisible(elements.toolbar ? elements.toolbar.hidden : false);
+        if (state.editMode) {
+          setEditMode(false);
+          setToolbarVisible(false);
+        } else {
+          setToolbarVisible(true);
+          setEditMode(true);
+        }
+        updateToolbar();
       });
     }
 
@@ -2589,11 +2612,6 @@
         handleAuthButtonClick();
       });
     }
-
-    elements.toggleButton.addEventListener("click", () => {
-      setEditMode(!state.editMode);
-      updateToolbar();
-    });
 
     elements.submitButton.addEventListener("click", () => {
       submitDrafts();

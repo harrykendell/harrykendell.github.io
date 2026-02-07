@@ -34,6 +34,7 @@ const SECTION_GROUPS = {
     supplement: "Supplement",
   },
 };
+window.SECTION_GROUPS = SECTION_GROUPS;
 
 const CONTENT_REPO_OWNER = "harrykendell";
 const CONTENT_REPO_NAME = "harrykendell.github.io";
@@ -73,6 +74,20 @@ window.getGitHubEditUrl = getGitHubEditUrl;
 
 function getEffectiveTocLevel() {
   return Math.min(6, tocDepth + 1);
+}
+
+function setupSearchBar() {
+  if (!window.SearchBar || typeof window.SearchBar.setup !== "function") {
+    return;
+  }
+  window.SearchBar.setup();
+}
+
+function refreshSearchBarIndex() {
+  if (!window.SearchBar || typeof window.SearchBar.refreshIndex !== "function") {
+    return;
+  }
+  window.SearchBar.refreshIndex();
 }
 
 async function loadSections() {
@@ -135,6 +150,8 @@ async function loadSections() {
   setupTocDepthControl();
   setupTocToggle();
   setupActiveTracking();
+  setupSearchBar();
+  refreshSearchBarIndex();
 
   // Restore scroll position after sections are loaded
   restoreScrollPosition();
@@ -169,11 +186,15 @@ async function loadPreface() {
     }
 
     preface.innerHTML = marked.parse(content);
+    if (typeof addHeadingIds === "function") {
+      addHeadingIds(preface, "preface");
+    }
     normalizeInternalHashLinks(preface);
     wrapTables(preface);
     if (typeof optimizeSectionMedia === "function") {
       optimizeSectionMedia(preface);
     }
+    refreshSearchBarIndex();
   } catch (error) {
     console.error("Failed to load preface introduction", error);
   }
@@ -344,6 +365,12 @@ function normalizeHashValue(hash) {
   return decodedValue ? `#${decodedValue}` : null;
 }
 
+function replaceUrlState(nextHash) {
+  const url = new URL(window.location.href);
+  url.hash = nextHash || "";
+  history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
+}
+
 function getInternalHashFromLink(link) {
   if (!link) {
     return null;
@@ -417,7 +444,10 @@ document.addEventListener("click", function (event) {
 
 function generateSidebar() {
   const sections = document.querySelectorAll(".section");
-  const sidebarList = document.querySelector(".sidebar ul");
+  const sidebarList = document.getElementById("toc-list");
+  if (!sidebarList) {
+    return;
+  }
 
   const effectiveDepth = getEffectiveTocLevel();
 
@@ -543,7 +573,7 @@ function setupActiveTracking() {
         activeLink.classList.add("active");
         // Update the URL hash to match the active heading, but only if it changed and hash updates are enabled
         if (hashUpdateEnabled && window.location.hash !== `#${activeElement.id}`) {
-          history.replaceState(null, document.title, `#${activeElement.id}`);
+          replaceUrlState(`#${activeElement.id}`);
         }
       }
     } else {
@@ -553,7 +583,7 @@ function setupActiveTracking() {
       if (contentsLink) {
         contentsLink.classList.add("active");
         if (hashUpdateEnabled && window.location.hash !== "#top") {
-          history.replaceState(null, document.title, `#top`);
+          replaceUrlState("#top");
         }
       }
     }
@@ -717,10 +747,13 @@ function updateSidebarArrow(sectionId, isCollapsed) {
 }
 
 function setupSidebarLinks() {
-  const sidebarLinks = document.querySelectorAll(".sidebar a");
-  const sidebarArrows = document.querySelectorAll(".sidebar .nav-arrow");
+  const sidebarLinks = document.querySelectorAll("#toc-list a, .toc-header a[href^='#']");
+  const sidebarArrows = document.querySelectorAll("#toc-list .nav-arrow");
 
   sidebarArrows.forEach((arrow) => {
+    if (arrow.dataset.sidebarBound === "true") {
+      return;
+    }
     arrow.addEventListener("click", (e) => {
       e.preventDefault();
       const sectionId = arrow.getAttribute("data-section");
@@ -740,10 +773,14 @@ function setupSidebarLinks() {
       updateSidebarArrow(sectionId, isCollapsed);
       window.updateActiveLink();
     });
+    arrow.dataset.sidebarBound = "true";
   });
 
   sidebarLinks.forEach((link) => {
-    link.addEventListener("click", (e) => {
+    if (link.dataset.sidebarBound === "true") {
+      return;
+    }
+    link.addEventListener("click", () => {
       const hash = getInternalHashFromLink(link);
       if (!hash) {
         return;
@@ -755,6 +792,7 @@ function setupSidebarLinks() {
         }
       }
     });
+    link.dataset.sidebarBound = "true";
   });
 
   const sections = document.querySelectorAll(".section");

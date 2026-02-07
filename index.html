@@ -13,7 +13,8 @@
   <meta name="apple-mobile-web-app-title" content="Boat Repairs" />
   <link rel="manifest" href="/favicon/site.webmanifest" />
   <link rel="stylesheet" href="styles.css?v=31" />
-  <script defer src="script.js?v=27"></script>
+  <script defer src="script.js?v=28"></script>
+  <script defer src="search-bar.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="markdown-to-section.js?v=26"></script>
   <script defer src="inline-editor.js?v=13"></script>
@@ -50,7 +51,30 @@
           </button>
         </div>
       </div>
-      <ul>
+      <div class="toc-search" role="search" aria-label="Search manual">
+        <input
+          id="toc-search-input"
+          type="search"
+          placeholder="Search manual"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Search manual"
+        />
+        <button
+          id="toc-search-clear"
+          type="button"
+          class="toc-search-clear"
+          hidden
+          aria-label="Clear search"
+          title="Clear search"
+        >
+          ×
+        </button>
+      </div>
+      <div id="toc-search-results" class="toc-search-results" hidden></div>
+      <ul id="toc-list">
         <!-- Sidebar will be auto-generated from sections -->
       </ul>
     </aside>
