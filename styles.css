@@ -121,6 +121,12 @@ body {
     text-align: left;
 }
 
+.toc-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .toc-controls select {
     appearance: none;
     border: 1px solid var(--border-subtle);
@@ -130,6 +136,43 @@ body {
     color: var(--text-soft);
     font-size: 0.75rem;
     cursor: pointer;
+}
+
+.toc-toolbar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    background: var(--bg-elevated);
+    color: var(--text-soft);
+    cursor: pointer;
+    transition:
+        color 0.1s,
+        border-color 0.1s,
+        transform 0.08s;
+}
+
+.toc-toolbar-toggle svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.toc-toolbar-toggle:hover {
+    color: var(--text-main);
+    border-color: #cbd5e1;
+}
+
+.toc-toolbar-toggle[aria-expanded="true"] {
+    color: var(--text-main);
+    border-color: #cbd5e1;
 }
 
 .sidebar ul {
@@ -1096,6 +1139,7 @@ a:hover {
 
 a:focus-visible,
 .toc-toggle:focus-visible,
+.toc-toolbar-toggle:focus-visible,
 .sidebar .nav-arrow:focus-visible,
 .section-header:focus-visible,
 .procedure-header:focus-visible,
@@ -1533,8 +1577,8 @@ hr {
         align-items: center;
         justify-content: center;
         position: fixed;
-        top: 14px;
-        right: 14px;
+        top: calc(0.7 * var(--gap));
+        right: calc(0.7 * var(--gap));
         z-index: 40;
         padding: 10px 14px;
         border-radius: var(--radius);
@@ -1554,5 +1598,87 @@ hr {
 
     .sidebar .nav-arrow {
         margin-right: 6px;
+    }
+
+    #inline-editor-status {
+        width: 100%;
+    }
+
+    .inline-editor-dialog {
+        width: calc(100vw - 12px);
+        max-height: calc(100vh - 12px);
+        margin: 6px auto;
+    }
+
+    .inline-editor-format-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        position: relative;
+        gap: 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    .inline-editor-format-toolbar.is-centered {
+        justify-content: center;
+    }
+
+    .inline-editor-format-toolbar.is-scrollable {
+        box-shadow: inset -18px 0 14px -14px rgba(15, 23, 42, 0.24);
+    }
+
+    .inline-editor-format-toolbar.is-scrollable:not(.at-start):not(.at-end) {
+        box-shadow:
+            inset 18px 0 14px -14px rgba(15, 23, 42, 0.24),
+            inset -18px 0 14px -14px rgba(15, 23, 42, 0.24);
+    }
+
+    .inline-editor-format-toolbar.is-scrollable.at-end {
+        box-shadow: inset 18px 0 14px -14px rgba(15, 23, 42, 0.24);
+    }
+
+    .inline-editor-format-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: nowrap;
+        flex: 0 0 auto;
+    }
+
+    .inline-editor-format-group-structures {
+        display: inline-flex;
+        min-width: 0;
+    }
+
+    .inline-editor-format-group + .inline-editor-format-group {
+        padding-left: 6px;
+        border-left: 1px solid var(--border-subtle);
+    }
+
+    .inline-editor-format-toolbar button {
+        width: 32px;
+        min-width: 32px;
+        padding: 0;
+        gap: 0;
+        flex: 0 0 32px;
+    }
+
+    .inline-editor-tool-label {
+        display: none;
+    }
+
+    .inline-editor-variant-control button[data-format-action] {
+        width: 32px;
+        min-width: 32px;
+        padding: 0;
+        flex: 0 0 32px;
+    }
+
+    .inline-editor-variant-control .inline-editor-variant-swap {
+        flex: 0 0 32px;
+        min-width: 32px;
     }
 }

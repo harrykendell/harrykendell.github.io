@@ -19,6 +19,7 @@
   const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
   const AUTH_MESSAGE_TYPE = "github-auth-complete";
   const AUTH_PROFILE_STORAGE_KEY = "inline-editor-github-profile";
+  const EDITOR_STATE_STORAGE_KEY = "inline-editor-state";
   const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
   const state = {
     busy: false,
@@ -46,6 +47,7 @@
 
   const elements = {
     toolbar: null,
+    toolbarVisibilityButton: null,
     authButton: null,
     repoCommit: null,
     repoDeploy: null,
@@ -563,6 +565,65 @@
     }
   }
 
+  function readStoredEditorState() {
+    try {
+      const raw = localStorage.getItem(EDITOR_STATE_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      const nextState = {};
+      if (typeof parsed.toolbarVisible === "boolean") {
+        nextState.toolbarVisible = parsed.toolbarVisible;
+      }
+      if (typeof parsed.editMode === "boolean") {
+        nextState.editMode = parsed.editMode;
+      }
+      return nextState;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function storeEditorState() {
+    try {
+      localStorage.setItem(
+        EDITOR_STATE_STORAGE_KEY,
+        JSON.stringify({
+          toolbarVisible: elements.toolbar ? !elements.toolbar.hidden : false,
+          editMode: !!state.editMode,
+        }),
+      );
+    } catch (error) {
+      // Ignore storage errors.
+    }
+  }
+
+  function setEditMode(isEnabled) {
+    state.editMode = !!isEnabled;
+    document.body.classList.toggle("edit-mode", state.editMode);
+    storeEditorState();
+  }
+
+  function restoreEditorState() {
+    const storedState = readStoredEditorState();
+    if (!storedState) {
+      document.body.classList.toggle("edit-mode", state.editMode);
+      return;
+    }
+    if (typeof storedState.toolbarVisible === "boolean") {
+      setToolbarVisible(storedState.toolbarVisible);
+    }
+    if (typeof storedState.editMode === "boolean") {
+      setEditMode(storedState.editMode);
+      return;
+    }
+    document.body.classList.toggle("edit-mode", state.editMode);
+  }
+
   async function authRequest(path, options) {
     const { method = "GET", body } = options || {};
     const response = await fetch(`${AUTH_WORKER_ORIGIN}${path}`, {
@@ -969,6 +1030,28 @@
     if (elements.modalSave) {
       elements.modalSave.disabled = disableToolbarActions;
     }
+  }
+
+  function updateToolbarVisibilityButton() {
+    if (!elements.toolbarVisibilityButton || !elements.toolbar) {
+      return;
+    }
+
+    const isVisible = !elements.toolbar.hidden;
+    const actionLabel = isVisible ? "Hide editor toolbar" : "Show editor toolbar";
+    elements.toolbarVisibilityButton.setAttribute("aria-expanded", String(isVisible));
+    elements.toolbarVisibilityButton.setAttribute("aria-label", actionLabel);
+    elements.toolbarVisibilityButton.setAttribute("title", actionLabel);
+  }
+
+  function setToolbarVisible(isVisible) {
+    if (!elements.toolbar) {
+      return;
+    }
+
+    elements.toolbar.hidden = !isVisible;
+    updateToolbarVisibilityButton();
+    storeEditorState();
   }
 
   function updateToolbar() {
@@ -2244,6 +2327,7 @@
   function buildUi() {
     const toolbar = document.createElement("div");
     toolbar.id = "inline-editor-toolbar";
+    toolbar.hidden = true;
     toolbar.innerHTML = `
       <div class="inline-toolbar-row inline-toolbar-row-main">
         <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
@@ -2420,6 +2504,7 @@
     document.body.appendChild(modal);
 
     elements.toolbar = toolbar;
+    elements.toolbarVisibilityButton = document.getElementById("inline-toolbar-toggle");
     elements.authButton = toolbar.querySelector("#inline-auth-action");
     elements.repoCommit = toolbar.querySelector("#inline-repo-commit");
     elements.repoDeploy = toolbar.querySelector("#inline-repo-deploy");
@@ -2434,11 +2519,18 @@
     elements.modalSave = modal.querySelector("#inline-editor-save");
     elements.modalReset = modal.querySelector("#inline-editor-reset");
     updateVariantControlState();
+    updateToolbarVisibilityButton();
   }
 
   function setupEvents() {
     if (!elements.toggleButton || !elements.submitButton || !elements.clearButton || !elements.modal) {
       return;
+    }
+
+    if (elements.toolbarVisibilityButton) {
+      elements.toolbarVisibilityButton.addEventListener("click", () => {
+        setToolbarVisible(elements.toolbar ? elements.toolbar.hidden : false);
+      });
     }
 
     if (elements.authButton) {
@@ -2448,8 +2540,7 @@
     }
 
     elements.toggleButton.addEventListener("click", () => {
-      state.editMode = !state.editMode;
-      document.body.classList.toggle("edit-mode", state.editMode);
+      setEditMode(!state.editMode);
       updateToolbar();
     });
 
@@ -2580,6 +2671,7 @@
 
   function init() {
     buildUi();
+    restoreEditorState();
     setupEvents();
     updateToolbar();
     updateAuthUi();
