@@ -1378,31 +1378,11 @@ hr {
     .sidebar .nav-arrow {
         margin-right: 6px;
     }
-    
+
     .inline-editor-dialog {
         width: calc(100vw - 12px);
         max-height: calc(100vh - 12px);
         margin: 6px auto;
-    }
-
-    #inline-editor-toolbar {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    #inline-editor-toolbar .inline-editor-auth {
-        border-right: none;
-        width: 100%;
-        justify-content: center;
-        padding-right: 0;
-        margin-right: 0;
-    }
-
-    #inline-auth-user {
-        max-width: 52vw;
     }
 
     .inline-editor-format-toolbar {
