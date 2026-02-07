@@ -37,7 +37,7 @@ const SECTION_GROUPS = {
 
 const CONTENT_REPO_OWNER = "harrykendell";
 const CONTENT_REPO_NAME = "harrykendell.github.io";
-const CONTENT_REPO_BRANCH = "dev";
+const CONTENT_REPO_BRANCH = "main";
 
 function escapeHtml(value) {
   return String(value)

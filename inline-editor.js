@@ -22,6 +22,7 @@
   const state = {
     busy: false,
     authBusy: false,
+    repoActivityBusy: false,
     editMode: false,
     drafts: new Map(),
     sourceMarkdown: new Map(),
@@ -37,12 +38,15 @@
     authPopupPollId: null,
     authPopupWindow: null,
     authBusyMessage: "",
+    repoActivityPollId: null,
+    repoActivity: null,
   };
 
   const elements = {
     toolbar: null,
     authButton: null,
-    authUser: null,
+    repoCommit: null,
+    repoDeploy: null,
     toggleButton: null,
     submitButton: null,
     clearButton: null,
@@ -53,12 +57,45 @@
     modalSave: null,
     modalReset: null,
   };
+  const AUTH_USER_ICON = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="8" r="4"></circle>
+      <path d="M4.5 20c1.6-3.3 4.4-5 7.5-5s5.9 1.7 7.5 5"></path>
+    </svg>
+  `;
 
   function normalizeSourcePath(path) {
     if (!path) {
       return null;
     }
     return String(path).replace(/^\/+/, "");
+  }
+
+  async function githubPublicRequest(urlPath) {
+    const response = await fetch(`https://api.github.com${urlPath}`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (error) {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      const message = payload && payload.message
+        ? payload.message
+        : `GitHub API ${response.status}`;
+      const err = new Error(message);
+      err.status = response.status;
+      throw err;
+    }
+
+    return payload;
   }
 
   function sectionIdFromPath(path) {
@@ -84,6 +121,232 @@
     }
     console.log(`Resolved content repository: ${owner}/${name} (branch: ${baseBranch})`);
     return { owner, name, baseBranch };
+  }
+
+  function formatRelativeTime(isoString) {
+    if (!isoString) {
+      return "";
+    }
+    const timestamp = Date.parse(isoString);
+    if (Number.isNaN(timestamp)) {
+      return "";
+    }
+    const deltaMs = Date.now() - timestamp;
+    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    if (Math.abs(deltaMs) < hour) {
+      return rtf.format(-Math.round(deltaMs / minute), "minute");
+    }
+    if (Math.abs(deltaMs) < day) {
+      return rtf.format(-Math.round(deltaMs / hour), "hour");
+    }
+    return rtf.format(-Math.round(deltaMs / day), "day");
+  }
+
+  function shortenSha(sha) {
+    return String(sha || "").slice(0, 7);
+  }
+
+  function classifyDeployState(run) {
+    if (!run) {
+      return { label: "unknown", cssClass: "unknown" };
+    }
+
+    if (run.status && run.status !== "completed") {
+      return { label: run.status, cssClass: "running" };
+    }
+
+    const conclusion = String(run.conclusion || "").toLowerCase();
+    if (conclusion === "success") {
+      return { label: "success", cssClass: "success" };
+    }
+    if (conclusion === "cancelled" || conclusion === "timed_out" || conclusion === "failure" || conclusion === "action_required") {
+      return { label: conclusion || "failed", cssClass: "failed" };
+    }
+    if (conclusion === "skipped" || conclusion === "neutral") {
+      return { label: conclusion, cssClass: "neutral" };
+    }
+    return { label: conclusion || "unknown", cssClass: "unknown" };
+  }
+
+  function isPagesDeployRun(run) {
+    const name = String(run && run.name ? run.name : "").toLowerCase();
+    const path = String(run && run.path ? run.path : "").toLowerCase();
+    const title = String(run && run.display_title ? run.display_title : "").toLowerCase();
+    const eventName = String(run && run.event ? run.event : "").toLowerCase();
+    const looksLikePages = name.includes("pages")
+      || path.includes("pages")
+      || title.includes("pages")
+      || path.includes("deploy");
+    return looksLikePages && (eventName === "push" || eventName === "workflow_dispatch" || eventName === "schedule" || !eventName);
+  }
+
+  async function refreshRepoActivity(force) {
+    if (state.repoActivityBusy && !force) {
+      return;
+    }
+
+    const repo = resolveRepoConfig();
+    if (!repo) {
+      return;
+    }
+
+    state.repoActivityBusy = true;
+    updateRepoActivityUi();
+
+    try {
+      const repoPrefix = `/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}`;
+      const branchRef = encodeURIComponent(repo.baseBranch);
+      const [commitResult, runsResult] = await Promise.allSettled([
+        githubPublicRequest(`${repoPrefix}/commits/${branchRef}`),
+        githubPublicRequest(`${repoPrefix}/actions/runs?branch=${branchRef}&per_page=20`),
+      ]);
+
+      const nextActivity = {
+        branch: repo.baseBranch,
+        updatedAt: Date.now(),
+      };
+
+      if (commitResult.status === "fulfilled") {
+        const commit = commitResult.value;
+        nextActivity.commitSha = commit && commit.sha ? commit.sha : "";
+        nextActivity.commitTime = commit && commit.commit && commit.commit.author
+          ? commit.commit.author.date
+          : "";
+        nextActivity.commitUrl = commit && commit.html_url ? commit.html_url : "";
+      } else {
+        nextActivity.commitError = commitResult.reason && commitResult.reason.message
+          ? commitResult.reason.message
+          : "Could not load latest commit.";
+      }
+
+      if (runsResult.status === "fulfilled") {
+        const workflowRuns = runsResult.value;
+        const runs = workflowRuns && Array.isArray(workflowRuns.workflow_runs)
+          ? workflowRuns.workflow_runs
+          : [];
+        const pagesRun = runs.find((run) => isPagesDeployRun(run)) || null;
+        nextActivity.deployRun = pagesRun;
+        nextActivity.fallbackRun = pagesRun ? null : (runs[0] || null);
+      } else {
+        nextActivity.runsError = runsResult.reason && runsResult.reason.message
+          ? runsResult.reason.message
+          : "Could not load deploy workflow runs.";
+      }
+
+      if (!nextActivity.commitSha && !nextActivity.deployRun && !nextActivity.fallbackRun) {
+        nextActivity.error = nextActivity.commitError || nextActivity.runsError || "Could not load repo activity.";
+      }
+
+      state.repoActivity = nextActivity;
+    } catch (error) {
+      console.error(error);
+      state.repoActivity = {
+        error: error.message || "Could not load repo activity.",
+      };
+    } finally {
+      state.repoActivityBusy = false;
+      updateRepoActivityUi();
+    }
+  }
+
+  function startRepoActivityPolling() {
+    if (state.repoActivityPollId) {
+      window.clearInterval(state.repoActivityPollId);
+      state.repoActivityPollId = null;
+    }
+    state.repoActivityPollId = window.setInterval(() => {
+      if (document.hidden) {
+        return;
+      }
+      refreshRepoActivity(false);
+    }, 120000);
+  }
+
+  function stopRepoActivityPolling() {
+    if (!state.repoActivityPollId) {
+      return;
+    }
+    window.clearInterval(state.repoActivityPollId);
+    state.repoActivityPollId = null;
+  }
+
+  function setActivityLink(el, text, href, cssClass) {
+    if (!el) {
+      return;
+    }
+    el.textContent = text;
+    el.className = `inline-repo-link ${cssClass || ""}`.trim();
+    if (href) {
+      el.setAttribute("href", href);
+      el.setAttribute("target", "_blank");
+      el.setAttribute("rel", "noopener noreferrer");
+      el.removeAttribute("aria-disabled");
+    } else {
+      el.removeAttribute("href");
+      el.removeAttribute("target");
+      el.removeAttribute("rel");
+      el.setAttribute("aria-disabled", "true");
+    }
+  }
+
+  function updateRepoActivityUi() {
+    if (!elements.repoCommit || !elements.repoDeploy) {
+      return;
+    }
+
+    if (state.repoActivityBusy) {
+      setActivityLink(elements.repoCommit, "Commit …", "", "is-muted");
+      setActivityLink(elements.repoDeploy, "Deploy …", "", "is-muted");
+      return;
+    }
+
+    const activity = state.repoActivity;
+    if (!activity) {
+      setActivityLink(elements.repoCommit, "Commit unavailable", "", "is-muted");
+      setActivityLink(elements.repoDeploy, "Deploy unavailable", "", "is-muted");
+      return;
+    }
+
+    if (activity.error) {
+      setActivityLink(elements.repoCommit, "Commit unavailable", "", "is-warning");
+      setActivityLink(elements.repoDeploy, "Deploy unavailable", "", "is-warning");
+      return;
+    }
+
+    const branch = activity.branch || "";
+    const branchLabel = branch ? `${branch}:` : "";
+    const commitText = activity.commitSha
+      ? `${branchLabel}${shortenSha(activity.commitSha)}${formatRelativeTime(activity.commitTime) ? ` · ${formatRelativeTime(activity.commitTime)}` : ""}`
+      : "Commit unavailable";
+    setActivityLink(
+      elements.repoCommit,
+      commitText,
+      activity.commitUrl,
+      activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted"),
+    );
+
+    const deployRun = activity.deployRun || activity.fallbackRun;
+    if (!deployRun) {
+      const deployText = activity.runsError
+        ? "Deploy unavailable"
+        : "Deploy pending";
+      setActivityLink(elements.repoDeploy, deployText, "", activity.runsError ? "is-warning" : "is-muted");
+      return;
+    }
+
+    const deployState = classifyDeployState(deployRun);
+    const deployAge = formatRelativeTime(deployRun.updated_at || deployRun.created_at);
+    const deployPrefix = activity.deployRun ? "Pages" : "Action";
+    const deployText = `${deployPrefix} ${deployState.label}${deployAge ? ` · ${deployAge}` : ""}`;
+    setActivityLink(
+      elements.repoDeploy,
+      deployText,
+      deployRun.html_url || "",
+      `is-${deployState.cssClass}`,
+    );
   }
 
   function resolveAuthWorkerOrigin() {
@@ -182,16 +445,53 @@
     return repoAccess.canPush ? "direct commit" : "PR fallback";
   }
 
+  function setAuthButtonVisual(config) {
+    if (!elements.authButton) {
+      return;
+    }
+
+    const {
+      label = "Sign in with GitHub",
+      title = "Sign in with GitHub",
+      glyph = "?",
+      signedIn = false,
+      busy = false,
+    } = config || {};
+
+    elements.authButton.replaceChildren();
+    elements.authButton.classList.toggle("is-busy", !!busy);
+
+    if (glyph === "user") {
+      const wrapper = document.createElement("span");
+      wrapper.className = "inline-auth-glyph inline-auth-glyph-user";
+      wrapper.innerHTML = AUTH_USER_ICON;
+      elements.authButton.appendChild(wrapper);
+    } else {
+      const wrapper = document.createElement("span");
+      wrapper.className = "inline-auth-glyph";
+      wrapper.textContent = String(glyph);
+      elements.authButton.appendChild(wrapper);
+    }
+
+    elements.authButton.setAttribute("aria-label", label);
+    elements.authButton.setAttribute("title", title);
+    elements.authButton.setAttribute("data-auth-state", signedIn ? "signed-in" : "signed-out");
+  }
+
   function updateAuthUi() {
-    if (!elements.authButton || !elements.authUser) {
+    if (!elements.authButton) {
       return;
     }
 
     const sessionPayload = state.authSession;
     if (state.authBusy) {
-      elements.authButton.textContent = "Working...";
       elements.authButton.disabled = true;
-      elements.authUser.textContent = state.authBusyMessage || "Checking GitHub session...";
+      setAuthButtonVisual({
+        glyph: "…",
+        label: state.authBusyMessage || "Working",
+        title: state.authBusyMessage || "Working",
+        busy: true,
+      });
       return;
     }
 
@@ -199,22 +499,28 @@
       const login = sessionPayload.user && sessionPayload.user.login
         ? sessionPayload.user.login
         : "";
-      elements.authButton.textContent = "Sign Out";
       elements.authButton.disabled = state.busy;
-      elements.authButton.setAttribute("data-auth-state", "signed-in");
-      elements.authUser.textContent = login
-        ? `@${login} (${getAuthAccessLabel(sessionPayload)})`
-        : "Signed in";
+      setAuthButtonVisual({
+        glyph: "user",
+        signedIn: true,
+        label: login ? `Signed in as @${login}. Click to sign out.` : "Signed in. Click to sign out.",
+        title: login
+          ? `@${login} (${getAuthAccessLabel(sessionPayload)}) · Click to sign out`
+          : "Signed in · Click to sign out",
+      });
       return;
     }
 
     const cached = readStoredAuthProfile();
-    elements.authButton.textContent = "Sign In";
     elements.authButton.disabled = state.busy;
-    elements.authButton.setAttribute("data-auth-state", "signed-out");
-    elements.authUser.textContent = cached && cached.login
-      ? `Signed out (last: @${cached.login})`
-      : "Not signed in";
+    setAuthButtonVisual({
+      glyph: "?",
+      signedIn: false,
+      label: "Sign in with GitHub",
+      title: cached && cached.login
+        ? `Sign in with GitHub (last: @${cached.login})`
+        : "Sign in with GitHub",
+    });
   }
 
   async function refreshAuthSession() {
@@ -334,6 +640,7 @@
       state.authSession = null;
       clearAuthProfile();
       setStatus("Signed out.");
+      refreshRepoActivity(true);
     } catch (error) {
       console.error(error);
       setStatus(error.message || "Could not sign out.", true);
@@ -381,6 +688,7 @@
     refreshAuthSession().then(() => {
       if (state.authSession && state.authSession.authenticated) {
         setStatus("GitHub sign-in complete.");
+        refreshRepoActivity(true);
       } else {
         setStatus("GitHub sign-in completed but session was not available. Retry once.", true);
       }
@@ -487,6 +795,7 @@
     elements.submitButton.disabled = state.busy || state.authBusy || !hasDrafts;
     elements.clearButton.disabled = state.busy || state.authBusy || !hasDrafts;
     updateAuthUi();
+    updateRepoActivityUi();
   }
 
   function renderPreface(markdown) {
@@ -1595,6 +1904,10 @@
 
       state.drafts.clear();
       updateToolbar();
+      refreshRepoActivity(true);
+      window.setTimeout(() => {
+        refreshRepoActivity(true);
+      }, 8000);
     } catch (error) {
       console.error(error);
       if (error && error.status === 401) {
@@ -1615,13 +1928,16 @@
     const toolbar = document.createElement("div");
     toolbar.id = "inline-editor-toolbar";
     toolbar.innerHTML = `
-      <div class="inline-editor-auth">
-        <button id="inline-auth-action" type="button">Sign In</button>
-        <span id="inline-auth-user">Not signed in</span>
+      <div class="inline-toolbar-row inline-toolbar-row-main">
+        <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
+        <div class="inline-editor-repo" aria-live="polite">
+          <a id="inline-repo-commit" class="inline-repo-link is-muted">Commit …</a>
+          <a id="inline-repo-deploy" class="inline-repo-link is-muted">Deploy …</a>
+        </div>
+        <button id="inline-edit-toggle" type="button">Enable Edit Mode</button>
+        <button id="inline-edit-submit" type="button" disabled>Publish (0)</button>
+        <button id="inline-edit-clear" type="button" disabled>Discard Drafts</button>
       </div>
-      <button id="inline-edit-toggle" type="button">Enable Edit Mode</button>
-      <button id="inline-edit-submit" type="button" disabled>Publish (0)</button>
-      <button id="inline-edit-clear" type="button" disabled>Discard Drafts</button>
       <span id="inline-editor-status"></span>
     `;
     document.body.appendChild(toolbar);
@@ -1777,7 +2093,8 @@
 
     elements.toolbar = toolbar;
     elements.authButton = toolbar.querySelector("#inline-auth-action");
-    elements.authUser = toolbar.querySelector("#inline-auth-user");
+    elements.repoCommit = toolbar.querySelector("#inline-repo-commit");
+    elements.repoDeploy = toolbar.querySelector("#inline-repo-deploy");
     elements.toggleButton = toolbar.querySelector("#inline-edit-toggle");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
@@ -1883,6 +2200,22 @@
       if (!state.authSession || !state.authSession.authenticated) {
         refreshAuthSession();
       }
+      refreshRepoActivity(false);
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        return;
+      }
+      refreshRepoActivity(false);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      stopRepoActivityPolling();
+      if (state.authPopupPollId) {
+        window.clearInterval(state.authPopupPollId);
+        state.authPopupPollId = null;
+      }
     });
 
     document.addEventListener("keydown", (event) => {
@@ -1921,8 +2254,11 @@
     setupEvents();
     updateToolbar();
     updateAuthUi();
+    updateRepoActivityUi();
     showAuthErrorFromUrl();
     refreshAuthSession();
+    refreshRepoActivity(true);
+    startRepoActivityPolling();
   }
 
   if (document.readyState === "loading") {
