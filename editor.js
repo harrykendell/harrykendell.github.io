@@ -346,8 +346,11 @@
       return;
     }
 
+    const showLoadingState = !state.repoActivity;
     state.repoActivityBusy = true;
-    updateRepoActivityUi();
+    if (showLoadingState) {
+      updateRepoActivityUi();
+    }
 
     try {
       const query = new URLSearchParams({
@@ -373,17 +376,24 @@
     }
   }
 
+  function isRepoActivityVisible() {
+    return !!(elements.toolbar && !elements.toolbar.hidden);
+  }
+
   function startRepoActivityPolling() {
+    if (!isRepoActivityVisible()) {
+      stopRepoActivityPolling();
+      return;
+    }
     if (state.repoActivityPollId) {
-      window.clearInterval(state.repoActivityPollId);
-      state.repoActivityPollId = null;
+      return;
     }
     state.repoActivityPollId = window.setInterval(() => {
-      if (document.hidden) {
+      if (document.hidden || !isRepoActivityVisible()) {
         return;
       }
       refreshRepoActivity(false);
-    }, 120000);
+    }, 10000);
   }
 
   function stopRepoActivityPolling() {
@@ -394,22 +404,41 @@
     state.repoActivityPollId = null;
   }
 
+  function setAttributeIfChanged(el, name, value) {
+    if (el.getAttribute(name) !== value) {
+      el.setAttribute(name, value);
+    }
+  }
+
+  function removeAttributeIfPresent(el, name) {
+    if (el.hasAttribute(name)) {
+      el.removeAttribute(name);
+    }
+  }
+
   function setActivityLink(el, text, href, cssClass) {
     if (!el) {
       return;
     }
-    el.textContent = text;
-    el.className = `inline-repo-link ${cssClass || ""}`.trim();
-    if (href) {
-      el.setAttribute("href", href);
-      el.setAttribute("target", "_blank");
-      el.setAttribute("rel", "noopener noreferrer");
-      el.removeAttribute("aria-disabled");
+    const nextText = String(text || "");
+    if (el.textContent !== nextText) {
+      el.textContent = nextText;
+    }
+    const nextClassName = `inline-repo-link ${cssClass || ""}`.trim();
+    if (el.className !== nextClassName) {
+      el.className = nextClassName;
+    }
+    const nextHref = typeof href === "string" ? href : "";
+    if (nextHref) {
+      setAttributeIfChanged(el, "href", nextHref);
+      setAttributeIfChanged(el, "target", "_blank");
+      setAttributeIfChanged(el, "rel", "noopener noreferrer");
+      removeAttributeIfPresent(el, "aria-disabled");
     } else {
-      el.removeAttribute("href");
-      el.removeAttribute("target");
-      el.removeAttribute("rel");
-      el.setAttribute("aria-disabled", "true");
+      removeAttributeIfPresent(el, "href");
+      removeAttributeIfPresent(el, "target");
+      removeAttributeIfPresent(el, "rel");
+      setAttributeIfChanged(el, "aria-disabled", "true");
     }
   }
 
@@ -430,8 +459,9 @@
       href,
       `inline-action-indicator ${stateClass}`,
     );
-    elements.repoDeploy.setAttribute("aria-label", label);
-    elements.repoDeploy.setAttribute("title", label);
+    const nextLabel = String(label || "Workflow status unavailable");
+    setAttributeIfChanged(elements.repoDeploy, "aria-label", nextLabel);
+    setAttributeIfChanged(elements.repoDeploy, "title", nextLabel);
   }
 
   function updateRepoActivityUi() {
@@ -439,7 +469,8 @@
       return;
     }
 
-    if (state.repoActivityBusy) {
+    const activity = state.repoActivity;
+    if (state.repoActivityBusy && !activity) {
       setActivityLink(elements.repoCommit, "…", "", "is-muted");
       setRepoActionIndicator({
         stateClass: "is-failed",
@@ -449,7 +480,6 @@
       return;
     }
 
-    const activity = state.repoActivity;
     if (!activity) {
       setActivityLink(elements.repoCommit, "—", "", "is-muted");
       setRepoActionIndicator({
@@ -484,11 +514,11 @@
       const commitTitle = commitAge
         ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
         : `Latest commit ${shortenSha(activity.commitSha)}`;
-      elements.repoCommit.setAttribute("aria-label", commitTitle);
-      elements.repoCommit.setAttribute("title", commitTitle);
+      setAttributeIfChanged(elements.repoCommit, "aria-label", commitTitle);
+      setAttributeIfChanged(elements.repoCommit, "title", commitTitle);
     } else {
-      elements.repoCommit.setAttribute("aria-label", "Latest commit unavailable");
-      elements.repoCommit.setAttribute("title", "Latest commit unavailable");
+      setAttributeIfChanged(elements.repoCommit, "aria-label", "Latest commit unavailable");
+      setAttributeIfChanged(elements.repoCommit, "title", "Latest commit unavailable");
     }
 
     const deployRun = activity.deployRun || activity.fallbackRun;
@@ -1132,10 +1162,20 @@
       return;
     }
 
+    const wasVisible = !elements.toolbar.hidden;
     const shouldShow = !!isVisible || getTotalStagedFileCount() > 0;
     elements.toolbar.hidden = !shouldShow;
+    const isNowVisible = !elements.toolbar.hidden;
     if (!shouldShow && state.editMode) {
       setEditMode(false);
+    }
+    if (isNowVisible) {
+      startRepoActivityPolling();
+      if (!wasVisible) {
+        refreshRepoActivity(true);
+      }
+    } else {
+      stopRepoActivityPolling();
     }
     updateToolbarVisibilityButton();
     storeEditorState();
@@ -2738,11 +2778,14 @@
       if (!state.authSession || !state.authSession.authenticated) {
         refreshAuthSession();
       }
+      if (!isRepoActivityVisible()) {
+        return;
+      }
       refreshRepoActivity(false);
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
+      if (document.hidden || !isRepoActivityVisible()) {
         return;
       }
       refreshRepoActivity(false);
@@ -2794,7 +2837,6 @@
     updateRepoActivityUi();
     showAuthErrorFromUrl();
     refreshAuthSession();
-    refreshRepoActivity(true);
     startRepoActivityPolling();
   }
 
