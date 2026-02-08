@@ -24,13 +24,19 @@ Useful reading:
 - [Damage classification in sandwich structures](https://www.aircraftsystemstech.com/2019/06/damage-classification-sandwich.html)
 
 <div class="figure-grid">
-  <figure class="figure-grid-item">
+  <figure class="figure">
     <img src="imgs/hull_damage_example.jpg" alt="Localized hull damage before scarf repair" />
     <div class="figure-body">
       <p class="figure-caption">Example of localized hull damage before any prep work.</p>
     </div>
   </figure>
-  <figure class="figure-grid-item">
+  <figure class="figure">
+    <img src="imgs/hull_repair_scarf.jpg" alt="Prepared scarf joint area before layup" />
+    <div class="figure-body">
+      <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>
+    </div>
+  </figure>
+    <figure class="figure">
     <img src="imgs/hull_repair_scarf.jpg" alt="Prepared scarf joint area before layup" />
     <div class="figure-body">
       <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>

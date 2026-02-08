@@ -22,6 +22,7 @@
   const AUTH_PROFILE_STORAGE_KEY = "editor-github-profile";
   const EDITOR_STATE_STORAGE_KEY = "editor-state";
   const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
+  const appUtils = window.AppUtils || null;
   const state = {
     busy: false,
     authBusy: false,
@@ -253,15 +254,18 @@
   }
 
   function resolveRepoConfig() {
-    const owner = typeof CONTENT_REPO_OWNER === "string"
-      ? CONTENT_REPO_OWNER
-      : "";
-    const name = typeof CONTENT_REPO_NAME === "string"
-      ? CONTENT_REPO_NAME
-      : "";
-    const baseBranch = typeof CONTENT_REPO_BRANCH === "string"
-      ? CONTENT_REPO_BRANCH
-      : "unknown";
+    const utilConfig = appUtils && typeof appUtils.getContentRepoConfig === "function"
+      ? appUtils.getContentRepoConfig()
+      : null;
+    const owner = utilConfig && typeof utilConfig.owner === "string"
+      ? utilConfig.owner
+      : (typeof CONTENT_REPO_OWNER === "string" ? CONTENT_REPO_OWNER : "");
+    const name = utilConfig && typeof utilConfig.name === "string"
+      ? utilConfig.name
+      : (typeof CONTENT_REPO_NAME === "string" ? CONTENT_REPO_NAME : "");
+    const baseBranch = utilConfig && typeof utilConfig.baseBranch === "string"
+      ? utilConfig.baseBranch
+      : (typeof CONTENT_REPO_BRANCH === "string" ? CONTENT_REPO_BRANCH : "unknown");
 
     if (!owner || !name) {
       return null;
@@ -1141,8 +1145,8 @@
     const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
       ? extractTitleAndContentFromMarkdown(markdown)
       : { content: markdown };
-    const introEditUrl = typeof getGitHubEditUrl === "function"
-      ? getGitHubEditUrl(INTRO_PATH)
+    const introEditUrl = appUtils && typeof appUtils.getGitHubEditUrl === "function"
+      ? appUtils.getGitHubEditUrl(INTRO_PATH)
       : null;
     const introEditLink = document.getElementById("intro-edit-link");
     if (introEditLink) {
@@ -1159,8 +1163,8 @@
     }
 
     preface.innerHTML = marked.parse(titleAndContent.content);
-    if (typeof normalizeInternalHashLinks === "function") {
-      normalizeInternalHashLinks(preface);
+    if (appUtils && typeof appUtils.normalizeInternalHashLinks === "function") {
+      appUtils.normalizeInternalHashLinks(preface);
     }
     if (typeof wrapTables === "function") {
       wrapTables(preface);

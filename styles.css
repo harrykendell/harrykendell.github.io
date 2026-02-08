@@ -620,23 +620,8 @@ hr {
 .figure-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0px;
+    gap: var(--gap);
     margin: 0px 0 0px;
-}
-
-.figure-grid-item {
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-soft);
-    background: #fff;
-    margin-inline: 0px;
-}
-
-.figure-grid-item img {
-    display: block;
-    width: 100%;
-    height: auto;
 }
 
 .video-wrapper,
@@ -719,5 +704,4 @@ hr {
     .table-scroll table {
         width: 860px;
     }
-
 }

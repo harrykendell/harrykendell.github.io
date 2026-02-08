@@ -25,51 +25,40 @@ const ACTIVATION_OFFSET = 120;
 let activeTrackingObserver = null;
 let activeTrackingResizeHandler = null;
 let activeTrackingScrollHandler = null;
+let sectionToggleBound = false;
+let sidebarLinksBound = false;
 
 const SECTION_GROUPS = {
-  order: ["maintenance", "repairs", "supplement"],
+  order: ["maintenance", "repairs", "supplement", "other"],
   labels: {
     maintenance: "Maintenance",
     repairs: "Repairs",
     supplement: "Supplement",
+    other: "Other",
   },
 };
 
-const CONTENT_REPO_OWNER = "harrykendell";
-const CONTENT_REPO_NAME = "harrykendell.github.io";
-const CONTENT_REPO_BRANCH = "main";
-
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+if (
+  !window.AppUtils
+  || typeof window.AppUtils.escapeHtml !== "function"
+  || typeof window.AppUtils.escapeAttribute !== "function"
+  || typeof window.AppUtils.getGitHubEditUrl !== "function"
+  || typeof window.AppUtils.normalizeHashValue !== "function"
+  || typeof window.AppUtils.replaceUrlState !== "function"
+  || typeof window.AppUtils.getInternalHashFromLink !== "function"
+  || typeof window.AppUtils.normalizeInternalHashLinks !== "function"
+) {
+  throw new Error("AppUtils is required before script.js.");
 }
-
-function escapeAttribute(value) {
-  return escapeHtml(value).replace(/`/g, "&#96;");
-}
-
-function getGitHubEditUrl(relativePath) {
-  const cleanPath = String(relativePath || "").replace(/^\/+/, "");
-  if (!cleanPath) {
-    return null;
-  }
-
-  const owner = encodeURIComponent(CONTENT_REPO_OWNER);
-  const repo = encodeURIComponent(CONTENT_REPO_NAME);
-  const branch = encodeURIComponent(CONTENT_REPO_BRANCH);
-  const path = cleanPath
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-
-  return `https://github.com/${owner}/${repo}/edit/${branch}/${path}`;
-}
-
-window.getGitHubEditUrl = getGitHubEditUrl;
+const {
+  escapeHtml,
+  escapeAttribute,
+  getGitHubEditUrl: appGetGitHubEditUrl,
+  normalizeHashValue: appNormalizeHashValue,
+  replaceUrlState: appReplaceUrlState,
+  getInternalHashFromLink: appGetInternalHashFromLink,
+  normalizeInternalHashLinks: appNormalizeInternalHashLinks,
+} = window.AppUtils;
 
 function getEffectiveTocLevel() {
   return Math.min(6, tocDepth + 1);
@@ -87,6 +76,21 @@ function refreshSearchBarIndex() {
     return;
   }
   window.SearchBar.refreshIndex();
+}
+
+function scheduleNonCriticalWork(task) {
+  if (typeof task !== "function") {
+    return;
+  }
+
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(() => {
+      task();
+    }, { timeout: 600 });
+    return;
+  }
+
+  window.setTimeout(task, 0);
 }
 
 async function loadSections() {
@@ -138,7 +142,7 @@ async function loadSections() {
   });
 
   container.appendChild(fragment);
-  normalizeInternalHashLinks(container);
+  appNormalizeInternalHashLinks(container);
 
   // Setup click handlers after all sections are loaded
   setupSectionToggle();
@@ -147,12 +151,15 @@ async function loadSections() {
   setupSidebarLinks();
   setupTocDepthControl();
   setupTocToggle();
-  setupActiveTracking();
   setupSearchBar();
-  refreshSearchBarIndex();
 
   // Restore scroll position after sections are loaded
   restoreScrollPosition();
+
+  // Defer active tracking setup so first paint (sections + TOC) is not blocked.
+  window.requestAnimationFrame(() => {
+    setupActiveTracking();
+  });
 }
 
 async function loadPreface() {
@@ -167,8 +174,13 @@ async function loadPreface() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const markdown = await response.text();
-    const { content } = extractTitleAndContentFromMarkdown(markdown);
-    const introEditUrl = getGitHubEditUrl("sections/supplement/introduction.md");
+    const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
+      ? extractTitleAndContentFromMarkdown(markdown)
+      : { content: markdown };
+    const content = titleAndContent && typeof titleAndContent.content === "string"
+      ? titleAndContent.content
+      : markdown;
+    const introEditUrl = appGetGitHubEditUrl("sections/supplement/introduction.md");
     const introEditLink = document.getElementById("intro-edit-link");
     if (introEditLink) {
       introEditLink.setAttribute("data-source-path", "sections/supplement/introduction.md");
@@ -183,16 +195,19 @@ async function loadPreface() {
       }
     }
 
-    preface.innerHTML = marked.parse(content);
+    if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+      preface.innerHTML = marked.parse(content);
+    } else {
+      preface.textContent = content;
+    }
     if (typeof addHeadingIds === "function") {
       addHeadingIds(preface, "preface");
     }
-    normalizeInternalHashLinks(preface);
+    appNormalizeInternalHashLinks(preface);
     wrapTables(preface);
     if (typeof optimizeSectionMedia === "function") {
       optimizeSectionMedia(preface);
     }
-    refreshSearchBarIndex();
   } catch (error) {
     console.error("Failed to load preface introduction", error);
   }
@@ -294,7 +309,7 @@ function getSectionGroup(sectionId) {
   if (sectionId.startsWith("supplement/")) {
     return "supplement";
   }
-  return "ERROR_UNKNOWN_GROUP";
+  return "other";
 }
 
 function renderSectionNavItem(section, effectiveDepth) {
@@ -337,84 +352,126 @@ function renderSectionNavItem(section, effectiveDepth) {
 
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadPreface();
-  loadSections();
-});
-
-
-function normalizeHashValue(hash) {
-  if (!hash || typeof hash !== "string") {
-    return null;
+function formatSectionTitleFromId(sectionId) {
+  const raw = String(sectionId || "");
+  const lastSegment = raw.includes("/") ? raw.split("/").pop() : raw;
+  const slug = String(lastSegment || raw).trim().toLowerCase();
+  if (!slug) {
+    return raw;
   }
 
-  const rawValue = hash.startsWith("#") ? hash.slice(1) : hash;
-  if (!rawValue) {
-    return null;
-  }
+  const lowercaseWords = new Set([
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "but",
+    "by",
+    "for",
+    "if",
+    "in",
+    "nor",
+    "of",
+    "on",
+    "or",
+    "per",
+    "the",
+    "to",
+    "via",
+  ]);
 
-  let decodedValue = rawValue;
-  try {
-    decodedValue = decodeURIComponent(rawValue);
-  } catch (error) {
-    decodedValue = rawValue;
-  }
-
-  return decodedValue ? `#${decodedValue}` : null;
+  const words = slug.split(/[-_]+/).filter(Boolean);
+  return words
+    .map((word, index) => {
+      const isConnector = lowercaseWords.has(word);
+      const isFirstOrLast = index === 0 || index === words.length - 1;
+      if (isConnector && !isFirstOrLast) {
+        return word;
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
 
-function replaceUrlState(nextHash) {
-  const url = new URL(window.location.href);
-  url.hash = nextHash || "";
-  history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
-}
-
-function getInternalHashFromLink(link) {
-  if (!link) {
-    return null;
-  }
-
-  const href = link.getAttribute("href");
-  if (!href) {
-    return null;
-  }
-
-  if (href.startsWith("#") || href.startsWith("/#")) {
-    const hashIndex = href.indexOf("#");
-    return normalizeHashValue(href.slice(hashIndex));
-  }
-
-  try {
-    const url = new URL(href, window.location.href);
-    if (!url.hash || url.origin !== window.location.origin) {
-      return null;
-    }
-
-    const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
-    const targetPath = url.pathname.replace(/\/+$/, "") || "/";
-    if (targetPath !== currentPath) {
-      return null;
-    }
-
-    return normalizeHashValue(url.hash);
-  } catch (error) {
-    return null;
-  }
-}
-
-function normalizeInternalHashLinks(rootEl) {
-  if (!rootEl) {
+function renderInitialSidebar() {
+  const sidebarList = document.getElementById("toc-list");
+  if (!sidebarList) {
     return;
   }
 
-  const links = Array.from(rootEl.querySelectorAll("a[href]"));
-  links.forEach((link) => {
-    const hash = getInternalHashFromLink(link);
-    if (hash) {
-      link.setAttribute("href", hash);
+  const groupOrder = SECTION_GROUPS.order;
+  const groupLabels = SECTION_GROUPS.labels;
+  const groupedSections = groupOrder.reduce((acc, groupKey) => {
+    acc[groupKey] = [];
+    return acc;
+  }, {});
+
+  sectionFiles.forEach((sectionId) => {
+    const groupKey = getSectionGroup(sectionId);
+    if (!groupedSections[groupKey]) {
+      groupedSections[groupKey] = [];
     }
+    groupedSections[groupKey].push(sectionId);
+  });
+
+  const sidebarHtml = groupOrder.map((groupKey) => {
+    const groupSectionIds = groupedSections[groupKey] || [];
+    if (groupSectionIds.length === 0) {
+      return "";
+    }
+
+    const groupItemsHtml = groupSectionIds.map((sectionId) => {
+      const sectionTitle = formatSectionTitleFromId(sectionId);
+      const safeSectionId = escapeAttribute(sectionId);
+      const safeSectionTitle = escapeHtml(sectionTitle);
+      return `
+        <li>
+          <div class="nav-row">
+            <button class="nav-arrow collapsed" type="button" data-section="${safeSectionId}" aria-label="Toggle section">▼</button>
+            <a href="#${safeSectionId}" data-section="${safeSectionId}">${safeSectionTitle}</a>
+          </div>
+          <ul class="sub-list collapsed" data-parent-section="${safeSectionId}"></ul>
+        </li>
+      `;
+    }).join("");
+
+    const groupLabel = groupLabels[groupKey];
+    const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
+    const titleHtml = safeGroupLabel
+      ? `<div class="toc-group-title">${safeGroupLabel}</div>`
+      : "";
+
+    return `
+      <li class="toc-group">
+        ${titleHtml}
+        <ul class="toc-group-list">
+          ${groupItemsHtml}
+        </ul>
+      </li>
+    `;
+  }).join("");
+
+  sidebarList.innerHTML = sidebarHtml;
+  refreshSidebarLinksCache();
+}
+
+async function initApp() {
+  renderInitialSidebar();
+  setupSidebarLinks();
+
+  await Promise.all([loadPreface(), loadSections()]);
+  scheduleNonCriticalWork(() => {
+    refreshSearchBarIndex();
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  initApp().catch((error) => {
+    console.error("App initialization failed", error);
+  });
+});
+
 
 document.addEventListener("click", function (event) {
   if (event.defaultPrevented || event.button !== 0) {
@@ -434,7 +491,7 @@ document.addEventListener("click", function (event) {
     return;
   }
 
-  const hash = getInternalHashFromLink(link);
+  const hash = appGetInternalHashFromLink(link);
   if (hash && scrollToSection(hash)) {
     event.preventDefault();
   }
@@ -571,7 +628,7 @@ function setupActiveTracking() {
         activeLink.classList.add("active");
         // Update the URL hash to match the active heading, but only if it changed and hash updates are enabled
         if (hashUpdateEnabled && window.location.hash !== `#${activeElement.id}`) {
-          replaceUrlState(`#${activeElement.id}`);
+          appReplaceUrlState(`#${activeElement.id}`);
         }
       }
     } else {
@@ -581,7 +638,7 @@ function setupActiveTracking() {
       if (contentsLink) {
         contentsLink.classList.add("active");
         if (hashUpdateEnabled && window.location.hash !== "#top") {
-          replaceUrlState("#top");
+          appReplaceUrlState("#top");
         }
       }
     }
@@ -622,7 +679,7 @@ function setupActiveTracking() {
 }
 
 function scrollToSection(hash, behavior = "smooth") {
-  const normalizedHash = normalizeHashValue(hash);
+  const normalizedHash = appNormalizeHashValue(hash);
   if (!normalizedHash) {
     return false;
   }
@@ -639,10 +696,7 @@ function scrollToSection(hash, behavior = "smooth") {
 
   const parentSection = targetElement.closest(".section");
   if (parentSection && parentSection.classList.contains("collapsed")) {
-    const header = parentSection.querySelector(".section-header");
-    if (header) {
-      header.click();
-    }
+    setSectionCollapsed(parentSection, false, { syncActive: false });
   }
 
   const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
@@ -653,49 +707,86 @@ function scrollToSection(hash, behavior = "smooth") {
   return true;
 }
 
-function setupSectionToggle() {
-  const sections = document.querySelectorAll(".section");
+function setCollapsibleState(container, headerSelector, isCollapsed) {
+  if (!(container instanceof Element)) {
+    return false;
+  }
 
-  sections.forEach((section) => {
-    const header = section.querySelector(".section-header");
+  const nextCollapsed = !!isCollapsed;
+  const changed = container.classList.contains("collapsed") !== nextCollapsed;
+  container.classList.toggle("collapsed", nextCollapsed);
 
-    if (header) {
-      if (header.dataset.toggleBound === "true") {
-        return;
-      }
+  const header = container.querySelector(headerSelector);
+  if (header) {
+    header.setAttribute("aria-expanded", String(!nextCollapsed));
+  }
 
-      const toggleSection = () => {
-        section.classList.toggle("collapsed");
-        const isCollapsed = section.classList.contains("collapsed");
-        header.setAttribute("aria-expanded", String(!isCollapsed));
+  return changed;
+}
 
-        const sectionId = section.id;
-        if (sectionId) {
-          updateSidebarArrow(sectionId, isCollapsed);
-          if (typeof window.updateActiveLink === "function") {
-            window.updateActiveLink();
-          }
-        }
-      };
+function setSectionCollapsed(section, isCollapsed, options) {
+  if (!(section instanceof Element)) {
+    return false;
+  }
 
-      header.addEventListener("click", (event) => {
-        if (event.target instanceof Element && event.target.closest(".section-edit-link")) {
-          return;
-        }
-        toggleSection();
-      });
-      header.addEventListener("keydown", (event) => {
-        if (event.target instanceof Element && event.target.closest(".section-edit-link")) {
-          return;
-        }
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          toggleSection();
-        }
-      });
-      header.dataset.toggleBound = "true";
+  const config = options || {};
+  const changed = setCollapsibleState(section, ".section-header", isCollapsed);
+  const sectionId = section.id;
+  if (sectionId) {
+    updateSidebarArrow(sectionId, section.classList.contains("collapsed"));
+  }
+
+  if (config.syncActive !== false && typeof window.updateActiveLink === "function") {
+    window.updateActiveLink();
+  }
+
+  return changed;
+}
+
+function toggleSectionCollapsed(section, options) {
+  if (!(section instanceof Element)) {
+    return false;
+  }
+  return setSectionCollapsed(section, !section.classList.contains("collapsed"), options);
+}
+
+function handleSectionHeaderToggle(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return;
+  }
+
+  const header = target.closest(".section-header");
+  if (!header) {
+    return;
+  }
+
+  const section = header.closest(".section");
+  if (!section) {
+    return;
+  }
+
+  if (target.closest(".section-edit-link")) {
+    return;
+  }
+
+  if (event.type === "keydown") {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
     }
-  });
+    event.preventDefault();
+  }
+
+  toggleSectionCollapsed(section);
+}
+
+function setupSectionToggle() {
+  if (sectionToggleBound) {
+    return;
+  }
+  document.addEventListener("click", handleSectionHeaderToggle);
+  document.addEventListener("keydown", handleSectionHeaderToggle);
+  sectionToggleBound = true;
 }
 
 function updateSidebarArrow(sectionId, isCollapsed) {
@@ -716,52 +807,46 @@ function updateSidebarArrow(sectionId, isCollapsed) {
 }
 
 function setupSidebarLinks() {
-  const sidebarLinks = document.querySelectorAll("#toc-list a, .toc-header a[href^='#']");
-  const sidebarArrows = document.querySelectorAll("#toc-list .nav-arrow");
-
-  sidebarArrows.forEach((arrow) => {
-    if (arrow.dataset.sidebarBound === "true") {
-      return;
-    }
-    arrow.addEventListener("click", (e) => {
-      e.preventDefault();
-      const sectionId = arrow.getAttribute("data-section");
-      const section = document.getElementById(sectionId);
-      if (!section) {
-        return;
-      }
-
-      section.classList.toggle("collapsed");
-      const isCollapsed = section.classList.contains("collapsed");
-      const header = section.querySelector(".section-header");
-      if (header) {
-        header.setAttribute("aria-expanded", String(!isCollapsed));
-      }
-
-      updateSidebarArrow(sectionId, isCollapsed);
-      window.updateActiveLink();
-    });
-    arrow.dataset.sidebarBound = "true";
-  });
-
-  sidebarLinks.forEach((link) => {
-    if (link.dataset.sidebarBound === "true") {
-      return;
-    }
-    link.addEventListener("click", () => {
-      const hash = getInternalHashFromLink(link);
-      if (!hash) {
-        return;
-      }
-
-      if (window.matchMedia("(max-width: 860px)").matches) {
-        if (typeof window.setTocOpen === "function") {
-          window.setTocOpen(false);
+  if (!sidebarLinksBound) {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) {
+      sidebar.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
         }
-      }
-    });
-    link.dataset.sidebarBound = "true";
-  });
+
+        const arrow = target.closest("#toc-list .nav-arrow");
+        if (arrow) {
+          event.preventDefault();
+          const sectionId = arrow.getAttribute("data-section");
+          const section = document.getElementById(sectionId);
+          if (!section) {
+            return;
+          }
+          toggleSectionCollapsed(section);
+          return;
+        }
+
+        const link = target.closest("#toc-list a[href^='#'], .toc-header a[href^='#']");
+        if (!link) {
+          return;
+        }
+
+        const hash = appGetInternalHashFromLink(link);
+        if (!hash) {
+          return;
+        }
+
+        if (window.matchMedia("(max-width: 860px)").matches) {
+          if (typeof window.setTocOpen === "function") {
+            window.setTocOpen(false);
+          }
+        }
+      });
+      sidebarLinksBound = true;
+    }
+  }
 
   const sections = document.querySelectorAll(".section");
   sections.forEach((section) => {

@@ -12,18 +12,17 @@ function slugify(text) {
         .replace(/-+/g, "-");
 }
 
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+if (
+    !window.AppUtils
+    || typeof window.AppUtils.escapeHtml !== "function"
+    || typeof window.AppUtils.escapeAttribute !== "function"
+    || typeof window.AppUtils.getGitHubEditUrl !== "function"
+) {
+    throw new Error("AppUtils is required before markdown-to-section.js.");
 }
-
-function escapeAttribute(value) {
-    return escapeHtml(value).replace(/`/g, "&#96;");
-}
+const markdownEscapeHtml = window.AppUtils.escapeHtml;
+const markdownEscapeAttribute = window.AppUtils.escapeAttribute;
+const markdownGetGitHubEditUrl = window.AppUtils.getGitHubEditUrl;
 
 function renderProcedureNode(node) {
     const skillRaw = (node.skillRaw || "").trim();
@@ -161,14 +160,9 @@ function initProcedures(rootEl) {
             return;
         }
 
-        procedure.classList.add("collapsed");
-        header.setAttribute("aria-expanded", "false");
+        setProcedureCollapsed(procedure, true);
         const toggleProcedure = () => {
-            procedure.classList.toggle("collapsed");
-            header.setAttribute(
-                "aria-expanded",
-                String(!procedure.classList.contains("collapsed")),
-            );
+            toggleProcedureCollapsed(procedure);
         };
         header.addEventListener("click", toggleProcedure);
         header.addEventListener("keydown", (event) => {
@@ -178,6 +172,30 @@ function initProcedures(rootEl) {
             }
         });
     });
+}
+
+function setProcedureCollapsed(procedure, isCollapsed) {
+    if (!(procedure instanceof Element)) {
+        return false;
+    }
+
+    const nextCollapsed = !!isCollapsed;
+    const changed = procedure.classList.contains("collapsed") !== nextCollapsed;
+    procedure.classList.toggle("collapsed", nextCollapsed);
+
+    const header = procedure.querySelector(".procedure-header");
+    if (header) {
+        header.setAttribute("aria-expanded", String(!nextCollapsed));
+    }
+
+    return changed;
+}
+
+function toggleProcedureCollapsed(procedure) {
+    if (!(procedure instanceof Element)) {
+        return false;
+    }
+    return setProcedureCollapsed(procedure, !procedure.classList.contains("collapsed"));
 }
 
 function transformCallouts(rootEl) {
@@ -332,7 +350,7 @@ function extractYouTubeId(src) {
 
 function buildYouTubeEmbed(iframe, videoId) {
     var title = iframe.getAttribute("title") || "YouTube video";
-    title = escapeHtml(title);
+    title = markdownEscapeHtml(title);
 
     let dataSrc = iframe.getAttribute("src") || "";
     try {
@@ -453,18 +471,16 @@ function markdownToSection(markdown, sectionId) {
 
     const html = marked.parse(transformProcedureBlocks(content, title));
 
-    const safeTitle = escapeHtml(title || sectionId);
-    const safeSectionId = escapeAttribute(sectionId);
+    const safeTitle = markdownEscapeHtml(title || sectionId);
+    const safeSectionId = markdownEscapeAttribute(sectionId);
     const sectionPath = `sections/${sectionId}.md`;
-    const editUrl = typeof window !== "undefined" && typeof window.getGitHubEditUrl === "function"
-        ? window.getGitHubEditUrl(sectionPath)
-        : null;
+    const editUrl = markdownGetGitHubEditUrl(sectionPath);
     const editLinkHtml = editUrl
-        ? `<a class="section-edit-link" data-source-path="${escapeAttribute(sectionPath)}" href="${escapeAttribute(editUrl)}" target="_blank" rel="noopener noreferrer">Edit</a>`
+        ? `<a class="section-edit-link" data-source-path="${markdownEscapeAttribute(sectionPath)}" href="${markdownEscapeAttribute(editUrl)}" target="_blank" rel="noopener noreferrer">Edit</a>`
         : "";
     const template = document.createElement("template");
     template.innerHTML = `
-        <section class="section collapsed" id="${safeSectionId}" data-source-path="${escapeAttribute(sectionPath)}">
+        <section class="section collapsed" id="${safeSectionId}" data-source-path="${markdownEscapeAttribute(sectionPath)}">
             <div class="section-header" role="button" tabindex="0" aria-expanded="false">
                 <div class="section-header-main">
                     <span class="section-toggle">▼</span>

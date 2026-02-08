@@ -16,19 +16,10 @@
     tokens: [],
     results: [],
   };
-
-  function escapeHtml(value) {
-    return String(value)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+  if (!window.AppUtils || typeof window.AppUtils.escapeHtml !== "function" || typeof window.AppUtils.escapeAttribute !== "function") {
+    throw new Error("AppUtils is required before sidebar.js.");
   }
-
-  function escapeAttribute(value) {
-    return escapeHtml(value).replace(/`/g, "&#96;");
-  }
+  const { escapeHtml, escapeAttribute } = window.AppUtils;
 
   function normalizeSearchText(value) {
     return String(value || "")
@@ -514,10 +505,15 @@
     if (!parentSection) {
       return expanded;
     }
-    const header = parentSection.querySelector(".section-header");
-    if (header) {
-      header.click();
+    if (typeof setSectionCollapsed === "function") {
+      setSectionCollapsed(parentSection, false, { syncActive: false });
       expanded = true;
+    } else {
+      const header = parentSection.querySelector(".section-header");
+      if (header) {
+        header.click();
+        expanded = true;
+      }
     }
     return expanded;
   }
@@ -531,10 +527,15 @@
     if (!parentProcedure) {
       return expanded;
     }
-    const header = parentProcedure.querySelector(".procedure-header");
-    if (header) {
-      header.click();
+    if (typeof setProcedureCollapsed === "function") {
+      setProcedureCollapsed(parentProcedure, false);
       expanded = true;
+    } else {
+      const header = parentProcedure.querySelector(".procedure-header");
+      if (header) {
+        header.click();
+        expanded = true;
+      }
     }
     return expanded;
   }
@@ -837,17 +838,7 @@
     renderSearchResults(state.results, tokens, rawQuery);
   }
 
-  function setup() {
-    if (initialized) {
-      return;
-    }
-
-    const { input, clear, results } = getSearchElements();
-    if (!input || !clear || !results) {
-      return;
-    }
-    initialized = true;
-
+  function bindSearchInputHandlers(input, clear, results) {
     input.addEventListener("input", () => {
       if (searchInputDebounceId) {
         window.clearTimeout(searchInputDebounceId);
@@ -901,7 +892,9 @@
         }
       }
     });
+  }
 
+  function bindSearchResultsHandlers(input, results) {
     results.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof Element)) {
@@ -957,7 +950,9 @@
         input.select();
       }
     });
+  }
 
+  function bindSearchGlobalHandlers(input) {
     document.addEventListener("keydown", (event) => {
       if (event.defaultPrevented) {
         return;
@@ -987,6 +982,22 @@
         syncInput: true,
       });
     });
+  }
+
+  function setup() {
+    if (initialized) {
+      return;
+    }
+
+    const { input, clear, results } = getSearchElements();
+    if (!input || !clear || !results) {
+      return;
+    }
+    initialized = true;
+
+    bindSearchInputHandlers(input, clear, results);
+    bindSearchResultsHandlers(input, results);
+    bindSearchGlobalHandlers(input);
 
     const initialQuery = getSearchQueryFromUrl();
     setSearchQuery(initialQuery, {
