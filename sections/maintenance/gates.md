@@ -1,4 +1,4 @@
-# Gates (oarlocks), pins, pitch bushings
+# Gates
 
 <figure class="figure">
   <img src="imgs/overviews/pin_overview.jpg" alt="Gate and pin assembly on a rigged rowing shell" />

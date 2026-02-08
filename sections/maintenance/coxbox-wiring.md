@@ -1,4 +1,4 @@
-# Coxbox wiring and boat harnesses
+# Coxbox wiring
 
 <figure class="figure figure-float-right">
   <img src="imgs/wiring/coxbox_plug.jpg" alt="Close-up of a coxbox plug showing pin layout" />

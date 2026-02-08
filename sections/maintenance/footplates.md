@@ -1,4 +1,4 @@
-# Footplates, shoes, and steering
+# Footplates
 
 Different boats use different stretcher and steering systems (wing-nut tracks, quick-release clamps, wire rope, Dyneema, rigid pushrods). Always confirm the exact routing and parts on that boat’s rigging sheet.
 

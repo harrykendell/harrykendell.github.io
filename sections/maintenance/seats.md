@@ -1,4 +1,4 @@
-# Seats, wheels, and tracks
+# Seats
 
 ## Routine cleaning
 

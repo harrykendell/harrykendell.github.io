@@ -4,32 +4,17 @@
   const SEARCH_URL_PARAM = "q";
   const SEARCH_RESULT_LIMIT = 12;
   const SEARCH_MIN_QUERY_LENGTH = 2;
-  const SEARCH_HIGHLIGHT_LIMIT = 220;
-  const SEARCH_RESULT_MARK_CLASS = "search-result-highlight";
-  const SEARCH_CONTENT_MARK_CLASS = "search-highlight";
-
-  const DEFAULT_GROUP_LABELS = {
-    maintenance: "Maintenance",
-    repairs: "Repairs",
-    supplement: "Supplement",
-  };
+  const SEARCH_NODE_ID_ATTR = "data-search-node-id";
 
   let initialized = false;
   let searchIndex = [];
+  let searchNodeCounter = 0;
   let searchInputDebounceId = null;
-  const navigatorUi = {
-    root: null,
-    count: null,
-    cancel: null,
-    next: null,
-  };
   const state = {
     query: "",
     normalizedQuery: "",
     tokens: [],
     results: [],
-    highlightMarks: [],
-    highlightIndex: -1,
   };
 
   function escapeHtml(value) {
@@ -43,17 +28,6 @@
 
   function escapeAttribute(value) {
     return escapeHtml(value).replace(/`/g, "&#96;");
-  }
-
-  function getSectionLabels() {
-    if (
-      window.SECTION_GROUPS
-      && window.SECTION_GROUPS.labels
-      && typeof window.SECTION_GROUPS.labels === "object"
-    ) {
-      return window.SECTION_GROUPS.labels;
-    }
-    return DEFAULT_GROUP_LABELS;
   }
 
   function normalizeSearchText(value) {
@@ -73,85 +47,32 @@
       .filter(Boolean);
   }
 
-  function escapeRegExp(value) {
-    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-
-  function mergeRanges(ranges) {
-    if (!ranges || ranges.length === 0) {
-      return [];
+  function buildHighlightTokens(tokens, normalizedQuery) {
+    const phrase = String(normalizedQuery || "").trim();
+    const ordered = [];
+    if (phrase.includes(" ") && phrase.length >= SEARCH_MIN_QUERY_LENGTH) {
+      ordered.push(phrase);
     }
-
-    const sorted = ranges
-      .filter((range) => range && Number.isFinite(range.start) && Number.isFinite(range.end) && range.end > range.start)
-      .sort((left, right) => left.start - right.start);
-
-    if (sorted.length === 0) {
-      return [];
-    }
-
-    const merged = [{ start: sorted[0].start, end: sorted[0].end }];
-    for (let idx = 1; idx < sorted.length; idx += 1) {
-      const current = sorted[idx];
-      const previous = merged[merged.length - 1];
-      if (current.start <= previous.end) {
-        previous.end = Math.max(previous.end, current.end);
-      } else {
-        merged.push({ start: current.start, end: current.end });
+    (tokens || []).forEach((token) => {
+      if (token && token.length >= 2) {
+        ordered.push(token);
       }
-    }
+    });
 
-    return merged;
-  }
-
-  function getTextMatchRanges(text, tokens) {
-    if (!text || !tokens || tokens.length === 0) {
-      return [];
-    }
-
-    const lower = text.toLowerCase();
-    const ranges = [];
-    tokens.forEach((token) => {
-      if (!token) {
+    const unique = [];
+    const seen = new Set();
+    ordered.forEach((value) => {
+      if (seen.has(value)) {
         return;
       }
-      let cursor = 0;
-      while (cursor < lower.length) {
-        const index = lower.indexOf(token, cursor);
-        if (index === -1) {
-          break;
-        }
-        ranges.push({ start: index, end: index + token.length });
-        cursor = index + token.length;
-      }
+      seen.add(value);
+      unique.push(value);
     });
-
-    return mergeRanges(ranges);
+    return unique;
   }
 
-  function renderTextWithHighlightRanges(text, ranges, markClassName) {
-    if (!ranges || ranges.length === 0) {
-      return escapeHtml(text);
-    }
-
-    let cursor = 0;
-    const parts = [];
-    ranges.forEach((range) => {
-      const start = Math.max(0, Math.min(range.start, text.length));
-      const end = Math.max(start, Math.min(range.end, text.length));
-      if (start > cursor) {
-        parts.push(escapeHtml(text.slice(cursor, start)));
-      }
-      const highlighted = text.slice(start, end);
-      parts.push(`<mark class="${escapeAttribute(markClassName)}">${escapeHtml(highlighted)}</mark>`);
-      cursor = end;
-    });
-
-    if (cursor < text.length) {
-      parts.push(escapeHtml(text.slice(cursor)));
-    }
-
-    return parts.join("");
+  function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function buildSearchSnippet(text, tokens, maxLength = 170) {
@@ -307,7 +228,47 @@
     }
 
     return node.classList.contains("procedure-description")
+      || node.classList.contains("procedure-title")
+      || node.classList.contains("procedure-skill-badge")
       || node.classList.contains("callout-title");
+  }
+
+  function hasTokenMatchInText(text, tokens) {
+    const normalizedText = normalizeSearchText(text);
+    if (!normalizedText) {
+      return false;
+    }
+
+    return (tokens || []).some((token) => token && normalizedText.includes(token));
+  }
+
+  function resolveSnippetSource(result, normalizedQuery, tokens) {
+    if (!result) {
+      return "";
+    }
+
+    const phrase = String(normalizedQuery || "");
+    const candidates = [
+      result.previewText || "",
+      result.title || "",
+      result.sectionTitle || "",
+    ];
+
+    const phraseCandidate = candidates.find((candidate) => {
+      const normalized = normalizeSearchText(candidate);
+      return normalized && phrase && normalized.includes(phrase);
+    });
+    if (phraseCandidate) {
+      return phraseCandidate;
+    }
+
+    const tokenCandidate = candidates.find((candidate) =>
+      hasTokenMatchInText(candidate, tokens));
+    if (tokenCandidate) {
+      return tokenCandidate;
+    }
+
+    return result.previewText || result.title || result.sectionTitle || "";
   }
 
   function addSearchIndexItem(items, dedupe, item) {
@@ -339,6 +300,53 @@
     });
   }
 
+  function ensureSearchNodeId(node) {
+    if (!(node instanceof Element)) {
+      return "";
+    }
+
+    const existing = (node.getAttribute(SEARCH_NODE_ID_ATTR) || "").trim();
+    if (existing) {
+      return existing;
+    }
+
+    searchNodeCounter += 1;
+    const nextId = `snode-${searchNodeCounter}`;
+    node.setAttribute(SEARCH_NODE_ID_ATTR, nextId);
+    return nextId;
+  }
+
+  function getSearchNodeById(nodeId) {
+    const normalizedNodeId = String(nodeId || "").trim();
+    if (!normalizedNodeId || !/^[-a-zA-Z0-9_]+$/.test(normalizedNodeId)) {
+      return null;
+    }
+    const selector = `#preface-content [${SEARCH_NODE_ID_ATTR}="${normalizedNodeId}"], #sections-container [${SEARCH_NODE_ID_ATTR}="${normalizedNodeId}"]`;
+    return document.querySelector(selector);
+  }
+
+  function getProcedureTitleForNode(node) {
+    if (!(node instanceof Element)) {
+      return "";
+    }
+
+    const procedure = node.closest(".procedure");
+    if (!procedure) {
+      return "";
+    }
+
+    const titleEl = procedure.querySelector(".procedure-title");
+    if (!titleEl) {
+      return "";
+    }
+
+    const preferredTitle = titleEl.querySelector("span:nth-of-type(2)");
+    const rawTitle = preferredTitle
+      ? preferredTitle.textContent
+      : titleEl.textContent;
+    return String(rawTitle || "").replace(/\s+/g, " ").trim();
+  }
+
   function indexSearchableContainer(options) {
     const {
       root,
@@ -364,6 +372,7 @@
       if (isSearchableContentNode(node)) {
         const text = (node.textContent || "").replace(/\s+/g, " ").trim();
         if (text) {
+          const sourceNodeId = ensureSearchNodeId(node);
           if (/^H[2-6]$/.test(node.tagName) && node.id) {
             currentHeadingId = node.id;
             currentHeadingTitle = text;
@@ -377,17 +386,35 @@
               sectionTitle,
               title: text,
               previewText: "",
+              sourceNodeId,
               baseWeight: headingBaseWeight - levelPenalty * 4,
             });
           } else if (text.length >= 24) {
+            const isProcedureContent = !!node.closest(".procedure");
+            const isProcedureTitleNode = isProcedureContent
+              && node.classList.contains("procedure-title");
+            const procedureContainer = isProcedureContent
+              ? node.closest(".procedure")
+              : null;
+            const procedureGroupId = procedureContainer
+              ? ensureSearchNodeId(procedureContainer)
+              : "";
+            const procedureTitle = isProcedureContent
+              ? getProcedureTitleForNode(node)
+              : "";
+            const resultTitle = isProcedureContent
+              ? (procedureTitle || currentHeadingTitle || sectionTitle)
+              : (currentHeadingTitle || sectionTitle);
             addSearchIndexItem(items, dedupe, {
-              kind: "content",
+              kind: isProcedureContent ? "procedure" : "content",
               targetId: currentHeadingId || sectionTargetId,
               sectionId,
               sectionGroup,
               sectionTitle,
-              title: currentHeadingTitle || sectionTitle,
-              previewText: text,
+              title: resultTitle,
+              previewText: isProcedureTitleNode ? "" : text,
+              sourceNodeId,
+              procedureGroupId,
               baseWeight: contentBaseWeight,
             });
           }
@@ -478,68 +505,12 @@
     };
   }
 
-  function ensureMobileNavigator() {
-    if (navigatorUi.root) {
-      return;
-    }
-
-    const root = document.createElement("div");
-    root.id = "mobile-search-nav";
-    root.className = "mobile-search-nav";
-    root.hidden = true;
-    root.innerHTML = `
-      <span class="mobile-search-nav-count" aria-live="polite" aria-atomic="true">0 / 0</span>
-      <button type="button" class="mobile-search-nav-cancel" aria-label="Cancel search">Cancel</button>
-      <button type="button" class="mobile-search-nav-next" aria-label="Go to next search match">Next</button>
-    `;
-
-    document.body.appendChild(root);
-    navigatorUi.root = root;
-    navigatorUi.count = root.querySelector(".mobile-search-nav-count");
-    navigatorUi.cancel = root.querySelector(".mobile-search-nav-cancel");
-    navigatorUi.next = root.querySelector(".mobile-search-nav-next");
-
-    if (navigatorUi.cancel) {
-      navigatorUi.cancel.addEventListener("click", () => {
-        cancelSearch();
-      });
-    }
-
-    if (navigatorUi.next) {
-      navigatorUi.next.addEventListener("click", () => {
-        goToAdjacentHighlight(1);
-      });
-    }
-  }
-
-  function updateMobileNavigator() {
-    ensureMobileNavigator();
-    if (!navigatorUi.root || !navigatorUi.count || !navigatorUi.next || !navigatorUi.cancel) {
-      return;
-    }
-
-    const hasActiveQuery = state.normalizedQuery.length >= SEARCH_MIN_QUERY_LENGTH;
-    const total = state.highlightMarks.length;
-    const shouldShow = hasActiveQuery;
-
-    navigatorUi.root.hidden = !shouldShow;
-    if (!shouldShow) {
-      return;
-    }
-
-    const current = total > 0
-      ? Math.max(0, state.highlightIndex) + 1
-      : 0;
-    navigatorUi.count.textContent = `${current} / ${total}`;
-    navigatorUi.next.disabled = total <= 1;
-  }
-
-  function expandSectionForMatch(mark) {
+  function expandSectionForElement(element) {
     let expanded = false;
-    if (!mark) {
+    if (!element) {
       return expanded;
     }
-    const parentSection = mark.closest(".section.collapsed");
+    const parentSection = element.closest(".section.collapsed");
     if (!parentSection) {
       return expanded;
     }
@@ -551,12 +522,12 @@
     return expanded;
   }
 
-  function expandProcedureForMatch(mark) {
+  function expandProcedureForElement(element) {
     let expanded = false;
-    if (!mark) {
+    if (!element) {
       return expanded;
     }
-    const parentProcedure = mark.closest(".procedure.collapsed");
+    const parentProcedure = element.closest(".procedure.collapsed");
     if (!parentProcedure) {
       return expanded;
     }
@@ -568,81 +539,37 @@
     return expanded;
   }
 
-  function expandAncestorsForMatch(mark) {
-    const sectionExpanded = expandSectionForMatch(mark);
-    const procedureExpanded = expandProcedureForMatch(mark);
+  function expandAncestorsForElement(element) {
+    const sectionExpanded = expandSectionForElement(element);
+    const procedureExpanded = expandProcedureForElement(element);
     return sectionExpanded || procedureExpanded;
   }
 
-  function scrollToHighlightMatch(mark) {
-    if (!mark) {
-      return;
+  function scrollToSearchSourceNode(sourceNodeId) {
+    const sourceNode = getSearchNodeById(sourceNodeId);
+    if (!sourceNode) {
+      return false;
     }
 
-    const expanded = expandAncestorsForMatch(mark);
+    const expanded = expandAncestorsForElement(sourceNode);
     const performScroll = () => {
-      const targetTop = mark.getBoundingClientRect().top + window.scrollY;
+      const targetTop = sourceNode.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: Math.max(targetTop - 116, 0),
         behavior: "smooth",
       });
+      flashSearchTarget(sourceNode);
     };
 
     if (expanded) {
       window.setTimeout(() => {
         window.requestAnimationFrame(performScroll);
       }, 140);
-      return;
+      return true;
     }
 
     performScroll();
-  }
-
-  function setActiveHighlightByIndex(nextIndex, scrollIntoView) {
-    const marks = state.highlightMarks;
-    if (!marks || marks.length === 0) {
-      state.highlightIndex = -1;
-      updateMobileNavigator();
-      return;
-    }
-
-    const normalizedIndex = ((nextIndex % marks.length) + marks.length) % marks.length;
-    state.highlightIndex = normalizedIndex;
-    marks.forEach((mark, index) => {
-      mark.classList.toggle("search-highlight-current", index === normalizedIndex);
-    });
-
-    const currentMark = marks[normalizedIndex];
-    if (scrollIntoView) {
-      scrollToHighlightMatch(currentMark);
-    }
-
-    updateMobileNavigator();
-  }
-
-  function refreshHighlightNavigation(resetIndex) {
-    const marks = Array.from(document.querySelectorAll(`mark.${SEARCH_CONTENT_MARK_CLASS}`));
-    state.highlightMarks = marks;
-
-    if (marks.length === 0) {
-      state.highlightIndex = -1;
-      updateMobileNavigator();
-      return;
-    }
-
-    if (resetIndex || state.highlightIndex < 0 || state.highlightIndex >= marks.length) {
-      state.highlightIndex = 0;
-    }
-
-    setActiveHighlightByIndex(state.highlightIndex, false);
-  }
-
-  function goToAdjacentHighlight(delta) {
-    if (!state.highlightMarks || state.highlightMarks.length === 0) {
-      return;
-    }
-    const current = state.highlightIndex >= 0 ? state.highlightIndex : 0;
-    setActiveHighlightByIndex(current + delta, true);
+    return true;
   }
 
   function cancelSearch() {
@@ -651,38 +578,6 @@
       searchInputDebounceId = null;
     }
     setSearchQuery("", { updateUrl: true, syncInput: true });
-  }
-
-  function syncHighlightToTarget(targetId) {
-    if (!targetId || !state.highlightMarks || state.highlightMarks.length === 0) {
-      return;
-    }
-
-    const target = document.getElementById(targetId);
-    if (!target) {
-      return;
-    }
-
-    const marks = state.highlightMarks;
-    const directIndex = marks.findIndex((mark) => target.contains(mark));
-    if (directIndex >= 0) {
-      setActiveHighlightByIndex(directIndex, false);
-      return;
-    }
-
-    const targetTop = target.getBoundingClientRect().top + window.scrollY;
-    let nearestIndex = 0;
-    let nearestDistance = Infinity;
-    marks.forEach((mark, index) => {
-      const markTop = mark.getBoundingClientRect().top + window.scrollY;
-      const distance = Math.abs(markTop - targetTop);
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestIndex = index;
-      }
-    });
-
-    setActiveHighlightByIndex(nearestIndex, false);
   }
 
   function getSearchQueryFromUrl() {
@@ -701,110 +596,6 @@
     history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
   }
 
-  function clearSearchHighlights() {
-    const marks = Array.from(document.querySelectorAll(`mark.${SEARCH_CONTENT_MARK_CLASS}`));
-    if (marks.length === 0) {
-      return;
-    }
-
-    const touchedParents = new Set();
-    marks.forEach((mark) => {
-      const parent = mark.parentNode;
-      if (!parent) {
-        return;
-      }
-      touchedParents.add(parent);
-      parent.replaceChild(document.createTextNode(mark.textContent || ""), mark);
-    });
-    touchedParents.forEach((parent) => {
-      if (parent && typeof parent.normalize === "function") {
-        parent.normalize();
-      }
-    });
-  }
-
-  function applySearchHighlights(tokens) {
-    clearSearchHighlights();
-
-    const highlightTokens = (tokens || [])
-      .filter((token) => token.length >= 2);
-    if (highlightTokens.length === 0) {
-      return;
-    }
-
-    const roots = [
-      document.getElementById("preface-content"),
-      document.getElementById("sections-container"),
-    ].filter(Boolean);
-
-    let remainingHighlights = SEARCH_HIGHLIGHT_LIMIT;
-    roots.forEach((root) => {
-      if (remainingHighlights <= 0) {
-        return;
-      }
-
-      const textNodes = [];
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-        acceptNode(node) {
-          if (!node || !node.nodeValue || !node.nodeValue.trim()) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          const parent = node.parentElement;
-          if (!parent) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          if (parent.closest("mark")) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          if (parent.closest("#inline-editor-modal, #inline-editor-toolbar")) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          const tag = parent.tagName;
-          if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT" || tag === "TEXTAREA") {
-            return NodeFilter.FILTER_REJECT;
-          }
-          return NodeFilter.FILTER_ACCEPT;
-        },
-      });
-
-      let textNode = walker.nextNode();
-      while (textNode) {
-        textNodes.push(textNode);
-        textNode = walker.nextNode();
-      }
-
-      textNodes.forEach((node) => {
-        if (remainingHighlights <= 0 || !node.parentNode) {
-          return;
-        }
-        const text = node.nodeValue || "";
-        const ranges = getTextMatchRanges(text, highlightTokens);
-        if (ranges.length === 0) {
-          return;
-        }
-
-        const limitedRanges = ranges.slice(0, remainingHighlights);
-        const fragment = document.createDocumentFragment();
-        let cursor = 0;
-        limitedRanges.forEach((range) => {
-          if (range.start > cursor) {
-            fragment.appendChild(document.createTextNode(text.slice(cursor, range.start)));
-          }
-          const mark = document.createElement("mark");
-          mark.className = SEARCH_CONTENT_MARK_CLASS;
-          mark.textContent = text.slice(range.start, range.end);
-          fragment.appendChild(mark);
-          cursor = range.end;
-        });
-        if (cursor < text.length) {
-          fragment.appendChild(document.createTextNode(text.slice(cursor)));
-        }
-        node.parentNode.replaceChild(fragment, node);
-        remainingHighlights -= limitedRanges.length;
-      });
-    });
-  }
-
   function getSearchKindLabel(kind) {
     if (kind === "section") {
       return "Section";
@@ -812,7 +603,32 @@
     if (kind === "heading") {
       return "Heading";
     }
+    if (kind === "procedure") {
+      return "Procedure";
+    }
     return "Text";
+  }
+
+  function shouldRenderResultSnippet(result, snippetText) {
+    if (!result || !snippetText) {
+      return false;
+    }
+
+    if (result.kind === "heading") {
+      return false;
+    }
+
+    const normalizedSnippet = normalizeSearchText(snippetText);
+    if (!normalizedSnippet) {
+      return false;
+    }
+
+    const normalizedTitle = normalizeSearchText(result.title || "");
+    if (normalizedSnippet === normalizedTitle) {
+      return false;
+    }
+
+    return true;
   }
 
   function renderSearchResults(results, tokens, rawQuery) {
@@ -822,6 +638,7 @@
     }
 
     const query = String(rawQuery || "").trim();
+    const normalizedQuery = normalizeSearchText(query);
     clear.hidden = !query;
     if (!query) {
       sidebar.classList.remove("search-active");
@@ -843,30 +660,43 @@
       return;
     }
 
-    const sectionLabels = getSectionLabels();
+    const snippetTokens = buildHighlightTokens(tokens, normalizedQuery);
     const rows = results.map((result) => {
-      const displayTokens = tokens.filter((token) => token.length > 0);
-      const titleRanges = getTextMatchRanges(result.title, displayTokens);
-      const titleHtml = renderTextWithHighlightRanges(result.title, titleRanges, SEARCH_RESULT_MARK_CLASS);
-      const snippet = buildSearchSnippet(result.previewText || result.title, displayTokens);
-      const snippetRanges = getTextMatchRanges(snippet, displayTokens);
-      const snippetHtml = renderTextWithHighlightRanges(snippet, snippetRanges, SEARCH_RESULT_MARK_CLASS);
+      const isProcedureContext = result.kind === "procedure";
+      const isHeadingResult = result.kind === "heading";
+      const includeSectionInHeadingTitle = isHeadingResult
+        && !!result.sectionTitle
+        && result.sectionTitle !== result.title;
+      const titleHtml = includeSectionInHeadingTitle
+        ? `
+          <span class="toc-search-result-title-section">${escapeHtml(result.sectionTitle)}</span>
+          <span class="toc-search-result-title-separator" aria-hidden="true">▼</span>
+          <span class="toc-search-result-title-heading">${escapeHtml(result.title)}</span>
+        `
+        : escapeHtml(result.title);
+      const snippetSource = resolveSnippetSource(result, normalizedQuery, snippetTokens);
+      const snippet = buildSearchSnippet(snippetSource, snippetTokens);
+      const showSnippet = shouldRenderResultSnippet(result, snippet);
+      const snippetHtml = showSnippet ? escapeHtml(snippet) : "";
 
-      const groupLabel = sectionLabels[result.sectionGroup] || "";
+      // const groupLabel = sectionLabels[result.sectionGroup] || "";
       const metaParts = [getSearchKindLabel(result.kind)];
-      if (groupLabel) {
-        metaParts.push(groupLabel);
-      }
-      if (result.sectionTitle && result.sectionTitle !== result.title) {
-        metaParts.push(result.sectionTitle);
+      // if (groupLabel) {
+      //   metaParts.push(groupLabel);
+      // }
+      if (!includeSectionInHeadingTitle && result.sectionTitle && result.sectionTitle !== result.title) {
+        metaParts.unshift(result.sectionTitle);
       }
 
       return `
       <li>
-        <button type="button" class="toc-search-result" data-search-target="${escapeAttribute(result.targetId)}">
-          <span class="toc-search-result-title">${titleHtml}</span>
-          <span class="toc-search-result-meta">${escapeHtml(metaParts.join(" · "))}</span>
-          ${snippet ? `<span class="toc-search-result-snippet">${snippetHtml}</span>` : ""}
+        <button type="button" class="toc-search-result" data-search-target="${escapeAttribute(result.targetId)}" data-search-kind="${escapeAttribute(result.kind)}" data-search-node-id="${escapeAttribute(result.sourceNodeId || "")}">
+          <span class="toc-search-result-title">
+            ${isProcedureContext ? "<span class=\"toc-search-result-procedure-icon\" aria-hidden=\"true\">🛠</span>" : ""}
+            <span class="toc-search-result-title-text">${titleHtml}</span>
+          </span>
+          <span class="toc-search-result-meta">${escapeHtml(metaParts.join(" → "))}</span>
+          ${showSnippet ? `<span class="toc-search-result-snippet">${snippetHtml}</span>` : ""}
         </button>
       </li>
     `;
@@ -893,7 +723,10 @@
 
     const bestByTarget = new Map();
     scoredItems.forEach((scoredItem) => {
-      const key = scoredItem.item.targetId;
+      const item = scoredItem.item;
+      const key = item.kind === "procedure"
+        ? `${item.targetId}|procedure|${item.procedureGroupId || item.sourceNodeId || item.title || ""}`
+        : item.targetId;
       const existing = bestByTarget.get(key);
       if (!existing || scoredItem.score > existing.score) {
         bestByTarget.set(key, scoredItem);
@@ -903,7 +736,8 @@
     const kindRank = {
       section: 0,
       heading: 1,
-      content: 2,
+      procedure: 2,
+      content: 3,
     };
 
     return Array.from(bestByTarget.values())
@@ -950,13 +784,16 @@
     }, 1200);
   }
 
-  function navigateToSearchTarget(targetId) {
+  function navigateToSearchTarget(targetId, resultKind, sourceNodeId) {
     if (!targetId || typeof scrollToSection !== "function") {
       return;
     }
 
     const hash = `#${targetId}`;
-    if (!scrollToSection(hash)) {
+    const isProcedureTarget = resultKind === "procedure";
+    const usedDirectSourceScroll = scrollToSearchSourceNode(sourceNodeId);
+
+    if (!usedDirectSourceScroll && !scrollToSection(hash, isProcedureTarget ? "auto" : "smooth")) {
       return;
     }
 
@@ -965,10 +802,9 @@
     history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
 
     const target = document.getElementById(targetId);
-    if (target && targetId !== "top") {
+    if (target && targetId !== "top" && !usedDirectSourceScroll) {
       flashSearchTarget(target);
     }
-    syncHighlightToTarget(targetId);
 
     if (window.matchMedia("(max-width: 860px)").matches && typeof window.setTocOpen === "function") {
       window.setTocOpen(false);
@@ -986,7 +822,6 @@
     }
 
     const rawQuery = String(nextQuery || "");
-    const previousNormalizedQuery = state.normalizedQuery;
     const normalizedQuery = normalizeSearchText(rawQuery);
     const tokens = tokenizeSearchQuery(rawQuery);
 
@@ -1004,16 +839,6 @@
     }
 
     renderSearchResults(state.results, tokens, rawQuery);
-
-    if (normalizedQuery.length >= SEARCH_MIN_QUERY_LENGTH && tokens.length > 0) {
-      applySearchHighlights(tokens);
-      refreshHighlightNavigation(normalizedQuery !== previousNormalizedQuery);
-    } else {
-      clearSearchHighlights();
-      state.highlightMarks = [];
-      state.highlightIndex = -1;
-      updateMobileNavigator();
-    }
   }
 
   function setup() {
@@ -1025,7 +850,6 @@
     if (!input || !clear || !results) {
       return;
     }
-    ensureMobileNavigator();
     initialized = true;
 
     input.addEventListener("input", () => {
@@ -1050,10 +874,10 @@
         event.preventDefault();
         event.stopPropagation();
         if (input.value) {
-        if (searchInputDebounceId) {
-          window.clearTimeout(searchInputDebounceId);
-          searchInputDebounceId = null;
-        }
+          if (searchInputDebounceId) {
+            window.clearTimeout(searchInputDebounceId);
+            searchInputDebounceId = null;
+          }
           cancelSearch();
         } else {
           input.blur();
@@ -1066,7 +890,9 @@
         if (firstResult) {
           event.preventDefault();
           const targetId = firstResult.getAttribute("data-search-target");
-          navigateToSearchTarget(targetId);
+          const resultKind = firstResult.getAttribute("data-search-kind");
+          const sourceNodeId = firstResult.getAttribute("data-search-node-id");
+          navigateToSearchTarget(targetId, resultKind, sourceNodeId);
         }
         return;
       }
@@ -1089,7 +915,11 @@
       if (!button) {
         return;
       }
-      navigateToSearchTarget(button.getAttribute("data-search-target"));
+      navigateToSearchTarget(
+        button.getAttribute("data-search-target"),
+        button.getAttribute("data-search-kind"),
+        button.getAttribute("data-search-node-id"),
+      );
     });
 
     results.addEventListener("keydown", (event) => {
@@ -1167,7 +997,6 @@
       updateUrl: false,
       syncInput: true,
     });
-    updateMobileNavigator();
   }
 
   function refreshIndex() {
