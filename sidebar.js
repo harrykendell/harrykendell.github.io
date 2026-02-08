@@ -679,11 +679,7 @@
       const showSnippet = shouldRenderResultSnippet(result, snippet);
       const snippetHtml = showSnippet ? escapeHtml(snippet) : "";
 
-      // const groupLabel = sectionLabels[result.sectionGroup] || "";
       const metaParts = [getSearchKindLabel(result.kind)];
-      // if (groupLabel) {
-      //   metaParts.push(groupLabel);
-      // }
       if (!includeSectionInHeadingTitle && result.sectionTitle && result.sectionTitle !== result.title) {
         metaParts.unshift(result.sectionTitle);
       }

@@ -34,7 +34,6 @@ const SECTION_GROUPS = {
     supplement: "Supplement",
   },
 };
-window.SECTION_GROUPS = SECTION_GROUPS;
 
 const CONTENT_REPO_OWNER = "harrykendell";
 const CONTENT_REPO_NAME = "harrykendell.github.io";
@@ -107,7 +106,6 @@ async function loadSections() {
       }
       const markdown = await response.text();
       const sectionEl = markdownToSection(markdown, section);
-      setInitialSectionState(sectionEl);
       return { section, sectionEl };
     } catch (error) {
       console.error(`Failed to load section: ${section}`, error);
@@ -296,7 +294,7 @@ function getSectionGroup(sectionId) {
   if (sectionId.startsWith("supplement/")) {
     return "supplement";
   }
-  return "guides";
+  return "ERROR_UNKNOWN_GROUP";
 }
 
 function renderSectionNavItem(section, effectiveDepth) {
@@ -655,29 +653,6 @@ function scrollToSection(hash, behavior = "smooth") {
   return true;
 }
 
-function setInitialSectionState(section) {
-  const header = section.querySelector(".section-header");
-  const sectionId = section.id;
-  if (sectionId) {
-    const state = localStorage.getItem(`section-${sectionId}`);
-    if (state === "expanded") {
-      section.classList.remove("collapsed");
-    } else {
-      section.classList.add("collapsed");
-    }
-  } else {
-    // If no ID, collapse by default
-    section.classList.add("collapsed");
-  }
-
-  if (header) {
-    header.setAttribute(
-      "aria-expanded",
-      String(!section.classList.contains("collapsed")),
-    );
-  }
-}
-
 function setupSectionToggle() {
   const sections = document.querySelectorAll(".section");
 
@@ -694,14 +669,8 @@ function setupSectionToggle() {
         const isCollapsed = section.classList.contains("collapsed");
         header.setAttribute("aria-expanded", String(!isCollapsed));
 
-        // Store preference in localStorage
         const sectionId = section.id;
         if (sectionId) {
-          localStorage.setItem(
-            `section-${sectionId}`,
-            isCollapsed ? "collapsed" : "expanded",
-          );
-          // Update sidebar arrow
           updateSidebarArrow(sectionId, isCollapsed);
           if (typeof window.updateActiveLink === "function") {
             window.updateActiveLink();
@@ -769,7 +738,6 @@ function setupSidebarLinks() {
         header.setAttribute("aria-expanded", String(!isCollapsed));
       }
 
-      localStorage.setItem(`section-${sectionId}`, isCollapsed ? "collapsed" : "expanded");
       updateSidebarArrow(sectionId, isCollapsed);
       window.updateActiveLink();
     });

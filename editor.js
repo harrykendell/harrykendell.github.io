@@ -19,8 +19,8 @@
   const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
   const AUTH_MESSAGE_TYPE = "github-auth-complete";
   const AUTH_SESSION_HEADER_NAME = "X-GHA-Session";
-  const AUTH_PROFILE_STORAGE_KEY = "inline-editor-github-profile";
-  const EDITOR_STATE_STORAGE_KEY = "inline-editor-state";
+  const AUTH_PROFILE_STORAGE_KEY = "editor-github-profile";
+  const EDITOR_STATE_STORAGE_KEY = "editor-state";
   const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
   const state = {
     busy: false,
@@ -1255,7 +1255,7 @@
     updateVariantControlState();
     syncCurrentEditorDraft();
     elements.modal.hidden = false;
-    const formatToolbar = elements.modal.querySelector(".inline-editor-format-toolbar");
+    const formatToolbar = elements.modal.querySelector(".editor-format-toolbar");
     if (formatToolbar) {
       formatToolbar.scrollLeft = 0;
     }
@@ -1279,7 +1279,7 @@
     if (!elements.modal) {
       return;
     }
-    const formatToolbar = elements.modal.querySelector(".inline-editor-format-toolbar");
+    const formatToolbar = elements.modal.querySelector(".editor-format-toolbar");
     if (!formatToolbar) {
       return;
     }
@@ -2395,31 +2395,31 @@
 
   function buildUi() {
     const toolbar = document.createElement("div");
-    toolbar.id = "inline-editor-toolbar";
+    toolbar.id = "editor-toolbar";
     toolbar.hidden = true;
     toolbar.innerHTML = `
       <div class="inline-toolbar-row inline-toolbar-row-main">
         <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
-        <div class="inline-editor-repo" aria-live="polite">
+        <div class="editor-repo" aria-live="polite">
           <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
           <a id="inline-repo-deploy" class="inline-repo-link inline-action-indicator is-failed" aria-label="Workflow status unavailable"></a>
         </div>
         <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
         <button id="inline-edit-clear" type="button" disabled>Reset</button>
       </div>
-      <span id="inline-editor-status"></span>
+      <span id="editor-status"></span>
     `;
     document.body.appendChild(toolbar);
 
     const modal = document.createElement("div");
-    modal.id = "inline-editor-modal";
+    modal.id = "editor-modal";
     modal.hidden = true;
     modal.innerHTML = `
-      <div class="inline-editor-backdrop"></div>
-      <div class="inline-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="inline-editor-path">
-        <div class="inline-editor-header">
-          <p id="inline-editor-path" class="inline-editor-path"></p>
-          <div class="inline-editor-history-controls" role="toolbar" aria-label="History actions">
+      <div class="editor-backdrop"></div>
+      <div class="editor-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-path">
+        <div class="editor-header">
+          <p id="editor-path" class="editor-path"></p>
+          <div class="editor-history-controls" role="toolbar" aria-label="History actions">
             <button type="button" data-format-action="undo" title="Undo (Cmd/Ctrl+Z)" aria-label="Undo">
               <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                 <path d="M9 4L5 8L9 12"></path>
@@ -2434,33 +2434,33 @@
             </button>
           </div>
         </div>
-        <div class="inline-editor-format-toolbar" role="toolbar" aria-label="Markdown formatting">
-          <div class="inline-editor-format-group inline-editor-format-group-text" role="group" aria-label="Text and heading formatting">
+        <div class="editor-format-toolbar" role="toolbar" aria-label="Markdown formatting">
+          <div class="editor-format-group editor-format-group-text" role="group" aria-label="Text and heading formatting">
             <button type="button" data-format-action="bold" title="Bold (Cmd/Ctrl+B)">
-              <span class="inline-editor-tool-icon inline-editor-tool-icon-text" aria-hidden="true"><strong>B</strong></span>
-              <span class="inline-editor-tool-label">Bold</span>
+              <span class="editor-tool-icon editor-tool-icon-text" aria-hidden="true"><strong>B</strong></span>
+              <span class="editor-tool-label">Bold</span>
             </button>
             <button type="button" data-format-action="italic" title="Italic (Cmd/Ctrl+I)">
-              <span class="inline-editor-tool-icon inline-editor-tool-icon-text" aria-hidden="true"><em>I</em></span>
-              <span class="inline-editor-tool-label">Italic</span>
+              <span class="editor-tool-icon editor-tool-icon-text" aria-hidden="true"><em>I</em></span>
+              <span class="editor-tool-label">Italic</span>
             </button>
             <button type="button" data-format-action="comment-line" title="Toggle line comment (Cmd/Ctrl+/)">
-              <span class="inline-editor-tool-icon inline-editor-tool-icon-code" aria-hidden="true">&lt;!--</span>
-              <span class="inline-editor-tool-label">Comment</span>
+              <span class="editor-tool-icon editor-tool-icon-code" aria-hidden="true">&lt;!--</span>
+              <span class="editor-tool-label">Comment</span>
             </button>
             <button type="button" data-format-action="heading-increase" title="Increase heading (Cmd/Ctrl+])">
-              <span class="inline-editor-tool-icon inline-editor-tool-icon-code" aria-hidden="true">#+</span>
-              <span class="inline-editor-tool-label">Heading +</span>
+              <span class="editor-tool-icon editor-tool-icon-code" aria-hidden="true">#+</span>
+              <span class="editor-tool-label">Heading +</span>
             </button>
             <button type="button" data-format-action="heading-decrease" title="Decrease heading (Cmd/Ctrl+[)">
-              <span class="inline-editor-tool-icon inline-editor-tool-icon-code" aria-hidden="true">#-</span>
-              <span class="inline-editor-tool-label">Heading -</span>
+              <span class="editor-tool-icon editor-tool-icon-code" aria-hidden="true">#-</span>
+              <span class="editor-tool-label">Heading -</span>
             </button>
           </div>
-          <div class="inline-editor-format-group inline-editor-format-group-structures" role="group" aria-label="Procedure and callout tools">
-            <div class="inline-editor-variant-control" role="group" aria-label="Procedure insertion">
+          <div class="editor-format-group editor-format-group-structures" role="group" aria-label="Procedure and callout tools">
+            <div class="editor-variant-control" role="group" aria-label="Procedure insertion">
               <button type="button" data-format-action="procedure-insert" title="Insert procedure (Cmd/Ctrl+Alt+1)">
-                <span class="inline-editor-tool-icon" aria-hidden="true">
+                <span class="editor-tool-icon" aria-hidden="true">
                   <svg viewBox="0 0 20 20" focusable="false">
                     <path d="M6 5H14"></path>
                     <path d="M6 10H14"></path>
@@ -2468,9 +2468,9 @@
                     <rect x="3" y="3.5" width="14" height="13" rx="2"></rect>
                   </svg>
                 </span>
-                <span class="inline-editor-tool-label" data-variant-label="procedure">Procedure: Beginner</span>
+                <span class="editor-tool-label" data-variant-label="procedure">Procedure: Beginner</span>
               </button>
-              <button type="button" class="inline-editor-variant-swap" data-format-cycle="procedure" title="Switch procedure level (Cmd/Ctrl+Alt+Shift+1)" aria-label="Switch procedure level">
+              <button type="button" class="editor-variant-swap" data-format-cycle="procedure" title="Switch procedure level (Cmd/Ctrl+Alt+Shift+1)" aria-label="Switch procedure level">
                 <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                   <path d="M7 4L4 7L7 10"></path>
                   <path d="M4 7H12C14.209 7 16 8.791 16 11"></path>
@@ -2479,18 +2479,18 @@
                 </svg>
               </button>
             </div>
-            <div class="inline-editor-variant-control" role="group" aria-label="Callout insertion">
+            <div class="editor-variant-control" role="group" aria-label="Callout insertion">
               <button type="button" data-format-action="callout-insert" title="Insert callout (Cmd/Ctrl+Alt+2)">
-                <span class="inline-editor-tool-icon" aria-hidden="true">
+                <span class="editor-tool-icon" aria-hidden="true">
                   <svg viewBox="0 0 20 20" focusable="false">
                     <path d="M10 4.5L3.5 15.5H16.5L10 4.5Z"></path>
                     <path d="M10 8.2V11.3"></path>
                     <circle cx="10" cy="13.6" r="0.8"></circle>
                   </svg>
                 </span>
-                <span class="inline-editor-tool-label" data-variant-label="callout">Callout: Info</span>
+                <span class="editor-tool-label" data-variant-label="callout">Callout: Info</span>
               </button>
-              <button type="button" class="inline-editor-variant-swap" data-format-cycle="callout" title="Switch callout type (Cmd/Ctrl+Alt+Shift+2)" aria-label="Switch callout type">
+              <button type="button" class="editor-variant-swap" data-format-cycle="callout" title="Switch callout type (Cmd/Ctrl+Alt+Shift+2)" aria-label="Switch callout type">
                 <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
                   <path d="M7 4L4 7L7 10"></path>
                   <path d="M4 7H12C14.209 7 16 8.791 16 11"></path>
@@ -2500,72 +2500,72 @@
               </button>
             </div>
           </div>
-          <div class="inline-editor-format-group inline-editor-format-group-media" role="group" aria-label="Media tools">
+          <div class="editor-format-group editor-format-group-media" role="group" aria-label="Media tools">
             <button type="button" data-format-action="image-upload" title="Upload image to imgs/ (Cmd/Ctrl+Alt+U)" aria-label="Upload image">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M10 13V4"></path>
                   <path d="M6.5 7.5L10 4L13.5 7.5"></path>
                   <path d="M4 12.5V15.5H16V12.5"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Upload</span>
+              <span class="editor-tool-label">Upload</span>
             </button>
             <button type="button" data-format-action="image-inline" title="Inline image (Cmd/Ctrl+Alt+M)" aria-label="Insert inline image">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <rect x="3" y="4" width="14" height="12" rx="2"></rect>
                   <circle cx="8" cy="8" r="1.3"></circle>
                   <path d="M6 13L9.2 9.8L11.6 12.2L14 9.8L16 13"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Inline</span>
+              <span class="editor-tool-label">Inline</span>
             </button>
             <button type="button" data-format-action="image-left" title="Left-aligned figure (Cmd/Ctrl+Alt+L)" aria-label="Insert left-aligned figure">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M3.5 4V16"></path>
                   <rect x="6" y="5" width="11" height="10" rx="1.8"></rect>
                   <path d="M8 12L10 10L12 12"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Left</span>
+              <span class="editor-tool-label">Left</span>
             </button>
             <button type="button" data-format-action="image-right" title="Right-aligned figure (Cmd/Ctrl+Alt+R)" aria-label="Insert right-aligned figure">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M16.5 4V16"></path>
                   <rect x="3" y="5" width="11" height="10" rx="1.8"></rect>
                   <path d="M5 12L7 10L9 12"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Right</span>
+              <span class="editor-tool-label">Right</span>
             </button>
             <button type="button" data-format-action="image-wide" title="Wide figure (Cmd/Ctrl+Alt+W)" aria-label="Insert wide figure">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <rect x="2.5" y="6" width="15" height="8" rx="1.8"></rect>
                   <path d="M5 12L8 9L10 11L12.5 8.5L15 12"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Wide</span>
+              <span class="editor-tool-label">Wide</span>
             </button>
             <button type="button" data-format-action="video" title="Insert video (Cmd/Ctrl+Alt+V)">
-              <span class="inline-editor-tool-icon" aria-hidden="true">
+              <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <rect x="3" y="4.5" width="14" height="11" rx="2"></rect>
                   <path d="M9 8L13 10L9 12Z"></path>
                 </svg>
               </span>
-              <span class="inline-editor-tool-label">Video</span>
+              <span class="editor-tool-label">Video</span>
             </button>
           </div>
         </div>
-        <textarea id="inline-editor-textarea"></textarea>
-        <input id="inline-editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
-        <div class="inline-editor-actions">
-          <button type="button" id="inline-editor-reset">Reset Section</button>
-          <button class="primary" type="button" id="inline-editor-save">Save Draft</button>
+        <textarea id="editor-textarea"></textarea>
+        <input id="editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
+        <div class="editor-actions">
+          <button type="button" id="editor-reset">Reset Section</button>
+          <button class="primary" type="button" id="editor-save">Save Draft</button>
         </div>
       </div>
     `;
@@ -2578,13 +2578,13 @@
     elements.repoDeploy = toolbar.querySelector("#inline-repo-deploy");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
-    elements.status = toolbar.querySelector("#inline-editor-status");
+    elements.status = toolbar.querySelector("#editor-status");
     elements.modal = modal;
-    elements.modalPath = modal.querySelector("#inline-editor-path");
-    elements.modalTextarea = modal.querySelector("#inline-editor-textarea");
-    elements.modalImageInput = modal.querySelector("#inline-editor-image-upload");
-    elements.modalSave = modal.querySelector("#inline-editor-save");
-    elements.modalReset = modal.querySelector("#inline-editor-reset");
+    elements.modalPath = modal.querySelector("#editor-path");
+    elements.modalTextarea = modal.querySelector("#editor-textarea");
+    elements.modalImageInput = modal.querySelector("#editor-image-upload");
+    elements.modalSave = modal.querySelector("#editor-save");
+    elements.modalReset = modal.querySelector("#editor-reset");
     updateVariantControlState();
     updateToolbarVisibilityButton();
   }
@@ -2638,12 +2638,12 @@
       });
     }
 
-    const backdrop = elements.modal.querySelector(".inline-editor-backdrop");
+    const backdrop = elements.modal.querySelector(".editor-backdrop");
     if (backdrop) {
       backdrop.addEventListener("click", closeModal);
     }
 
-    const dialog = elements.modal.querySelector(".inline-editor-dialog");
+    const dialog = elements.modal.querySelector(".editor-dialog");
     if (dialog) {
       dialog.addEventListener("click", (event) => {
         const target = event.target;
@@ -2671,7 +2671,7 @@
       });
     }
 
-    const formatToolbar = elements.modal.querySelector(".inline-editor-format-toolbar");
+    const formatToolbar = elements.modal.querySelector(".editor-format-toolbar");
     if (formatToolbar) {
       formatToolbar.addEventListener("scroll", updateFormatToolbarScrollState, { passive: true });
     }

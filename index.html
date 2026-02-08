@@ -12,12 +12,14 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Boat Repairs" />
   <link rel="manifest" href="/favicon/site.webmanifest" />
-  <link rel="stylesheet" href="styles.css?v=31" />
+  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="sidebar.css?v=1" />
+  <link rel="stylesheet" href="editor.css?v=1" />
   <script defer src="script.js?v=28"></script>
-  <script defer src="search-bar.js?v=5"></script>
+  <script defer src="sidebar.js?v=1"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="markdown-to-section.js?v=26"></script>
-  <script defer src="inline-editor.js?v=13"></script>
+  <script defer src="editor.js?v=13"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
@@ -34,15 +36,8 @@
         <h2><a href="#top">Contents</a></h2>
         <div class="toc-controls" aria-label="Table of contents depth">
           <select id="toc-depth" name="toc-depth" aria-label="Contents depth"></select>
-          <button
-            id="inline-toolbar-toggle"
-            class="toc-toolbar-toggle"
-            type="button"
-            aria-controls="inline-editor-toolbar"
-            aria-expanded="false"
-            aria-label="Show editor toolbar"
-            title="Show editor toolbar"
-          >
+          <button id="inline-toolbar-toggle" class="toc-toolbar-toggle" type="button" aria-controls="editor-toolbar"
+            aria-expanded="false" aria-label="Show editor toolbar" title="Show editor toolbar">
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
               <path d="M3 14.5V17H5.5L14.4 8.1L11.9 5.6L3 14.5Z"></path>
               <path d="M10.9 6.6L13.4 9.1"></path>
@@ -52,24 +47,10 @@
         </div>
       </div>
       <div class="toc-search" role="search" aria-label="Search manual">
-        <input
-          id="toc-search-input"
-          type="search"
-          placeholder="Search manual"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          aria-label="Search manual"
-        />
-        <button
-          id="toc-search-clear"
-          type="button"
-          class="toc-search-clear"
-          hidden
-          aria-label="Clear search"
-          title="Clear search"
-        >
+        <input id="toc-search-input" type="search" placeholder="Search manual" autocomplete="off" autocorrect="off"
+          autocapitalize="off" spellcheck="false" aria-label="Search manual" />
+        <button id="toc-search-clear" type="button" class="toc-search-clear" hidden aria-label="Clear search"
+          title="Clear search">
           ×
         </button>
       </div>
@@ -85,7 +66,9 @@
           <h1 class="page-title">Rowing Repairs Manual</h1>
           <div class="page-subtitle-row">
             <span class="page-subtitle">Harry Kendell</span>
-            <a id="intro-edit-link" class="section-edit-link" data-source-path="sections/supplement/introduction.md" href="https://github.com/harrykendell/harrykendell.github.io/edit/main/sections/supplement/introduction.md" target="_blank" rel="noopener noreferrer">Edit</a>
+            <a id="intro-edit-link" class="section-edit-link" data-source-path="sections/supplement/introduction.md"
+              href="https://github.com/harrykendell/harrykendell.github.io/edit/main/sections/supplement/introduction.md"
+              target="_blank" rel="noopener noreferrer">Edit</a>
           </div>
         </header>
 
