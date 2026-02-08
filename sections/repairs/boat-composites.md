@@ -1,4 +1,4 @@
-# Boat composite repairs
+# Boat Composites
 
 ## Composite construction primer
 

@@ -1,4 +1,4 @@
-# Harness build and repair
+# Coxbox Wiring
 
 ## Harness build/repair procedure
 

@@ -9,11 +9,11 @@ const sectionFiles = [
   "maintenance/seats",
   "maintenance/coxbox-wiring",
   "maintenance/hardware",
-  "repairs/boats-composites",
+  "repairs/boat-composites",
   "repairs/oars",
-  "repairs/electronics-harness",
-  "supplement/QuickReferenceChecklists",
-  "supplement/ToolsAndConsumables",
+  "repairs/coxbox-wiring",
+  "supplement/quick-reference-checklists",
+  "supplement/tools-and-consumables",
 ];
 
 const DEFAULT_TOC_DEPTH = 4;

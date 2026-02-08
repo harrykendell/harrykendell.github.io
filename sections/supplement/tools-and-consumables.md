@@ -1,4 +1,4 @@
-# Tools and consumables
+# Tools and Consumables
 
 ## Core hand tools
 

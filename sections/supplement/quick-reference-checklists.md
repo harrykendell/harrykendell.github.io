@@ -1,4 +1,4 @@
-# Quick-reference checklists
+# Quick Reference Checklists
 
 ## After every outing (Beginner)
 
