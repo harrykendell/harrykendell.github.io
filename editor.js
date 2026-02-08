@@ -1138,13 +1138,19 @@
 
   function renderPreface(markdown) {
     const preface = document.getElementById("preface-content");
-    if (!preface || typeof marked === "undefined") {
+    if (!preface) {
       return;
     }
 
     const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
       ? extractTitleAndContentFromMarkdown(markdown)
       : { content: markdown };
+    const introTitle = titleAndContent && typeof titleAndContent.title === "string"
+      ? titleAndContent.title
+      : "";
+    const introContent = titleAndContent && typeof titleAndContent.content === "string"
+      ? titleAndContent.content
+      : markdown;
     const introEditUrl = appUtils && typeof appUtils.getGitHubEditUrl === "function"
       ? appUtils.getGitHubEditUrl(INTRO_PATH)
       : null;
@@ -1162,15 +1168,28 @@
       }
     }
 
-    preface.innerHTML = marked.parse(titleAndContent.content);
+    let renderedBySharedPipeline = false;
+    if (typeof renderMarkdownContent === "function") {
+      renderedBySharedPipeline = renderMarkdownContent(preface, introContent, {
+        documentTitle: introTitle || "Introduction",
+        headingScopeId: "preface",
+      });
+    }
+    if (!renderedBySharedPipeline) {
+      if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+        preface.innerHTML = marked.parse(introContent);
+      } else {
+        preface.textContent = introContent;
+      }
+      if (typeof wrapTables === "function") {
+        wrapTables(preface);
+      }
+      if (typeof optimizeSectionMedia === "function") {
+        optimizeSectionMedia(preface);
+      }
+    }
     if (appUtils && typeof appUtils.normalizeInternalHashLinks === "function") {
       appUtils.normalizeInternalHashLinks(preface);
-    }
-    if (typeof wrapTables === "function") {
-      wrapTables(preface);
-    }
-    if (typeof optimizeSectionMedia === "function") {
-      optimizeSectionMedia(preface);
     }
     applyStagedImagePreviews(preface);
   }

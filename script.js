@@ -177,6 +177,9 @@ async function loadPreface() {
     const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
       ? extractTitleAndContentFromMarkdown(markdown)
       : { content: markdown };
+    const introTitle = titleAndContent && typeof titleAndContent.title === "string"
+      ? titleAndContent.title
+      : "";
     const content = titleAndContent && typeof titleAndContent.content === "string"
       ? titleAndContent.content
       : markdown;
@@ -195,19 +198,30 @@ async function loadPreface() {
       }
     }
 
-    if (typeof marked !== "undefined" && typeof marked.parse === "function") {
-      preface.innerHTML = marked.parse(content);
-    } else {
-      preface.textContent = content;
+    let renderedBySharedPipeline = false;
+    if (typeof renderMarkdownContent === "function") {
+      renderedBySharedPipeline = renderMarkdownContent(preface, content, {
+        documentTitle: introTitle || "Introduction",
+        headingScopeId: "preface",
+      });
     }
-    if (typeof addHeadingIds === "function") {
-      addHeadingIds(preface, "preface");
+    if (!renderedBySharedPipeline) {
+      if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+        preface.innerHTML = marked.parse(content);
+      } else {
+        preface.textContent = content;
+      }
+      if (typeof addHeadingIds === "function") {
+        addHeadingIds(preface, "preface");
+      }
+      if (typeof wrapTables === "function") {
+        wrapTables(preface);
+      }
+      if (typeof optimizeSectionMedia === "function") {
+        optimizeSectionMedia(preface);
+      }
     }
     appNormalizeInternalHashLinks(preface);
-    wrapTables(preface);
-    if (typeof optimizeSectionMedia === "function") {
-      optimizeSectionMedia(preface);
-    }
   } catch (error) {
     console.error("Failed to load preface introduction", error);
   }

@@ -460,6 +460,47 @@ function initYouTubeEmbeds(rootEl) {
     });
 }
 
+function renderMarkdownContent(rootEl, markdownContent, options) {
+    if (!(rootEl instanceof Element)) {
+        return false;
+    }
+
+    const settings = options || {};
+    const sourceMarkdown = typeof markdownContent === "string" ? markdownContent : "";
+    const documentTitle = typeof settings.documentTitle === "string" ? settings.documentTitle : "";
+    const headingScopeId = typeof settings.headingScopeId === "string" ? settings.headingScopeId : "";
+    const shouldDowngradeHeadings = !!settings.downgradeHeadings;
+
+    if (
+        typeof marked === "undefined"
+        || typeof marked.parse !== "function"
+        || typeof marked.parseInline !== "function"
+    ) {
+        rootEl.textContent = sourceMarkdown;
+        return false;
+    }
+
+    const transformedMarkdown = transformProcedureBlocks(sourceMarkdown, documentTitle);
+    rootEl.innerHTML = marked.parse(transformedMarkdown);
+
+    if (shouldDowngradeHeadings) {
+        downgradeHeadings(rootEl);
+    }
+
+    initProcedures(rootEl);
+    transformCallouts(rootEl);
+    transformYouTubeEmbeds(rootEl);
+    initYouTubeEmbeds(rootEl);
+    wrapTables(rootEl);
+    optimizeSectionMedia(rootEl);
+
+    if (headingScopeId) {
+        addHeadingIds(rootEl, headingScopeId);
+    }
+
+    return true;
+}
+
 /**
  * Converts Markdown content to a section element.
  * @param {string} markdown - The Markdown content
@@ -468,8 +509,6 @@ function initYouTubeEmbeds(rootEl) {
  */
 function markdownToSection(markdown, sectionId) {
     const { title, content } = extractTitleAndContentFromMarkdown(markdown);
-
-    const html = marked.parse(transformProcedureBlocks(content, title));
 
     const safeTitle = markdownEscapeHtml(title || sectionId);
     const safeSectionId = markdownEscapeAttribute(sectionId);
@@ -488,29 +527,17 @@ function markdownToSection(markdown, sectionId) {
                 </div>
                 ${editLinkHtml}
             </div>
-            <div class="section-content">${html}</div>
+            <div class="section-content"></div>
         </section>
     `;
 
     const sectionEl = template.content.firstElementChild;
     const contentEl = sectionEl.querySelector(".section-content");
-
-    // Ensure section content doesn't include h1
-    downgradeHeadings(contentEl);
-
-    initProcedures(contentEl);
-    transformCallouts(contentEl);
-
-    transformYouTubeEmbeds(contentEl);
-    initYouTubeEmbeds(contentEl);
-
-    // Wrap tables for mobile horizontal scrolling
-    wrapTables(contentEl);
-
-    optimizeSectionMedia(contentEl);
-
-    // Set ids for sidebar linking without changing heading levels
-    addHeadingIds(contentEl, sectionId);
+    renderMarkdownContent(contentEl, content, {
+        documentTitle: title || sectionId,
+        headingScopeId: sectionId,
+        downgradeHeadings: true,
+    });
 
     return sectionEl;
 }
