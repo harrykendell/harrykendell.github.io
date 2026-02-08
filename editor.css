@@ -216,12 +216,14 @@
 
 #editor-toolbar .inline-repo-link.inline-action-indicator.is-running::before {
     content: "";
-    width: 9px;
-    height: 9px;
+    width: 12px;
+    height: 12px;
+    box-sizing: border-box;
     border-radius: 999px;
     border: 2px solid currentColor;
     border-right-color: transparent;
-    display: inline-block;
+    display: block;
+    transform-origin: 50% 50%;
     animation: inline-deploy-spin 0.75s linear infinite;
 }
 

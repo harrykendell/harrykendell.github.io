@@ -19,6 +19,7 @@
   const AUTH_POPUP_FEATURES = "popup=yes,width=620,height=780,resizable=yes,scrollbars=yes";
   const AUTH_MESSAGE_TYPE = "github-auth-complete";
   const AUTH_SESSION_HEADER_NAME = "X-GHA-Session";
+  const AUTH_SESSION_TOKEN_STORAGE_KEY = "editor-auth-session-header-token";
   const AUTH_PROFILE_STORAGE_KEY = "editor-github-profile";
   const EDITOR_STATE_STORAGE_KEY = "editor-state";
   const MAX_STAGED_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -539,8 +540,33 @@
     return value === "localhost" || value === "127.0.0.1" || value === "::1" || value === "[::1]";
   }
 
+  function readStoredAuthHeaderSessionToken() {
+    if (!isLoopbackHost(window.location.hostname)) {
+      return "";
+    }
+    try {
+      const raw = sessionStorage.getItem(AUTH_SESSION_TOKEN_STORAGE_KEY);
+      return typeof raw === "string" ? raw : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
   function storeAuthHeaderSessionToken(value) {
-    state.authHeaderSessionToken = typeof value === "string" ? value : "";
+    const token = typeof value === "string" ? value : "";
+    state.authHeaderSessionToken = token;
+    if (!isLoopbackHost(window.location.hostname)) {
+      return;
+    }
+    try {
+      if (token) {
+        sessionStorage.setItem(AUTH_SESSION_TOKEN_STORAGE_KEY, token);
+      } else {
+        sessionStorage.removeItem(AUTH_SESSION_TOKEN_STORAGE_KEY);
+      }
+    } catch (error) {
+      // Ignore storage errors (privacy mode / policy).
+    }
   }
 
   function stopAuthPopupTracking() {
@@ -2761,6 +2787,7 @@
   function init() {
     buildUi();
     restoreEditorState();
+    storeAuthHeaderSessionToken(readStoredAuthHeaderSessionToken());
     setupEvents();
     updateToolbar();
     updateAuthUi();
