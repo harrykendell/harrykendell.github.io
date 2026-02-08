@@ -220,9 +220,22 @@
     height: 12px;
     box-sizing: border-box;
     border-radius: 999px;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
     display: block;
+    background: conic-gradient(
+        from 0deg,
+        currentColor 0deg 300deg,
+        transparent 300deg 360deg
+    );
+    -webkit-mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 2px),
+        #000 calc(100% - 2px)
+    );
+    mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 2px),
+        #000 calc(100% - 2px)
+    );
     transform-origin: 50% 50%;
     animation: inline-deploy-spin 0.75s linear infinite;
 }
