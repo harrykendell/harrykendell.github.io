@@ -271,7 +271,6 @@
     if (!owner || !name) {
       return null;
     }
-    console.log(`Resolved content repository: ${owner}/${name} (branch: ${baseBranch})`);
     return { owner, name, baseBranch };
   }
 
@@ -451,7 +450,8 @@
       stateClass = "is-failed",
       href = "",
       label = "Workflow status unavailable",
-    } = options || {};
+    }
+      = options || {};
 
     setActivityLink(
       elements.repoDeploy,
@@ -711,7 +711,8 @@
       method = "GET",
       body,
       includeSessionHeader = true,
-    } = options || {};
+    }
+      = options || {};
     const headers = {};
     if (body !== undefined) {
       headers["Content-Type"] = "application/json";
@@ -775,7 +776,8 @@
       avatarUrl = "",
       signedIn = false,
       busy = false,
-    } = config || {};
+    }
+      = config || {};
 
     elements.authButton.replaceChildren();
     elements.authButton.classList.toggle("has-avatar", !!avatarUrl);
@@ -1653,16 +1655,9 @@
 
     const selected = value.slice(start, end);
 
-    const hasOuterMarkers =
-      start >= prefix.length &&
-      end + suffix.length <= value.length &&
-      value.slice(start - prefix.length, start) === prefix &&
-      value.slice(end, end + suffix.length) === suffix;
+    const hasOuterMarkers = start >= prefix.length && end + suffix.length <= value.length && value.slice(start - prefix.length, start) === prefix && value.slice(end, end + suffix.length) === suffix;
 
-    const isSingleCharSymmetricWrapper =
-      prefix.length === 1 &&
-      suffix.length === 1 &&
-      prefix === suffix;
+    const isSingleCharSymmetricWrapper = prefix.length === 1 && suffix.length === 1 && prefix === suffix;
 
     let shouldUnwrapOuter = hasOuterMarkers;
     if (shouldUnwrapOuter && isSingleCharSymmetricWrapper) {
@@ -1684,10 +1679,7 @@
       return;
     }
 
-    const selectedHasMarkers =
-      selected.length >= prefix.length + suffix.length &&
-      selected.startsWith(prefix) &&
-      selected.endsWith(suffix);
+    const selectedHasMarkers = selected.length >= prefix.length + suffix.length && selected.startsWith(prefix) && selected.endsWith(suffix);
 
     let shouldUnwrapSelected = selectedHasMarkers;
     if (shouldUnwrapSelected && isSingleCharSymmetricWrapper) {
@@ -1852,7 +1844,8 @@
         return `${headingMatch[1]}${headingMatch[3]}`;
       }
       return `${headingMatch[1]}${hashes.slice(0, -1)} ${headingMatch[3]}`;
-    }).join("\n");
+    })
+      .join("\n");
 
     replaceTextRange(textarea, lineStart, lineEnd, adjustedBlock, lineStart, lineStart + adjustedBlock.length);
   }
@@ -2035,10 +2028,7 @@
     }
 
     const current = state.editorHistory[state.editorHistoryIndex];
-    const unchanged = current &&
-      current.value === entry.value &&
-      current.selectionStart === entry.selectionStart &&
-      current.selectionEnd === entry.selectionEnd;
+    const unchanged = current && current.value === entry.value && current.selectionStart === entry.selectionStart && current.selectionEnd === entry.selectionEnd;
     if (unchanged) {
       return;
     }
@@ -2181,8 +2171,7 @@
     const lines = selectedBlock.split("\n");
     const nonEmptyLines = lines.filter((line) => line.trim() !== "");
     const commentPattern = /^(\s*)<!--\s?(.*?)\s?-->\s*$/;
-    const allCommented = nonEmptyLines.length > 0 &&
-      nonEmptyLines.every((line) => commentPattern.test(line));
+    const allCommented = nonEmptyLines.length > 0 && nonEmptyLines.every((line) => commentPattern.test(line));
 
     const nextLines = lines.map((line) => {
       if (!line.trim()) {
@@ -2400,14 +2389,11 @@
 
     let defaultCommitMessage = "";
     if (counts.images > 0 && counts.markdown > 0) {
-      defaultCommitMessage =
-        `docs: update ${totalStaged} files (${counts.markdown} markdown, ${counts.images} images)`;
+      defaultCommitMessage = `docs: update ${totalStaged} files (${counts.markdown} markdown, ${counts.images} images)`;
     } else if (counts.images > 0) {
-      defaultCommitMessage =
-        `docs: add ${counts.images} image${counts.images === 1 ? "" : "s"}`;
+      defaultCommitMessage = `docs: add ${counts.images} image${counts.images === 1 ? "" : "s"}`;
     } else {
-      defaultCommitMessage =
-        `docs: update ${counts.markdown} markdown file${counts.markdown === 1 ? "" : "s"}`;
+      defaultCommitMessage = `docs: update ${counts.markdown} markdown file${counts.markdown === 1 ? "" : "s"}`;
     }
     const commitMessage = window.prompt("Commit message:", defaultCommitMessage);
     if (!commitMessage) {
