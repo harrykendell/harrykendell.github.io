@@ -53,7 +53,13 @@ function renderProcedureNode(node) {
     const html = [
         `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""}>`,
         `  <div class="procedure-header" role="button" tabindex="0" aria-expanded="false">`,
-        `    <div class="procedure-title"><span>🛠</span><span>${title}</span>${skillBadge}</div>`,
+        `    <div class="procedure-title">`,
+        `      <span class="procedure-title-icon" aria-hidden="true">🛠</span>`,
+        `      <div class="procedure-title-content">`,
+        skillBadge ? `        ${skillBadge}` : "",
+        `        <span class="procedure-title-text">${title}</span>`,
+        `      </div>`,
+        `    </div>`,
         `  </div>`,
         `  <div class="procedure-content">`,
         descriptionHtml
@@ -67,8 +73,7 @@ function renderProcedureNode(node) {
     return html;
 }
 
-function transformProcedureBlocks(markdown, documentTitle) {
-    const titleInfo = documentTitle ? ` in "${documentTitle}"` : '';
+function transformProcedureBlocks(markdown) {
     const lines = markdown.split(/\r?\n/);
     const output = [];
     const stack = [];
@@ -330,22 +335,14 @@ function optimizeSectionMedia(rootEl) {
 }
 
 function extractYouTubeId(src) {
-    try {
-        const url = new URL(src);
-        if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
-            console.error(`❌ Not a YouTube URL ${url.hostname}`);
-            return null;
-        }
-        const match = url.pathname.match(/\/embed\/([^/?]+)/);
-        const videoId = match ? match[1] : null;
-        return videoId;
-    } catch (error) {
-        console.error('⚠️ URL parse failed, trying fallback regex');
-        const fallback = /youtube(?:-nocookie)?\.com\/embed\/([^?&]+)/.exec(
-            src);
-        const videoId = fallback ? fallback[1] : null;
-        return videoId;
+    const url = new URL(src);
+    if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
+        console.error(`❌ Not a YouTube URL ${url.hostname}`);
+        return null;
     }
+    const match = url.pathname.match(/\/embed\/([^/?]+)/);
+    const videoId = match ? match[1] : null;
+    return videoId;
 }
 
 function buildYouTubeEmbed(iframe, videoId) {
@@ -353,13 +350,9 @@ function buildYouTubeEmbed(iframe, videoId) {
     title = markdownEscapeHtml(title);
 
     let dataSrc = iframe.getAttribute("src") || "";
-    try {
-        dataSrc = new URL(dataSrc);
-        dataSrc.searchParams.set("autoplay", "1");
-        dataSrc = dataSrc.toString();
-    } catch (error) {
-        dataSrc += dataSrc.includes("?") ? "&autoplay=1" : "?autoplay=1";
-    }
+    dataSrc = new URL(dataSrc);
+    dataSrc.searchParams.set("autoplay", "1");
+    dataSrc = dataSrc.toString();
 
     const wrapper = document.createElement("div");
     wrapper.className = "youtube-embed";
@@ -395,7 +388,7 @@ function buildYouTubeEmbed(iframe, videoId) {
     thumbnail.loading = "lazy";
     thumbnail.decoding = "async";
     thumbnail.alt = title;
-    thumbnail.src = `https://img.youtube-nocookie.com/vi/${videoId}/0.jpg`;
+    thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
 
     button.appendChild(icon);
     button.appendChild(thumbnail);
@@ -467,7 +460,6 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
 
     const settings = options || {};
     const sourceMarkdown = typeof markdownContent === "string" ? markdownContent : "";
-    const documentTitle = typeof settings.documentTitle === "string" ? settings.documentTitle : "";
     const headingScopeId = typeof settings.headingScopeId === "string" ? settings.headingScopeId : "";
     const shouldDowngradeHeadings = !!settings.downgradeHeadings;
 
@@ -476,11 +468,10 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
         || typeof marked.parse !== "function"
         || typeof marked.parseInline !== "function"
     ) {
-        rootEl.textContent = sourceMarkdown;
-        return false;
+        throw new Error("marked is required to render markdown content.");
     }
 
-    const transformedMarkdown = transformProcedureBlocks(sourceMarkdown, documentTitle);
+    const transformedMarkdown = transformProcedureBlocks(sourceMarkdown);
     rootEl.innerHTML = marked.parse(transformedMarkdown);
 
     if (shouldDowngradeHeadings) {

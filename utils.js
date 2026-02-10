@@ -17,7 +17,7 @@
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
+      .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
   }
 
@@ -41,6 +41,30 @@
       .join("/");
 
     return `https://github.com/${owner}/${repo}/edit/${branch}/${path}`;
+  }
+
+  function normalizeSectionId(value) {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return null;
+    }
+
+    const normalized = raw
+      .replace(/^[-*+]\s+/, "")
+      .replace(/^\d+\.\s+/, "")
+      .replace(/^`+|`+$/g, "")
+      .replace(/^\/+/, "")
+      .replace(/^sections\//, "")
+      .replace(/\.md$/i, "")
+      .trim();
+
+    if (!normalized || normalized === "supplement/introduction") {
+      return null;
+    }
+
+    return /^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)+$/.test(normalized)
+      ? normalized
+      : null;
   }
 
   function normalizeHashValue(hash) {
@@ -121,21 +145,10 @@
     escapeAttribute,
     getGitHubEditUrl,
     getContentRepoConfig,
+    normalizeSectionId,
     normalizeHashValue,
     replaceUrlState,
     getInternalHashFromLink,
     normalizeInternalHashLinks,
   };
-
-  // Backwards-compatible global aliases for older scripts.
-  global.getGitHubEditUrl = getGitHubEditUrl;
-  global.normalizeHashValue = normalizeHashValue;
-  global.replaceUrlState = replaceUrlState;
-  global.getInternalHashFromLink = getInternalHashFromLink;
-  global.normalizeInternalHashLinks = normalizeInternalHashLinks;
-
-  // Backwards-compatible repo globals used by older editor code.
-  global.CONTENT_REPO_OWNER = CONTENT_REPO_OWNER;
-  global.CONTENT_REPO_NAME = CONTENT_REPO_NAME;
-  global.CONTENT_REPO_BRANCH = CONTENT_REPO_BRANCH;
 }(window));

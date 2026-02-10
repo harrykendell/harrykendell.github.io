@@ -4,7 +4,7 @@
   const SEARCH_URL_PARAM = "q";
   const SEARCH_RESULT_LIMIT = 12;
   const SEARCH_MIN_QUERY_LENGTH = 2;
-  const SEARCH_NODE_ID_ATTR = "data-search-node-id";
+  const SEARCH_NODE_ID_ATTR = "search-node-id";
 
   let initialized = false;
   let searchIndex = [];
@@ -103,6 +103,64 @@
     const prefix = start > 0 ? "…" : "";
     const suffix = end < compactText.length ? "…" : "";
     return `${prefix}${compactText.slice(start, end).trim()}${suffix}`;
+  }
+
+  function highlightSearchText(text, tokens) {
+    const rawText = String(text || "");
+    if (!rawText) {
+      return "";
+    }
+
+    const tokenList = (tokens || [])
+      .map((token) => String(token || "").trim())
+      .filter(Boolean);
+    if (!tokenList.length) {
+      return escapeHtml(rawText);
+    }
+
+    const uniqueTokens = [];
+    const seen = new Set();
+    tokenList.forEach((token) => {
+      if (seen.has(token)) {
+        return;
+      }
+      seen.add(token);
+      uniqueTokens.push(token);
+    });
+    if (!uniqueTokens.length) {
+      return escapeHtml(rawText);
+    }
+
+    const pattern = uniqueTokens
+      .sort((a, b) => b.length - a.length)
+      .map((token) => escapeRegExp(token))
+      .join("|");
+    if (!pattern) {
+      return escapeHtml(rawText);
+    }
+
+    const regex = new RegExp(pattern, "gi");
+    let output = "";
+    let lastIndex = 0;
+    let match = regex.exec(rawText);
+    while (match) {
+      const start = match.index;
+      const end = start + match[0].length;
+      if (start > lastIndex) {
+        output += escapeHtml(rawText.slice(lastIndex, start));
+      }
+      output += `<mark>${escapeHtml(rawText.slice(start, end))}</mark>`;
+      lastIndex = end;
+      if (regex.lastIndex === start) {
+        regex.lastIndex = end;
+      }
+      match = regex.exec(rawText);
+    }
+    if (lastIndex < rawText.length) {
+      output += escapeHtml(rawText.slice(lastIndex));
+    }
+
+    return output || escapeHtml(rawText);
   }
 
   function fuzzySubsequenceScore(queryToken, corpus) {
@@ -210,7 +268,7 @@
     }
 
     const tag = node.tagName;
-    if (/^H[2-6]$/.test(tag) && node.id) {
+    if (/^H[1-6]$/.test(tag) && node.id) {
       return true;
     }
 
@@ -331,11 +389,39 @@
       return "";
     }
 
-    const preferredTitle = titleEl.querySelector("span:nth-of-type(2)");
+    const preferredTitle = titleEl.querySelector(".procedure-title-text")
+      || titleEl.querySelector("span:nth-of-type(2)");
     const rawTitle = preferredTitle
       ? preferredTitle.textContent
       : titleEl.textContent;
     return String(rawTitle || "").replace(/\s+/g, " ").trim();
+  }
+
+  function formatSkillLabel(value) {
+    const cleaned = String(value || "").trim();
+    if (!cleaned) {
+      return "";
+    }
+    return cleaned
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  function getProcedureSkillInfo(procedure) {
+    if (!(procedure instanceof Element)) {
+      return { skill: "", label: "" };
+    }
+
+    const skill = String(procedure.getAttribute("data-skill") || "").trim().toLowerCase();
+    if (!skill) {
+      return { skill: "", label: "" };
+    }
+
+    const badge = procedure.querySelector(".procedure-skill-badge");
+    const badgeText = badge ? badge.textContent : "";
+    const label = formatSkillLabel(badgeText || skill);
+    return { skill, label };
   }
 
   function indexSearchableContainer(options) {
@@ -357,6 +443,7 @@
 
     let currentHeadingId = sectionTargetId;
     let currentHeadingTitle = sectionTitle;
+    let currentHeadingLevel = 2;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
     let node = walker.nextNode();
     while (node) {
@@ -364,11 +451,14 @@
         const text = (node.textContent || "").replace(/\s+/g, " ").trim();
         if (text) {
           const sourceNodeId = ensureSearchNodeId(node);
-          if (/^H[2-6]$/.test(node.tagName) && node.id) {
+          if (/^H[1-6]$/.test(node.tagName) && node.id) {
             currentHeadingId = node.id;
             currentHeadingTitle = text;
             const level = parseInt(node.tagName.slice(1), 10);
             const levelPenalty = Number.isNaN(level) ? 0 : Math.max(0, level - 2);
+            if (!Number.isNaN(level)) {
+              currentHeadingLevel = level;
+            }
             addSearchIndexItem(items, dedupe, {
               kind: "heading",
               targetId: currentHeadingId,
@@ -378,6 +468,8 @@
               title: text,
               previewText: "",
               sourceNodeId,
+              headingTitle: text,
+              headingLevel: currentHeadingLevel,
               baseWeight: headingBaseWeight - levelPenalty * 4,
             });
           } else if (text.length >= 24) {
@@ -393,6 +485,9 @@
             const procedureTitle = isProcedureContent
               ? getProcedureTitleForNode(node)
               : "";
+            const procedureSkillInfo = isProcedureContent
+              ? getProcedureSkillInfo(procedureContainer)
+              : { skill: "", label: "" };
             const resultTitle = isProcedureContent
               ? (procedureTitle || currentHeadingTitle || sectionTitle)
               : (currentHeadingTitle || sectionTitle);
@@ -406,6 +501,11 @@
               previewText: isProcedureTitleNode ? "" : text,
               sourceNodeId,
               procedureGroupId,
+              procedureTitle,
+              procedureSkill: procedureSkillInfo.skill,
+              procedureSkillLabel: procedureSkillInfo.label,
+              headingTitle: currentHeadingTitle,
+              headingLevel: currentHeadingLevel,
               baseWeight: contentBaseWeight,
             });
           }
@@ -419,18 +519,32 @@
     const items = [];
     const dedupe = new Set();
     const preface = document.getElementById("preface-content");
+    const usedHeadingIds = new Set();
+
+    function ensureHeadingId(heading, baseId) {
+      if (!(heading instanceof Element)) {
+        return "";
+      }
+
+      const existing = (heading.getAttribute("id") || "").trim();
+      if (existing) {
+        usedHeadingIds.add(existing);
+        return existing;
+      }
+
+      const base = String(baseId || "heading").replace(/[^a-z0-9_-]+/gi, "-");
+      let candidate = `${base}-title`;
+      let suffix = 2;
+      while (usedHeadingIds.has(candidate) || document.getElementById(candidate)) {
+        candidate = `${base}-title-${suffix}`;
+        suffix += 1;
+      }
+      heading.setAttribute("id", candidate);
+      usedHeadingIds.add(candidate);
+      return candidate;
+    }
 
     if (preface) {
-      addSearchIndexItem(items, dedupe, {
-        kind: "section",
-        targetId: "top",
-        sectionId: "preface",
-        sectionGroup: "supplement",
-        sectionTitle: "Introduction",
-        title: "Introduction",
-        previewText: (preface.textContent || "").replace(/\s+/g, " ").trim(),
-        baseWeight: 130,
-      });
       indexSearchableContainer({
         root: preface,
         sectionId: "preface",
@@ -459,16 +573,23 @@
         ? getSectionGroup(sectionId)
         : "";
 
-      addSearchIndexItem(items, dedupe, {
-        kind: "section",
-        targetId: sectionId,
-        sectionId,
-        sectionGroup,
-        sectionTitle,
-        title: sectionTitle,
-        previewText: "",
-        baseWeight: 140,
-      });
+      if (sectionTitleEl) {
+        const sectionHeadingId = ensureHeadingId(sectionTitleEl, sectionId);
+        const sourceNodeId = ensureSearchNodeId(sectionTitleEl);
+        addSearchIndexItem(items, dedupe, {
+          kind: "heading",
+          targetId: sectionHeadingId,
+          sectionId,
+          sectionGroup,
+          sectionTitle,
+          title: sectionTitle,
+          previewText: "",
+          sourceNodeId,
+          headingTitle: sectionTitle,
+          headingLevel: 2,
+          baseWeight: 140,
+        });
+      }
 
       const contentRoot = section.querySelector(".section-content");
       indexSearchableContainer({
@@ -559,7 +680,10 @@
         top: Math.max(targetTop - 116, 0),
         behavior: "smooth",
       });
-      flashSearchTarget(sourceNode);
+      const flashTarget = getFlashTarget(sourceNode);
+      if (flashTarget) {
+        flashSearchTarget(flashTarget);
+      }
     };
 
     if (expanded) {
@@ -595,19 +719,6 @@
       url.searchParams.delete(SEARCH_URL_PARAM);
     }
     history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
-  }
-
-  function getSearchKindLabel(kind) {
-    if (kind === "section") {
-      return "Section";
-    }
-    if (kind === "heading") {
-      return "Heading";
-    }
-    if (kind === "procedure") {
-      return "Procedure";
-    }
-    return "Text";
   }
 
   function shouldRenderResultSnippet(result, snippetText) {
@@ -665,34 +776,47 @@
     const rows = results.map((result) => {
       const isProcedureContext = result.kind === "procedure";
       const isHeadingResult = result.kind === "heading";
-      const includeSectionInHeadingTitle = isHeadingResult
-        && !!result.sectionTitle
-        && result.sectionTitle !== result.title;
-      const titleHtml = includeSectionInHeadingTitle
-        ? `
-          <span class="toc-search-result-title-section">${escapeHtml(result.sectionTitle)}</span>
-          <span class="toc-search-result-title-separator" aria-hidden="true">▼</span>
-          <span class="toc-search-result-title-heading">${escapeHtml(result.title)}</span>
-        `
-        : escapeHtml(result.title);
+      const highlightedTitle = highlightSearchText(result.title, snippetTokens);
+      const headingTitleHtml = `<span class="toc-search-result-title-heading">${highlightedTitle}</span>`;
+      let titleHtml = highlightedTitle;
+      if (isHeadingResult) {
+        titleHtml = headingTitleHtml;
+      } else if (result.kind === "section") {
+        titleHtml = `<span class="toc-search-result-title-section">${highlightedTitle}</span>`;
+      }
       const snippetSource = resolveSnippetSource(result, normalizedQuery, snippetTokens);
       const snippet = buildSearchSnippet(snippetSource, snippetTokens);
       const showSnippet = shouldRenderResultSnippet(result, snippet);
-      const snippetHtml = showSnippet ? escapeHtml(snippet) : "";
+      const snippetHtml = showSnippet ? highlightSearchText(snippet, snippetTokens) : "";
 
-      const metaParts = [getSearchKindLabel(result.kind)];
-      if (!includeSectionInHeadingTitle && result.sectionTitle && result.sectionTitle !== result.title) {
-        metaParts.unshift(result.sectionTitle);
+      const contextParts = [];
+      if (result.sectionTitle && result.sectionTitle !== result.title) {
+        contextParts.push(result.sectionTitle);
       }
+      if (result.headingTitle && result.headingTitle !== result.title && result.headingTitle !== result.sectionTitle) {
+        contextParts.push(result.headingTitle);
+      }
+
+      const skillValue = String(result.procedureSkill || "").trim();
+      const skillLabel = String(result.procedureSkillLabel || skillValue || "").trim();
+      const skillBadgeHtml = skillValue
+        ? `<span class="procedure-skill-badge" data-skill="${escapeAttribute(skillValue)}">${escapeHtml(skillLabel)}</span>`
+        : "";
+      const headingLevel = Number.isFinite(result.headingLevel) ? String(result.headingLevel) : "";
+      const resultClasses = `toc-search-result${isProcedureContext ? " procedure" : ""}`;
+      const skillDataAttr = skillValue && isProcedureContext
+        ? ` data-skill="${escapeAttribute(skillValue)}"`
+        : "";
 
       return `
       <li>
-        <button type="button" class="toc-search-result" data-search-target="${escapeAttribute(result.targetId)}" data-search-kind="${escapeAttribute(result.kind)}" data-search-node-id="${escapeAttribute(result.sourceNodeId || "")}">
+        <button type="button" class="${resultClasses}" search-target="${escapeAttribute(result.targetId)}" search-kind="${escapeAttribute(result.kind)}"${headingLevel ? ` search-heading-level="${escapeAttribute(headingLevel)}"` : ""}${skillValue ? ` search-skill="${escapeAttribute(skillValue)}"` : ""}${skillDataAttr} search-node-id="${escapeAttribute(result.sourceNodeId || "")}">
           <span class="toc-search-result-title">
             ${isProcedureContext ? "<span class=\"toc-search-result-procedure-icon\" aria-hidden=\"true\">🛠</span>" : ""}
             <span class="toc-search-result-title-text">${titleHtml}</span>
+            ${skillBadgeHtml}
           </span>
-          <span class="toc-search-result-meta">${escapeHtml(metaParts.join(" → "))}</span>
+          ${contextParts.length ? `<span class="toc-search-result-meta">${escapeHtml(contextParts.join(" → "))}</span>` : ""}
           ${showSnippet ? `<span class="toc-search-result-snippet">${snippetHtml}</span>` : ""}
         </button>
       </li>
@@ -778,7 +902,20 @@
     targetElement.classList.add("search-target-flash");
     window.setTimeout(() => {
       targetElement.classList.remove("search-target-flash");
-    }, 1200);
+    }, 2000);
+  }
+
+  function getFlashTarget(element) {
+    if (!(element instanceof Element)) {
+      return null;
+    }
+
+    if (element.classList.contains("section")) {
+      return element.querySelector(".section-header") || element;
+    }
+
+    const block = element.closest("p, li, td, th, blockquote, .procedure, .section-header, h1, h2, h3, h4, h5, h6");
+    return block || element;
   }
 
   function navigateToSearchTarget(targetId, resultKind, sourceNodeId) {
@@ -799,8 +936,20 @@
     history.replaceState(null, document.title, `${url.pathname}${url.search}${url.hash}`);
 
     const target = document.getElementById(targetId);
-    if (target && targetId !== "top" && !usedDirectSourceScroll) {
-      flashSearchTarget(target);
+    if (!usedDirectSourceScroll) {
+      if (targetId === "top") {
+        const prefaceTarget = document.querySelector(".page-header")
+          || document.getElementById("preface-content");
+        const flashTarget = getFlashTarget(prefaceTarget);
+        if (flashTarget) {
+          flashSearchTarget(flashTarget);
+        }
+      } else if (target) {
+        const flashTarget = getFlashTarget(target);
+        if (flashTarget) {
+          flashSearchTarget(flashTarget);
+        }
+      }
     }
 
     if (window.matchMedia("(max-width: 860px)").matches && typeof window.setTocOpen === "function") {
@@ -873,19 +1022,19 @@
       }
 
       if (event.key === "Enter") {
-        const firstResult = results.querySelector("button[data-search-target]");
+        const firstResult = results.querySelector("button[search-target]");
         if (firstResult) {
           event.preventDefault();
-          const targetId = firstResult.getAttribute("data-search-target");
-          const resultKind = firstResult.getAttribute("data-search-kind");
-          const sourceNodeId = firstResult.getAttribute("data-search-node-id");
+          const targetId = firstResult.getAttribute("search-target");
+          const resultKind = firstResult.getAttribute("search-kind");
+          const sourceNodeId = firstResult.getAttribute("search-node-id");
           navigateToSearchTarget(targetId, resultKind, sourceNodeId);
         }
         return;
       }
 
       if (event.key === "ArrowDown") {
-        const firstResult = results.querySelector("button[data-search-target]");
+        const firstResult = results.querySelector("button[search-target]");
         if (firstResult) {
           event.preventDefault();
           firstResult.focus();
@@ -900,14 +1049,14 @@
       if (!(target instanceof Element)) {
         return;
       }
-      const button = target.closest("button[data-search-target]");
+      const button = target.closest("button[search-target]");
       if (!button) {
         return;
       }
       navigateToSearchTarget(
-        button.getAttribute("data-search-target"),
-        button.getAttribute("data-search-kind"),
-        button.getAttribute("data-search-node-id"),
+        button.getAttribute("search-target"),
+        button.getAttribute("search-kind"),
+        button.getAttribute("search-node-id"),
       );
     });
 
@@ -916,11 +1065,11 @@
       if (!(target instanceof Element)) {
         return;
       }
-      const currentButton = target.closest("button[data-search-target]");
+      const currentButton = target.closest("button[search-target]");
       if (!currentButton) {
         return;
       }
-      const buttons = Array.from(results.querySelectorAll("button[data-search-target]"));
+      const buttons = Array.from(results.querySelectorAll("button[search-target]"));
       const currentIndex = buttons.indexOf(currentButton);
       if (currentIndex === -1) {
         return;
@@ -1018,8 +1167,6 @@
     });
   }
 
-  window.SearchBar = {
-    setup,
-    refreshIndex,
-  };
+  window.SearchBarSetup = setup;
+  window.SearchBarRefreshIndex = refreshIndex;
 }());

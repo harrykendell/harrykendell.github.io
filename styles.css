@@ -1,21 +1,10 @@
-td > img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-height: 15dvh;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-soft);
-    background: #fff;
-    margin-inline: 0px;
-}
 :root {
     --bristol-green: #00491e;
     --bg: #f5f5f7;
     --bg-elevated: #ffffff;
 
     --border-subtle: #e0e0e5;
+    --border-subtle-line: 1px solid var(--border-subtle);
     --radius: 10px;
     --shadow-soft: 0 14px 30px rgba(15, 23, 42, 0.06);
 
@@ -35,6 +24,19 @@ td > img {
 
     --warn: #f59e0b;
     --warn-soft: #fef3c7;
+
+    --section-h2-size-base: 1.25rem;
+    --section-h3-size-base: 1.12rem;
+    --section-h4-size-base: 1rem;
+    --section-h2-size: var(--section-h2-size-base);
+    --section-h3-size: var(--section-h3-size-base);
+    --section-h4-size: var(--section-h4-size-base);
+    --section-h2-weight: 700;
+    --section-h3-accent: var(--info);
+}
+
+.section-edit-link {
+  display: none;
 }
 
 * {
@@ -92,7 +94,7 @@ main {
     background: var(--bg-elevated);
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     padding: var(--gap);
 }
 
@@ -121,8 +123,6 @@ main {
     overflow-x: auto;
 }
 
-/* Tables adapt to content width, but don't wrap cell content by default */
-/* Tables take full container width, columns adapt to content */
 .table-scroll table {
     width: 100%;
     table-layout: auto;
@@ -138,7 +138,7 @@ main {
 }
 
 header.page-header {
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
     padding-bottom: 12px;
     margin-bottom: 16px;
 }
@@ -147,7 +147,7 @@ header.page-header {
     margin: 0;
     font-size: 2.5rem;
     letter-spacing: 0.01em;
-    color: var(--bristol-green);
+    color: var(--info);
 }
 
 .page-subtitle {
@@ -166,7 +166,7 @@ header.page-header {
 .section {
     margin: 0;
     max-width: 100%;
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow-soft);
@@ -194,7 +194,7 @@ header.page-header {
     text-align: left;
     user-select: none;
     transition: background 0.1s;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
 }
 
 .section-header-main {
@@ -202,6 +202,14 @@ header.page-header {
     align-items: center;
     gap: 12px;
     min-width: 0;
+}
+
+.section-header-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .section-header:hover {
@@ -223,9 +231,17 @@ header.page-header {
     transform: rotate(-90deg);
 }
 
+.section h2,
+.toc-search-result-title-section,
+.toc-search-result[search-heading-level="2"] .toc-search-result-title-heading,
+.toc-search-result[search-kind="content"][search-heading-level="2"] .toc-search-result-title-text {
+    font-size: var(--section-h2-size);
+    font-weight: var(--section-h2-weight);
+    color: var(--text-main);
+}
+
 .section h2 {
     margin: 0;
-    font-size: 1.25rem;
     scroll-margin-top: 90px;
 }
 
@@ -250,22 +266,37 @@ header.page-header {
     overflow: hidden;
 }
 
+.section h3,
+.toc-search-result[search-heading-level="3"] .toc-search-result-title-heading,
+.toc-search-result[search-kind="content"][search-heading-level="3"] .toc-search-result-title-text {
+    font-size: var(--section-h3-size);
+    font-weight: 600;
+    color: var(--section-h3-accent);
+}
+
 .section h3 {
     margin: 24px 0 12px;
-    font-size: 1.12rem;
-    font-weight: 600;
-    color: var(--bristol-green);
     scroll-margin-top: 90px;
-    border-bottom: 3px solid var(--bristol-green);
+    border-bottom: 3px solid var(--section-h3-accent);
     padding-bottom: 8px;
     display: block;
 }
 
+.section h4,
+.toc-search-result[search-heading-level="4"] .toc-search-result-title-heading,
+.toc-search-result[search-heading-level="5"] .toc-search-result-title-heading,
+.toc-search-result[search-heading-level="6"] .toc-search-result-title-heading,
+.toc-search-result[search-kind="content"][search-heading-level="4"] .toc-search-result-title-text,
+.toc-search-result[search-kind="content"][search-heading-level="5"] .toc-search-result-title-text,
+.toc-search-result[search-kind="content"][search-heading-level="6"] .toc-search-result-title-text {
+    font-size: var(--section-h4-size);
+    font-weight: 600;
+    color: var(--text-main);
+    text-transform: none;
+}
+
 .section h4 {
     margin: 14px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    text-transform: none;
 }
 
 p {
@@ -354,20 +385,12 @@ blockquote p {
     border-left-color: var(--info);
 }
 
-.callout--info .callout-icon {
-    color: var(--info);
-}
-
 .callout--info .callout-title {
     color: var(--info);
 }
 
 .callout--danger {
     border-left-color: var(--danger);
-}
-
-.callout--danger .callout-icon {
-    color: var(--danger);
 }
 
 .callout--danger .callout-title {
@@ -378,17 +401,13 @@ blockquote p {
     border-left-color: var(--warn);
 }
 
-.callout--warn .callout-icon {
-    color: var(--warn);
-}
-
 .callout--warn .callout-title {
     color: var(--warn);
 }
 
 /* Procedures - Unique Styles */
 .procedure {
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     border-radius: var(--radius);
 }
 
@@ -399,7 +418,7 @@ blockquote p {
     font-style: italic;
     margin: 0 0 10px 0;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
 }
 
 .procedure-header {
@@ -408,7 +427,7 @@ blockquote p {
     border: 0;
     background: var(--bg);
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
     color: inherit;
     cursor: pointer;
     font: inherit;
@@ -425,6 +444,40 @@ blockquote p {
     font-size: 1rem;
 }
 
+.procedure-title {
+    align-items: flex-start;
+}
+
+.procedure-title-icon {
+    flex: 0 0 auto;
+    line-height: 1;
+}
+
+.procedure-title-content {
+    flex: 1;
+    min-width: 0;
+    display: flow-root;
+}
+
+.procedure-title-text {
+    display: inline;
+}
+
+.procedure-title .procedure-skill-badge {
+    float: right;
+    margin-left: 10px;
+    margin-right: 0;
+    line-height: inherit;
+}
+
+@supports (shape-outside: inset(0 0 1px 0)) {
+    .procedure-title .procedure-skill-badge {
+        /* Reserve only one line for wrapping; let later lines run full width */
+        shape-outside: inset(0 0 calc(100% - 1lh) 0);
+        shape-margin: 6px;
+    }
+}
+
 .procedure-skill-badge {
     background: var(--bg-elevated);
     color: var(--text-muted);
@@ -434,7 +487,7 @@ blockquote p {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     margin-left: auto;
     white-space: nowrap;
     min-width: 110px;
@@ -522,13 +575,23 @@ tr {
 }
 th,
 td {
-    border-left: 1px solid var(--border-subtle);
+    border-left: var(--border-subtle-line);
+    border-top: var(--border-subtle-line);
     padding: 4px 6px;
     vertical-align: top;
     word-break: break-word;
 }
-td {
-    border-top: 1px solid var(--border-subtle);
+td > img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 15dvh;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: var(--border-subtle-line);
+    box-shadow: var(--shadow-soft);
+    background: #fff;
+    margin-inline: 0px;
 }
 th {
     text-align: left;
@@ -574,7 +637,7 @@ hr {
     margin: 0px 0px 14px;
     border-radius: var(--radius);
     overflow: hidden;
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     max-width: 100%;
     box-shadow: var(--shadow-soft);
     background: #fff;

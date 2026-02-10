@@ -43,6 +43,8 @@ export default {
                         "GET /api/session",
                         "POST /api/session/exchange",
                         "GET /api/repo-status",
+                        "GET /api/file-history",
+                        "GET /api/file-content",
                         "POST /api/logout",
                         "POST /api/submit",
                     ],
@@ -67,6 +69,14 @@ export default {
 
             if (url.pathname === "/api/repo-status" && request.method === "GET") {
                 return handleApiRepoStatus(request, env, corsHeaders);
+            }
+
+            if (url.pathname === "/api/file-history" && request.method === "GET") {
+                return handleApiFileHistory(request, env, corsHeaders);
+            }
+
+            if (url.pathname === "/api/file-content" && request.method === "GET") {
+                return handleApiFileContent(request, env, corsHeaders);
             }
 
             if (url.pathname === "/api/logout" && request.method === "POST") {
@@ -401,6 +411,150 @@ async function handleApiRepoStatus(request, env, corsHeaders) {
     }, 200, corsHeaders);
 }
 
+function summarizeGitHubCommit(commit) {
+    if (!commit || typeof commit !== "object") {
+        return {
+            sha: "",
+            url: "",
+            message: "",
+            committedAt: "",
+            authorLogin: "",
+            authorName: "",
+        };
+    }
+
+    const commitData = commit.commit && typeof commit.commit === "object"
+        ? commit.commit
+        : {};
+    const authorData = commitData.author && typeof commitData.author === "object"
+        ? commitData.author
+        : {};
+    const author = commit.author && typeof commit.author === "object"
+        ? commit.author
+        : {};
+
+    return {
+        sha: typeof commit.sha === "string" ? commit.sha : "",
+        url: typeof commit.html_url === "string" ? commit.html_url : "",
+        message: typeof commitData.message === "string" ? commitData.message : "",
+        committedAt: typeof authorData.date === "string" ? authorData.date : "",
+        authorLogin: typeof author.login === "string" ? author.login : "",
+        authorName: typeof authorData.name === "string" ? authorData.name : "",
+    };
+}
+
+function parsePositiveInteger(value, min, max) {
+    const parsed = Number.parseInt(String(value || ""), 10);
+    if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+        throw new Error(`Expected integer between ${min} and ${max}.`);
+    }
+    return parsed;
+}
+
+function normalizeGitReference(value) {
+    if (!value) {
+        return "";
+    }
+
+    const ref = String(value).trim();
+    if (!ref || ref.length > 200) {
+        return "";
+    }
+    if (/[^\w./-]/.test(ref)) {
+        return "";
+    }
+    return ref;
+}
+
+function encodeRepoPath(path) {
+    return String(path || "")
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+}
+
+function decodeBase64Text(base64) {
+    const normalized = String(base64 || "").replace(/\s+/g, "");
+    const binary = atob(normalized);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+    }
+    return textDecoder.decode(bytes);
+}
+
+async function handleApiFileHistory(request, env, corsHeaders) {
+    const token = mustGetEnv(env, "GITHUB_STATUS_TOKEN");
+    const url = new URL(request.url);
+    const owner = normalizeRepoOwner(url.searchParams.get("owner"));
+    const repo = normalizeRepoName(url.searchParams.get("repo"));
+    const branch = normalizeBranchName(url.searchParams.get("branch")) || "main";
+    const path = normalizeMarkdownRepoPath(url.searchParams.get("path"));
+    const perPage = parsePositiveInteger(url.searchParams.get("per_page"), 1, 80);
+
+    if (!owner || !repo || !path) {
+        return jsonResponse({ error: "owner, repo, and path are required." }, 400, corsHeaders);
+    }
+
+    const repoPrefix = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const branchRef = encodeURIComponent(branch);
+    const pathQuery = encodeURIComponent(path);
+
+    const [headCommit, fileCommits] = await Promise.all([
+        githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token }),
+        githubApiRequest(`${repoPrefix}/commits?sha=${branchRef}&path=${pathQuery}&per_page=${perPage}`, { token }),
+    ]);
+
+    const commits = Array.isArray(fileCommits) ? fileCommits : [];
+    return jsonResponse({
+        owner,
+        repo,
+        branch,
+        path,
+        head: summarizeGitHubCommit(headCommit),
+        commits: commits.map((commit) => summarizeGitHubCommit(commit)),
+    }, 200, corsHeaders);
+}
+
+async function handleApiFileContent(request, env, corsHeaders) {
+    const token = mustGetEnv(env, "GITHUB_STATUS_TOKEN");
+    const url = new URL(request.url);
+    const owner = normalizeRepoOwner(url.searchParams.get("owner"));
+    const repo = normalizeRepoName(url.searchParams.get("repo"));
+    const path = normalizeMarkdownRepoPath(url.searchParams.get("path"));
+    const ref = normalizeGitReference(url.searchParams.get("ref"));
+
+    if (!owner || !repo || !path || !ref) {
+        return jsonResponse({ error: "owner, repo, path, and ref are required." }, 400, corsHeaders);
+    }
+
+    const repoPrefix = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const encodedPath = encodeRepoPath(path);
+    const encodedRef = encodeURIComponent(ref);
+    const file = await githubApiRequest(`${repoPrefix}/contents/${encodedPath}?ref=${encodedRef}`, { token });
+    const content = file && typeof file.content === "string" ? file.content : "";
+    const encoding = file && typeof file.encoding === "string" ? file.encoding.toLowerCase() : "";
+    if (!content || encoding !== "base64") {
+        return jsonResponse({ error: "Could not decode file content from GitHub." }, 502, corsHeaders);
+    }
+
+    let markdown = "";
+    try {
+        markdown = decodeBase64Text(content);
+    } catch (error) {
+        return jsonResponse({ error: "Could not decode file content from base64." }, 502, corsHeaders);
+    }
+
+    return jsonResponse({
+        owner,
+        repo,
+        path,
+        ref,
+        sha: file && typeof file.sha === "string" ? file.sha : "",
+        markdown,
+    }, 200, corsHeaders);
+}
+
 async function handleApiLogout(request, env, corsHeaders) {
     const response = jsonResponse({ ok: true }, 200, corsHeaders);
     clearSessionCookie(response, env);
@@ -479,29 +633,23 @@ async function handleApiSubmit(request, env, corsHeaders) {
         .sort();
 
     if (canPush) {
-        try {
-            const commit = await createCommitOnBranch({
-                token: session.token,
-                owner,
-                repo,
-                branch: baseBranch,
-                commitMessage,
-                files,
-                binaryFiles,
-            });
+        const commit = await createCommitOnBranch({
+            token: session.token,
+            owner,
+            repo,
+            branch: baseBranch,
+            commitMessage,
+            files,
+            binaryFiles,
+        });
 
-            return jsonResponse({
-                mode: "direct",
-                branch: baseBranch,
-                files: sortedPaths,
-                commitSha: commit.sha,
-                url: commit.url,
-            }, 200, corsHeaders);
-        } catch (error) {
-            if (!shouldFallbackToPullRequest(error)) {
-                throw error;
-            }
-        }
+        return jsonResponse({
+            mode: "direct",
+            branch: baseBranch,
+            files: sortedPaths,
+            commitSha: commit.sha,
+            url: commit.url,
+        }, 200, corsHeaders);
     }
 
     const pullRequest = await createPullRequestFromFork({
@@ -522,25 +670,6 @@ async function handleApiSubmit(request, env, corsHeaders) {
         pullRequestNumber: pullRequest.number,
         url: pullRequest.url,
     }, 200, corsHeaders);
-}
-
-function shouldFallbackToPullRequest(error) {
-    if (!error || typeof error !== "object") {
-        return false;
-    }
-
-    if (error.status === 403 || error.status === 404) {
-        return true;
-    }
-
-    if (error.status === 422) {
-        const message = String(error.message || "").toLowerCase();
-        return message.includes("protected branch")
-            || message.includes("resource not accessible")
-            || message.includes("not a fast forward");
-    }
-
-    return false;
 }
 
 async function getRepoStatusWithCache(options) {
@@ -643,14 +772,13 @@ async function fetchRepoStatusFromGitHub(options) {
             : [];
         const pagesRun = runs.find((run) => isPagesDeployRun(run)) || null;
         activity.deployRun = pagesRun;
-        activity.fallbackRun = pagesRun ? null : (runs[0] || null);
     } else {
         activity.runsError = runsResult.reason && runsResult.reason.message
             ? runsResult.reason.message
             : "Could not load deploy workflow runs.";
     }
 
-    if (!activity.commitSha && !activity.deployRun && !activity.fallbackRun) {
+    if (!activity.commitSha && !activity.deployRun) {
         activity.error = activity.commitError || activity.runsError || "Could not load repo activity.";
     }
 
@@ -1336,10 +1464,12 @@ function buildPopupCompletionHtml(ok, message, origin, extraPayload) {
 }
 
 function popupOrRedirectError(request, env, message, oauthPayload) {
-    const fallbackOrigin = chooseAllowedOrigin(null, env) || new URL(request.url).origin;
     const origin = oauthPayload && oauthPayload.origin
-        ? chooseAllowedOrigin(oauthPayload.origin, env) || fallbackOrigin
-        : fallbackOrigin;
+        ? chooseAllowedOrigin(oauthPayload.origin, env)
+        : chooseAllowedOrigin(null, env);
+    if (!origin) {
+        throw new Error("No allowed origin configured.");
+    }
     const mode = oauthPayload && oauthPayload.mode ? oauthPayload.mode : "redirect";
 
     if (mode === "popup") {
@@ -1786,6 +1916,6 @@ function escapeHtml(value) {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
+        .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }

@@ -7,7 +7,7 @@
     max-height: calc(100dvh - 2 * var(--gap));
     background: var(--bg-elevated);
     border-radius: var(--radius);
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     box-shadow: var(--shadow-soft);
     padding: var(--gap);
     font-size: 0.9rem;
@@ -28,7 +28,7 @@
     gap: 10px;
     margin: 0 0 12px;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
 }
 
 .sidebar h2 {
@@ -40,30 +40,13 @@
     text-align: left;
 }
 
-.toc-controls {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.toc-controls select {
-    appearance: none;
-    border: 1px solid var(--border-subtle);
-    border-radius: 999px;
-    padding: 4px 10px;
-    background: var(--bg-elevated);
-    color: var(--text-soft);
-    font-size: 0.75rem;
-    cursor: pointer;
-}
-
 .toc-toolbar-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 27px;
     height: 27px;
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     border-radius: 999px;
     background: var(--bg-elevated);
     color: var(--text-soft);
@@ -86,12 +69,12 @@
 
 .toc-toolbar-toggle:hover {
     color: var(--text-main);
-    border-color: #cbd5e1;
+    border-color: var(--border-subtle);
 }
 
 .toc-toolbar-toggle[aria-expanded="true"] {
     color: var(--text-main);
-    border-color: #cbd5e1;
+    border-color: var(--border-subtle);
 }
 
 #toc-list {
@@ -103,7 +86,7 @@
 .sidebar .toc-group {
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: var(--border-subtle-line);
 }
 
 .sidebar .toc-group:last-child {
@@ -153,12 +136,12 @@
 }
 
 .sidebar a:hover {
-    color: var(--bristol-green);
+    color: var(--info);
     transform: translateX(2px);
 }
 
 .sidebar a.active {
-    color: var(--bristol-green);
+    color: var(--info);
     font-weight: 800;
 }
 
@@ -186,26 +169,6 @@
     font-size: 0.85em;
     margin-top: 4px;
     margin-bottom: 2px;
-}
-
-.sidebar .sub.toc-level-2 {
-    padding-left: 0;
-}
-
-.sidebar .sub.toc-level-3 {
-    padding-left: 10px;
-}
-
-.sidebar .sub.toc-level-4 {
-    padding-left: 20px;
-}
-
-.sidebar .sub.toc-level-5 {
-    padding-left: 30px;
-}
-
-.sidebar .sub.toc-level-6 {
-    padding-left: 40px;
 }
 
 .sidebar .sub-list {
@@ -239,7 +202,7 @@
 
 .toc-search input {
     width: 100%;
-    border: 1px solid var(--border-subtle);
+    border: var(--border-subtle-line);
     border-radius: 999px;
     padding: 8px 34px 8px 12px;
     background: var(--bg-elevated);
@@ -291,6 +254,10 @@
 
 .toc-search-results {
     margin: 0 0 12px;
+    --search-heading-scale: 0.85;
+    --section-h2-size: calc(var(--section-h2-size-base) * var(--search-heading-scale));
+    --section-h3-size: calc(var(--section-h3-size-base) * var(--search-heading-scale));
+    --section-h4-size: calc(var(--section-h4-size-base) * var(--search-heading-scale));
 }
 
 .sidebar.search-active #toc-list {
@@ -303,29 +270,45 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 6px;
 }
 
 .toc-search-result {
     width: 100%;
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    background: #f9fafb;
+    border: var(--border-subtle-line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
     color: var(--text-main);
     text-align: left;
     padding: 8px 10px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     transition:
         border-color 0.1s,
         transform 0.08s,
         background 0.1s;
 }
 
+.toc-search-result.procedure {
+    margin: 0;
+}
+
+.toc-search-result .procedure-skill-badge {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    min-width: 88px;
+}
+
+
+.toc-search-result[search-kind="content"] .toc-search-result-title-text {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
 .toc-search-result:hover {
-    border-color: #cbd5e1;
+    border-color: var(--border-subtle);
     background: #f3f4f6;
     transform: translateX(1px);
 }
@@ -336,51 +319,66 @@
 }
 
 .toc-search-result-title {
-    font-size: 0.84rem;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8rem;
     font-weight: 700;
     line-height: 1.3;
     display: inline-flex;
     align-items: flex-start;
-    gap: 6px;
+    gap: 5px;
 }
 
 .toc-search-result-title-text {
     min-width: 0;
 }
 
-.toc-search-result-title-separator {
+.toc-search-result-title-heading {
+    color: var(--text-main);
     display: inline-block;
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-    opacity: 0.75;
-    font-size: 0.7rem;
-    line-height: 1.2;
-    margin-top: 0.12rem;
+}
+
+.toc-search-result[search-heading-level="3"] .toc-search-result-title-heading,
+.toc-search-result[search-kind="content"][search-heading-level="3"] .toc-search-result-title-text {
+    text-decoration: underline;
+    text-decoration-color: var(--section-h3-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+}
+
+.toc-search-result[search-kind="content"] .toc-search-result-title-text {
+    color: var(--text-main);
 }
 
 .toc-search-result-procedure-icon {
     flex: 0 0 auto;
-    font-size: 0.82rem;
-    line-height: 1.25;
+    font-size: 0.74rem;
+    line-height: 1.2;
     opacity: 0.9;
 }
 
 .toc-search-result-meta {
-    font-size: 0.69rem;
-    color: #ababab;
+    font-size: 0.63rem;
+    color: var(--text-soft);
     letter-spacing: 0.02em;
 }
 
 .toc-search-result-snippet {
-    font-size: 0.76rem;
+    font-size: 0.68rem;
     color: var(--text-muted);
     line-height: 1.35;
 }
 
+.toc-search-result mark {
+    background: var(--info-soft);
+    color: inherit;
+    border-radius: 3px;
+}
+
 .toc-search-empty {
     margin: 0;
-    padding: 8px 10px;
-    font-size: 0.78rem;
+    padding: 7px 9px;
+    font-size: 0.74rem;
     color: var(--text-soft);
     border: 1px dashed var(--border-subtle);
     border-radius: 10px;
@@ -393,7 +391,10 @@
 
 @keyframes search-target-flash {
     0% {
-        background: rgba(254, 240, 138, 0.8);
+        background: var(--info-soft);
+    }
+    50% {
+        background: var(--info-soft);
     }
     100% {
         background: transparent;
@@ -423,6 +424,7 @@
 
     main.toc-dim {
         opacity: 0.2;
+        pointer-events: none;
     }
 
     .toc-toggle {
@@ -435,7 +437,7 @@
         z-index: 40;
         padding: 10px 14px;
         border-radius: var(--radius);
-        border: 1px solid var(--border-subtle);
+        border: var(--border-subtle-line);
         background: var(--bg-elevated);
         color: var(--text-main);
         box-shadow: var(--shadow-soft);

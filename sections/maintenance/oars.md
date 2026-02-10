@@ -105,20 +105,7 @@ Monthly check that collars are tight and that inboard is consistent across a pai
 
 **Repairs note:** structural spoon delamination repair is an advanced repair. See **[Oar repairs](/#repairs/oars)**.
 
-For delamination or breakage, stabilise with epoxy:
-
-### When to send to manufacturer
-
-Concept2 also runs **Regatta Service** at select events (complimentary repairs/maintenance for Concept2 oars):
-
-- [Concept2 Regatta Service](https://www.concept2.com/support/oars/about-regatta-service)
-
-**Send to manufacturer for:**
-
-- Large shaft damage.
-- Blade-to-shaft joint failure.
-- Major spoon structural damage.
-- Any repair that would materially change stiffness/weight balance.
+For delamination or breakage, stabilise with epoxy.
 
 > [!INFO] Note
 > Our club insurance policy treats oars as paired equipment; a single written-off blade allows for a replacement pair.
