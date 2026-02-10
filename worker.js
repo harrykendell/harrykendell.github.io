@@ -771,7 +771,9 @@ async function fetchRepoStatusFromGitHub(options) {
             ? workflowRuns.workflow_runs
             : [];
         const pagesRun = runs.find((run) => isPagesDeployRun(run)) || null;
-        activity.deployRun = pagesRun;
+        // Prefer a pages/deploy workflow, but fall back to the latest run so
+        // the UI still shows current workflow health for repos with custom naming.
+        activity.deployRun = pagesRun || (runs.length > 0 ? runs[0] : null);
     } else {
         activity.runsError = runsResult.reason && runsResult.reason.message
             ? runsResult.reason.message

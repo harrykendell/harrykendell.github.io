@@ -1278,7 +1278,7 @@
       setRepoActionIndicator({
         stateClass: "is-failed",
         href: "",
-        label: "No recent workflow run",
+        label: activity.runsError || "No recent workflow run",
       });
       return;
     }
