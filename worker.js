@@ -6,6 +6,7 @@ const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 const SESSION_EXCHANGE_MAX_AGE_SECONDS = 60 * 2;
 const OAUTH_MAX_AGE_SECONDS = 60 * 10;
 const REPO_STATUS_MIN_POLL_MS = 10 * 1000;
+const REPO_STATUS_REQUEST_TIMEOUT_MS = 7 * 1000;
 
 const DEFAULT_ALLOWED_ORIGINS = [
     "https://kendell.uk",
@@ -483,6 +484,23 @@ function decodeBase64Text(base64) {
     return textDecoder.decode(bytes);
 }
 
+async function waitWithTimeout(promise, timeoutMs, message) {
+    if (!timeoutMs) {
+        return promise;
+    }
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+            reject(new Error(message || "Operation timed out."));
+        }, timeoutMs);
+    });
+    try {
+        return await Promise.race([promise, timeoutPromise]);
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
 async function handleApiFileHistory(request, env, corsHeaders) {
     const token = mustGetEnv(env, "GITHUB_STATUS_TOKEN");
     const url = new URL(request.url);
@@ -688,13 +706,25 @@ async function getRepoStatusWithCache(options) {
 
     const inFlight = repoStatusInFlight.get(cacheKey);
     if (inFlight) {
-        const data = await inFlight;
-        const freshCache = repoStatusCache.get(cacheKey);
-        return {
-            data,
-            cacheHit: !!freshCache,
-            cacheAgeMs: freshCache ? Math.max(0, Date.now() - freshCache.fetchedAt) : 0,
-        };
+        try {
+            const data = await waitWithTimeout(inFlight, REPO_STATUS_REQUEST_TIMEOUT_MS, "Repo status request timed out.");
+            const freshCache = repoStatusCache.get(cacheKey);
+            return {
+                data,
+                cacheHit: !!freshCache,
+                cacheAgeMs: freshCache ? Math.max(0, Date.now() - freshCache.fetchedAt) : 0,
+            };
+        } catch (error) {
+            repoStatusInFlight.delete(cacheKey);
+            if (cached) {
+                return {
+                    data: cached.data,
+                    cacheHit: true,
+                    cacheAgeMs: Math.max(0, Date.now() - cached.fetchedAt),
+                };
+            }
+            throw error;
+        }
     }
 
     const fetchPromise = (async () => {
@@ -741,8 +771,8 @@ async function fetchRepoStatusFromGitHub(options) {
     const branchRef = encodeURIComponent(branch);
 
     const [commitResult, runsResult] = await Promise.allSettled([
-        githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token }),
-        githubApiRequest(`${repoPrefix}/actions/runs?branch=${branchRef}&per_page=20`, { token }),
+        githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS }),
+        githubApiRequest(`${repoPrefix}/actions/runs?branch=${branchRef}&per_page=20`, { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS }),
     ]);
 
     const activity = {
@@ -1124,18 +1154,31 @@ async function exchangeCodeForAccessToken(options) {
 }
 
 async function githubApiRequest(path, options) {
-    const { method = "GET", token, body } = options || {};
-    const response = await fetch(`https://api.github.com${path}`, {
-        method,
-        headers: {
-            Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${token}`,
-            "X-GitHub-Api-Version": "2022-11-28",
-            "Content-Type": "application/json",
-            "User-Agent": "kendell-github-auth-worker",
-        },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    const { method = "GET", token, body, timeoutMs = 0 } = options || {};
+    const controller = timeoutMs ? new AbortController() : null;
+    let timeoutId = null;
+    if (controller) {
+        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    }
+    let response;
+    try {
+        response = await fetch(`https://api.github.com${path}`, {
+            method,
+            headers: {
+                Accept: "application/vnd.github+json",
+                Authorization: `Bearer ${token}`,
+                "X-GitHub-Api-Version": "2022-11-28",
+                "Content-Type": "application/json",
+                "User-Agent": "kendell-github-auth-worker",
+            },
+            body: body !== undefined ? JSON.stringify(body) : undefined,
+            signal: controller ? controller.signal : undefined,
+        });
+    } finally {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+    }
 
     const text = await response.text();
     let payload = null;

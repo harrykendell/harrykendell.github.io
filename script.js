@@ -1,8 +1,9 @@
 // Prevent hash updates until after initial scroll restoration
 let hashUpdateEnabled = false;
-const SECTION_ORDER_PATH = "sections/supplement/section-order.md";
+const SECTION_ORDER_PATH = "sections/section-order.md";
 const EDITOR_MARKDOWN_DRAFTS_STORAGE_KEY = "editor-markdown-drafts-v1";
 let sectionFiles = [];
+let nextSectionIds = null;
 
 let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
@@ -129,7 +130,25 @@ async function resolveSectionFiles() {
     }
   }
 
-  sectionFiles = parsed.slice();
+  const nextIds = nextSectionIds || parsed;
+  const seenIds = new Set(nextIds);
+  const draftOnlyIds = [];
+  draftMap.forEach((draft, path) => {
+    if (typeof draft !== "string") {
+      return;
+    }
+    if (!path || path === SECTION_ORDER_PATH || path === "sections/supplement/introduction.md") {
+      return;
+    }
+    const normalizedId = appNormalizeSectionId(path);
+    if (!normalizedId || seenIds.has(normalizedId)) {
+      return;
+    }
+    seenIds.add(normalizedId);
+    draftOnlyIds.push(normalizedId);
+  });
+
+  sectionFiles = nextIds.concat(draftOnlyIds);
   return sectionFiles;
 }
 
@@ -142,14 +161,14 @@ function loadEditorAssets() {
     const link = document.createElement("link");
     link.id = "editor-css";
     link.rel = "stylesheet";
-    link.href = "editor.css?v=3";
+    link.href = "editor.css?v=4";
     document.head.appendChild(link);
   }
 
   if (!document.getElementById("editor-script")) {
     const script = document.createElement("script");
     script.id = "editor-script";
-    script.src = "editor.js?v=17";
+    script.src = "editor.js?v=23";
     script.async = true;
     document.head.appendChild(script);
   }

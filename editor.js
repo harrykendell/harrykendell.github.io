@@ -38,6 +38,7 @@
     authBusy: false,
     repoActivityBusy: false,
     editMode: false,
+    editorAuthorized: false,
     drafts: new Map(),
     imageDrafts: new Map(),
     sourceMarkdown: new Map(),
@@ -117,6 +118,11 @@
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <circle cx="12" cy="8" r="4"></circle>
       <path d="M4.5 20c1.6-3.3 4.4-5 7.5-5s5.9 1.7 7.5 5"></path>
+    </svg>
+  `;
+  const AUTH_GITHUB_ICON = `
+    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path>
     </svg>
   `;
 
@@ -1110,6 +1116,7 @@
       });
       const activity = await authRequest(`/api/repo-status?${query.toString()}`, {
         includeSessionHeader: false,
+        timeoutMs: 8000,
       });
       if (!activity || typeof activity !== "object") {
         throw new Error("Invalid repo status response.");
@@ -1127,7 +1134,7 @@
   }
 
   function isRepoActivityVisible() {
-    return !!(elements.toolbar && !elements.toolbar.hidden);
+    return !!(elements.toolbar && !elements.toolbar.hidden && state.editorAuthorized);
   }
 
   function startRepoActivityPolling() {
@@ -1604,7 +1611,8 @@
 
   function setEditMode(isEnabled) {
     const shouldEnable = !!isEnabled;
-    state.editMode = shouldEnable && (!elements.toolbar || !elements.toolbar.hidden);
+    const allowEdit = shouldEnable && hasEditorAccess(state.authSession);
+    state.editMode = allowEdit && (!elements.toolbar || !elements.toolbar.hidden);
     document.body.classList.toggle("edit-mode", state.editMode);
     updateToolbarVisibilityButton();
     storeEditorState();
@@ -1615,9 +1623,6 @@
     if (!storedState) {
       document.body.classList.toggle("edit-mode", state.editMode);
       return;
-    }
-    if (typeof storedState.toolbarVisible === "boolean") {
-      setToolbarVisible(storedState.toolbarVisible);
     }
     if (typeof storedState.editMode === "boolean") {
       setEditMode(storedState.editMode);
@@ -1631,6 +1636,7 @@
       method = "GET",
       body,
       includeSessionHeader = true,
+      timeoutMs = 0,
     }
       = options || {};
     const headers = {};
@@ -1640,12 +1646,24 @@
     if (includeSessionHeader && state.authHeaderSessionToken && isLoopbackHost(window.location.hostname)) {
       headers[AUTH_SESSION_HEADER_NAME] = state.authHeaderSessionToken;
     }
+    const controller = timeoutMs ? new AbortController() : null;
+    let timeoutId = null;
+    if (controller) {
+      timeoutId = window.setTimeout(() => {
+        controller.abort();
+      }, timeoutMs);
+    }
+
     const response = await fetch(`${AUTH_WORKER_ORIGIN}${path}`, {
       method,
       credentials: "include",
       headers: Object.keys(headers).length > 0 ? headers : undefined,
       body: body === undefined ? undefined : JSON.stringify(body),
+      signal: controller ? controller.signal : undefined,
     });
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
 
     let payload = null;
     try {
@@ -1674,14 +1692,37 @@
     updateAuthUi();
   }
 
+  function wait(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function hasEditorAccess(sessionPayload) {
+    if (!sessionPayload || !sessionPayload.authenticated) {
+      return false;
+    }
+    const repoAccess = sessionPayload.repoAccess;
+    if (!repoAccess) {
+      return false;
+    }
+    return !!(repoAccess.canPush || repoAccess.canPull);
+  }
+
   function getAuthAccessLabel(sessionPayload) {
     const repoAccess = sessionPayload && sessionPayload.repoAccess
       ? sessionPayload.repoAccess
       : null;
     if (!repoAccess) {
-      return "publish";
+      return "no repo access";
     }
-    return repoAccess.canPush ? "direct commit" : "pull request";
+    if (repoAccess.canPush) {
+      return "direct commit";
+    }
+    if (repoAccess.canPull) {
+      return "pull request";
+    }
+    return "no repo access";
   }
 
   function setAuthButtonVisual(config) {
@@ -1715,6 +1756,11 @@
       wrapper.className = "inline-auth-glyph inline-auth-glyph-user";
       wrapper.innerHTML = AUTH_USER_ICON;
       elements.authButton.appendChild(wrapper);
+    } else if (glyph === "github") {
+      const wrapper = document.createElement("span");
+      wrapper.className = "inline-auth-glyph inline-auth-glyph-github";
+      wrapper.innerHTML = AUTH_GITHUB_ICON;
+      elements.authButton.appendChild(wrapper);
     } else {
       const wrapper = document.createElement("span");
       wrapper.className = "inline-auth-glyph";
@@ -1727,7 +1773,32 @@
     elements.authButton.setAttribute("data-auth-state", signedIn ? "signed-in" : "signed-out");
   }
 
+  function updateEditorAccessState() {
+    const authorized = hasEditorAccess(state.authSession);
+    const accessChanged = state.editorAuthorized !== authorized;
+    if (elements.toolbar) {
+      elements.toolbar.hidden = false;
+      elements.toolbar.classList.toggle("is-auth-only", !authorized);
+    }
+
+    if (state.editMode !== authorized) {
+      setEditMode(authorized);
+    }
+
+    if (accessChanged) {
+      state.editorAuthorized = authorized;
+      if (authorized) {
+        startRepoActivityPolling();
+        refreshRepoActivity(true);
+      } else {
+        stopRepoActivityPolling();
+      }
+    }
+    updateToolbar();
+  }
+
   function updateAuthUi() {
+    updateEditorAccessState();
     if (!elements.authButton) {
       return;
     }
@@ -1766,7 +1837,7 @@
     const cached = readStoredAuthProfile();
     elements.authButton.disabled = state.busy;
     setAuthButtonVisual({
-      glyph: "?",
+      glyph: "github",
       signedIn: false,
       label: "Sign in with GitHub",
       title: cached && cached.login
@@ -1816,6 +1887,23 @@
     } finally {
       state.authRefreshPromise = null;
     }
+  }
+
+  async function refreshAuthSessionWithRetry(retries = 1, delayMs = 300) {
+    let session = await refreshAuthSession();
+    if (session && session.authenticated) {
+      return session;
+    }
+
+    for (let attempt = 0; attempt < retries; attempt += 1) {
+      await wait(delayMs * (attempt + 1));
+      session = await refreshAuthSession();
+      if (session && session.authenticated) {
+        break;
+      }
+    }
+
+    return session;
   }
 
   function startAuthPopupPolling(popupWindow) {
@@ -1948,7 +2036,7 @@
         storeAuthHeaderSessionToken(exchangePayload.sessionHeaderToken);
       }
 
-      await refreshAuthSession();
+      await refreshAuthSessionWithRetry(2, 350);
       if (state.authSession && state.authSession.authenticated) {
         setStatus("GitHub sign-in complete.");
         refreshRepoActivity(true);
@@ -1975,12 +2063,20 @@
     }
 
     if (state.authSession && state.authSession.authenticated) {
-      return true;
+      if (hasEditorAccess(state.authSession)) {
+        return true;
+      }
+      setStatus("GitHub account does not have access to publish to this repo.", true);
+      return false;
     }
 
     await refreshAuthSession();
     if (state.authSession && state.authSession.authenticated) {
-      return true;
+      if (hasEditorAccess(state.authSession)) {
+        return true;
+      }
+      setStatus("GitHub account does not have access to publish to this repo.", true);
+      return false;
     }
 
     const signInDialog = await openAppDialog({
@@ -2241,7 +2337,6 @@
     if (elements.addSectionButton) {
       elements.addSectionButton.disabled = state.busy || state.authBusy || !state.editMode;
     }
-    updateAuthUi();
     updateRepoActivityUi();
   }
 
@@ -2352,7 +2447,7 @@
   }
 
   function getSectionOrderPath() {
-    return "sections/supplement/section-order.md";
+    return "sections/section-order.md";
   }
 
   function normalizeSectionId(sectionId) {
@@ -2821,12 +2916,10 @@
   }
 
   function getDefaultSectionTitle(sectionId) {
-    const normalized = String(sectionId || "").trim();
-    if (!normalized) {
-      return "";
+    if (typeof window.formatSectionTitleFromId === "function") {
+      return window.formatSectionTitleFromId(sectionId);
     }
-    const segments = normalized.split("/").filter(Boolean);
-    return segments.length ? segments[segments.length - 1] : normalized;
+    return sectionId.split("/").slice(-1)[0] || "Untitled";
   }
 
   function setNewSectionMode(isNew) {
@@ -4287,10 +4380,13 @@
   function buildUi() {
     const toolbar = document.createElement("div");
     toolbar.id = "editor-toolbar";
-    toolbar.hidden = true;
+    toolbar.hidden = false;
+    toolbar.classList.add("is-auth-only");
     toolbar.innerHTML = `
       <div class="inline-toolbar-row inline-toolbar-row-main">
-        <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
+        <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">
+          <span class="inline-auth-glyph inline-auth-glyph-github">${AUTH_GITHUB_ICON}</span>
+        </button>
         <div class="editor-repo" aria-live="polite">
           <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
         </div>

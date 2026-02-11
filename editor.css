@@ -137,6 +137,12 @@
     stroke-linejoin: round;
 }
 
+#editor-toolbar .inline-auth-icon-button .inline-auth-glyph-github svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
 #editor-toolbar .inline-auth-icon-button.has-avatar img {
     width: 100%;
     height: 100%;
@@ -154,6 +160,22 @@
 }
 #inline-auth-action[data-auth-state="signed-out"] {
     border-color: var(--danger);
+}
+
+#editor-toolbar.is-auth-only {
+    padding: 6px;
+}
+
+#editor-toolbar.is-auth-only .inline-toolbar-row-main {
+    gap: 0;
+}
+
+#editor-toolbar.is-auth-only .inline-toolbar-row-main > :not(#inline-auth-action) {
+    display: none;
+}
+
+#editor-toolbar.is-auth-only #editor-status {
+    display: none;
 }
 
 #editor-toolbar .editor-repo {
