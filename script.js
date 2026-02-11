@@ -1061,10 +1061,8 @@ function setupSidebarLinks() {
           return;
         }
 
-        if (window.matchMedia("(max-width: 860px)").matches) {
-          if (typeof window.setTocOpen === "function") {
-            window.setTocOpen(false);
-          }
+        if (typeof window.setTocOpen === "function") {
+          window.setTocOpen(false);
         }
       });
       sidebarLinksBound = true;

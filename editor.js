@@ -1255,8 +1255,8 @@
     const commitBaseClass = activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted");
     const commitTitle = activity.commitSha
       ? (commitAge
-          ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
-          : `Latest commit ${shortenSha(activity.commitSha)}`)
+        ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
+        : `Latest commit ${shortenSha(activity.commitSha)}`)
       : "Latest commit unavailable";
 
     const deployRun = activity.deployRun;
@@ -4559,6 +4559,9 @@
 
     if (elements.toolbarVisibilityButton) {
       elements.toolbarVisibilityButton.addEventListener("click", () => {
+        if (typeof window.setTocOpen === "function") {
+          window.setTocOpen(false);
+        }
         if (state.editMode) {
           setEditMode(false);
           setToolbarVisible(false);

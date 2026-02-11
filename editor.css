@@ -916,7 +916,6 @@ body.editor-modal-open {
 
     .editor-diff-editor {
         min-height: 240px;
-        height: 44vh;
     }
 
     .editor-format-toolbar {
