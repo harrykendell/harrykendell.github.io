@@ -1744,7 +1744,16 @@
     elements.authButton.classList.toggle("has-avatar", !!avatarUrl);
     elements.authButton.classList.toggle("is-busy", !!busy);
 
-    if (avatarUrl) {
+    if (busy) {
+      const wrapper = document.createElement("span");
+      wrapper.className = "inline-auth-glyph inline-auth-glyph-dots";
+      wrapper.innerHTML = `
+        <span class="inline-auth-dot"></span>
+        <span class="inline-auth-dot"></span>
+        <span class="inline-auth-dot"></span>
+      `;
+      elements.authButton.appendChild(wrapper);
+    } else if (avatarUrl) {
       const image = document.createElement("img");
       image.src = avatarUrl;
       image.alt = "";
@@ -1779,6 +1788,7 @@
     if (elements.toolbar) {
       elements.toolbar.hidden = false;
       elements.toolbar.classList.toggle("is-auth-only", !authorized);
+      elements.toolbar.classList.toggle("is-authenticated", authorized);
     }
 
     if (state.editMode !== authorized) {

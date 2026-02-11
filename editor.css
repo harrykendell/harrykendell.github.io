@@ -67,9 +67,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
-    background: var(--bg-elevated);
     color: var(--text-main);
     padding: 7px 8px;
+}
+
+#editor-toolbar.is-authenticated {
+    background: var(--bg-elevated);
     border-radius: 12px;
     border: var(--border-subtle-line);
     box-shadow:
@@ -152,14 +155,32 @@
 }
 
 #editor-toolbar .inline-auth-icon-button.is-busy {
-    animation: inline-auth-pulse 0.9s ease-in-out infinite;
+    background: #ffffff;
+}
+
+#editor-toolbar .inline-auth-icon-button.is-busy .inline-auth-glyph-dots {
+    align-items: center;
+    gap: 3px;
+}
+
+#editor-toolbar .inline-auth-icon-button.is-busy .inline-auth-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: inline-auth-dot-jump 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+}
+
+#editor-toolbar .inline-auth-icon-button.is-busy .inline-auth-dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+#editor-toolbar .inline-auth-icon-button.is-busy .inline-auth-dot:nth-child(3) {
+    animation-delay: 0.6s;
 }
 
 #inline-auth-action[data-auth-state="signed-in"] {
     border-color: var(--info);
-}
-#inline-auth-action[data-auth-state="signed-out"] {
-    border-color: var(--danger);
 }
 
 #editor-toolbar.is-auth-only {
@@ -284,7 +305,6 @@
 }
 
 #editor-toolbar button:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
 }
 
@@ -319,13 +339,22 @@
     initial-value: 0deg;
 }
 
-@keyframes inline-auth-pulse {
-    0%,
-    100% {
+@keyframes inline-auth-dot-jump {
+    0% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+    20% {
+        transform: translateY(-4px);
         opacity: 1;
     }
-    50% {
-        opacity: 0.62;
+    40% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.6;
     }
 }
 
@@ -818,20 +847,23 @@ body.editor-modal-open {
 
 .editor-codemirror .cm-editor {
     height: 100%;
-    color: var(--text-main);
-    font-family:
-        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        "Liberation Mono", "Courier New", monospace;
-    font-size: 0.86rem;
-    line-height: 1.5;
-}
-
-.editor-codemirror .cm-content {
-    padding: 14px;
 }
 
 .editor-codemirror .cm-scroller {
     overscroll-behavior: contain;
+}
+
+.editor-codemirror .cm-content {
+    color: var(--text-main);
+    font-family:
+        "Open Sans",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    background: var(--bg-elevated);
 }
 
 .cm-diff-ins {
