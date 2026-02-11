@@ -211,14 +211,16 @@ function renderSectionSubItems(section) {
   const sectionId = section.id;
   const safeSectionId = escapeAttribute(sectionId);
   const headings = section.querySelectorAll(
-    ".section-content h2[id], .section-content h3[id]",
+    ".section-content h2[id], .section-content h3[id], .section-content h4[id]",
   );
 
   return Array.from(headings).map((heading) => {
     const headingId = escapeAttribute(heading.id);
     const headingText = escapeHtml(heading.textContent);
+    const headingLevel = heading.tagName.toLowerCase();
+    const subClass = `sub sub-${headingLevel}`;
     return `
-      <li class="sub">
+      <li class="${subClass}">
         <a href="#${headingId}" data-parent="${safeSectionId}">${headingText}</a>
       </li>
     `;
@@ -550,14 +552,16 @@ function renderSectionNavItem(section) {
   const safeSectionTitle = escapeHtml(sectionTitle);
 
   const headings = section.querySelectorAll(
-    ".section-content h2[id], .section-content h3[id]",
+    ".section-content h2[id], .section-content h3[id], .section-content h4[id]",
   );
 
   const subItems = Array.from(headings).map((heading) => {
     const headingId = escapeAttribute(heading.id);
     const headingText = escapeHtml(heading.textContent);
+    const headingLevel = heading.tagName.toLowerCase();
+    const subClass = `sub sub-${headingLevel}`;
     return `
-            <li class="sub">
+            <li class="${subClass}">
                 <a href="#${headingId}" data-parent="${safeSectionId}">${headingText}</a>
             </li>
         `;
@@ -796,7 +800,7 @@ function setupActiveTracking() {
   }
 
   const headings = Array.from(document.querySelectorAll(
-    ".section[id], .section .section-content h2[id], .section .section-content h3[id]",
+    ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id]",
   ));
   function isCollapsedHeading(heading) {
     if (heading.classList && heading.classList.contains("section")) {

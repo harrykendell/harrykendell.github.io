@@ -171,6 +171,10 @@
     margin-bottom: 2px;
 }
 
+.sidebar .sub.sub-h4 {
+    padding-left: 14px;
+}
+
 .sidebar .sub-list {
     list-style: none;
     margin: 4px 0 0;

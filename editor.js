@@ -23,6 +23,7 @@
   const AUTH_PROFILE_STORAGE_KEY = "editor-github-profile";
   const EDITOR_STATE_STORAGE_KEY = "editor-state";
   const MARKDOWN_DRAFTS_STORAGE_KEY = "editor-markdown-drafts-v1";
+  const IMAGE_DRAFTS_STORAGE_KEY = "editor-image-drafts-v1";
   const EDITOR_MODAL_OPEN_CLASS = "editor-modal-open";
   const DIFF_MATCH_PATCH_MODULE_URL = "https://esm.sh/diff-match-patch@1.0.5";
   const CODEMIRROR_STATE_MODULE_URL = "https://esm.sh/@codemirror/state";
@@ -90,7 +91,6 @@
     toolbarVisibilityButton: null,
     authButton: null,
     repoCommit: null,
-    repoDeploy: null,
     addSectionButton: null,
     submitButton: null,
     clearButton: null,
@@ -111,7 +111,6 @@
     modalImageInput: null,
     modalCompareToolbar: null,
     modalCompareSelect: null,
-    modalCompareRefresh: null,
     modalDiffSummary: null,
   };
   const AUTH_USER_ICON = `
@@ -632,7 +631,7 @@
                 state.newSectionDraft.markdownTouched = true;
               }
               state.newSectionDraft.markdown = update.state.doc.toString();
-              scheduleDiffPreviewRender();
+              syncNewSectionDraft();
             } else {
               syncCurrentEditorDraft();
             }
@@ -1193,61 +1192,58 @@
     }
   }
 
-  function setRepoActionIndicator(options) {
-    if (!elements.repoDeploy) {
-      return;
-    }
-
-    const {
-      stateClass = "is-failed",
-      href = "",
-      label = "Workflow status unavailable",
-    }
-      = options || {};
-
-    setActivityLink(
-      elements.repoDeploy,
-      "",
-      href,
-      `inline-action-indicator ${stateClass}`,
-    );
-    const nextLabel = String(label || "Workflow status unavailable");
-    setAttributeIfChanged(elements.repoDeploy, "aria-label", nextLabel);
-    setAttributeIfChanged(elements.repoDeploy, "title", nextLabel);
-  }
-
   function updateRepoActivityUi() {
-    if (!elements.repoCommit || !elements.repoDeploy) {
+    if (!elements.repoCommit) {
       return;
     }
+
+    const applyCommitStatus = ({
+      text = "—",
+      href = "",
+      baseClass = "",
+      statusClass = "is-failed",
+      title = "",
+      ariaLabel = "",
+    } = {}) => {
+      const className = [baseClass, statusClass].filter(Boolean).join(" ").trim();
+      setActivityLink(elements.repoCommit, text, href, className);
+      setAttributeIfChanged(elements.repoCommit, "aria-label", ariaLabel || title || text);
+      setAttributeIfChanged(elements.repoCommit, "title", title || ariaLabel || text);
+    };
 
     const activity = state.repoActivity;
     if (state.repoActivityBusy && !activity) {
-      setActivityLink(elements.repoCommit, "…", "", "is-muted");
-      setRepoActionIndicator({
-        stateClass: "is-failed",
+      applyCommitStatus({
+        text: "…",
         href: "",
-        label: "Checking workflow status",
+        baseClass: "is-muted",
+        statusClass: "is-running",
+        title: "Checking latest commit and workflow status",
+        ariaLabel: "Checking latest commit and workflow status",
       });
       return;
     }
 
     if (!activity) {
-      setActivityLink(elements.repoCommit, "—", "", "is-muted");
-      setRepoActionIndicator({
-        stateClass: "is-failed",
+      applyCommitStatus({
+        text: "—",
         href: "",
-        label: "Workflow status unavailable",
+        baseClass: "is-muted",
+        statusClass: "is-failed",
+        title: "Latest commit unavailable. Workflow status unavailable.",
+        ariaLabel: "Latest commit unavailable. Workflow status unavailable.",
       });
       return;
     }
 
     if (activity.error) {
-      setActivityLink(elements.repoCommit, "—", "", "is-warning");
-      setRepoActionIndicator({
-        stateClass: "is-failed",
+      applyCommitStatus({
+        text: "—",
         href: "",
-        label: "Workflow status unavailable",
+        baseClass: "is-warning",
+        statusClass: "is-failed",
+        title: "Latest commit unavailable. Workflow status unavailable.",
+        ariaLabel: "Latest commit unavailable. Workflow status unavailable.",
       });
       return;
     }
@@ -1256,54 +1252,57 @@
     const commitText = activity.commitSha
       ? `${shortenSha(activity.commitSha)}${commitAge ? ` | ${commitAge}` : ""}`
       : "—";
-    setActivityLink(
-      elements.repoCommit,
-      commitText,
-      activity.commitUrl,
-      activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted"),
-    );
-    if (activity.commitSha) {
-      const commitTitle = commitAge
-        ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
-        : `Latest commit ${shortenSha(activity.commitSha)}`;
-      setAttributeIfChanged(elements.repoCommit, "aria-label", commitTitle);
-      setAttributeIfChanged(elements.repoCommit, "title", commitTitle);
-    } else {
-      setAttributeIfChanged(elements.repoCommit, "aria-label", "Latest commit unavailable");
-      setAttributeIfChanged(elements.repoCommit, "title", "Latest commit unavailable");
-    }
+    const commitBaseClass = activity.commitSha ? "" : (activity.commitError ? "is-warning" : "is-muted");
+    const commitTitle = activity.commitSha
+      ? (commitAge
+          ? `Latest commit ${shortenSha(activity.commitSha)} (${commitAge})`
+          : `Latest commit ${shortenSha(activity.commitSha)}`)
+      : "Latest commit unavailable";
 
     const deployRun = activity.deployRun;
     if (!deployRun) {
-      setRepoActionIndicator({
-        stateClass: "is-failed",
-        href: "",
-        label: activity.runsError || "No recent workflow run",
+      const statusLabel = activity.runsError || "No recent workflow run";
+      applyCommitStatus({
+        text: commitText,
+        href: activity.commitUrl,
+        baseClass: commitBaseClass,
+        statusClass: "is-failed",
+        title: `${commitTitle}. ${statusLabel}.`,
+        ariaLabel: `${commitTitle}. ${statusLabel}.`,
       });
       return;
     }
 
     const deployState = classifyDeployState(deployRun);
     if (deployState.cssClass === "running") {
-      setRepoActionIndicator({
-        stateClass: "is-running",
-        href: deployRun.html_url || "",
-        label: "Workflow running",
+      applyCommitStatus({
+        text: commitText,
+        href: activity.commitUrl,
+        baseClass: commitBaseClass,
+        statusClass: "is-running",
+        title: `${commitTitle}. Workflow running.`,
+        ariaLabel: `${commitTitle}. Workflow running.`,
       });
       return;
     }
     if (deployState.cssClass === "success") {
-      setRepoActionIndicator({
-        stateClass: "is-success",
-        href: deployRun.html_url || "",
-        label: "Workflow successful",
+      applyCommitStatus({
+        text: commitText,
+        href: activity.commitUrl,
+        baseClass: commitBaseClass,
+        statusClass: "is-success",
+        title: `${commitTitle}. Workflow successful.`,
+        ariaLabel: `${commitTitle}. Workflow successful.`,
       });
       return;
     }
-    setRepoActionIndicator({
-      stateClass: "is-failed",
-      href: deployRun.html_url || "",
-      label: "Workflow failed or unavailable",
+    applyCommitStatus({
+      text: commitText,
+      href: activity.commitUrl,
+      baseClass: commitBaseClass,
+      statusClass: "is-failed",
+      title: `${commitTitle}. Workflow failed or unavailable.`,
+      ariaLabel: `${commitTitle}. Workflow failed or unavailable.`,
     });
   }
 
@@ -1428,6 +1427,40 @@
     }
   }
 
+  function readStoredImageDrafts() {
+    try {
+      const raw = localStorage.getItem(IMAGE_DRAFTS_STORAGE_KEY);
+      if (!raw) {
+        return new Map();
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || typeof parsed.drafts !== "object") {
+        return new Map();
+      }
+
+      const nextDrafts = new Map();
+      Object.entries(parsed.drafts).forEach(([path, draft]) => {
+        const normalizedPath = normalizeImageRepoPath(path);
+        if (!normalizedPath || !draft || typeof draft !== "object") {
+          return;
+        }
+        const contentBase64 = typeof draft.contentBase64 === "string" ? draft.contentBase64 : "";
+        if (!contentBase64) {
+          return;
+        }
+        nextDrafts.set(normalizedPath, {
+          contentBase64,
+          contentType: typeof draft.contentType === "string" ? draft.contentType : "",
+          size: Number.isFinite(draft.size) ? draft.size : 0,
+          fileName: typeof draft.fileName === "string" ? draft.fileName : "",
+        });
+      });
+      return nextDrafts;
+    } catch (error) {
+      return new Map();
+    }
+  }
+
   function storeMarkdownDrafts() {
     try {
       if (state.drafts.size === 0) {
@@ -1461,6 +1494,49 @@
     }
   }
 
+  function storeImageDrafts() {
+    try {
+      if (state.imageDrafts.size === 0) {
+        localStorage.removeItem(IMAGE_DRAFTS_STORAGE_KEY);
+        return;
+      }
+
+      const draftEntries = Array.from(state.imageDrafts.entries())
+        .filter(([path, draft]) => {
+          if (!normalizeImageRepoPath(path) || !draft || typeof draft !== "object") {
+            return false;
+          }
+          return typeof draft.contentBase64 === "string" && draft.contentBase64.length > 0;
+        })
+        .sort((left, right) => left[0].localeCompare(right[0]));
+      if (draftEntries.length === 0) {
+        localStorage.removeItem(IMAGE_DRAFTS_STORAGE_KEY);
+        return;
+      }
+
+      const drafts = {};
+      draftEntries.forEach(([path, draft]) => {
+        drafts[path] = {
+          contentBase64: draft.contentBase64,
+          contentType: typeof draft.contentType === "string" ? draft.contentType : "",
+          size: Number.isFinite(draft.size) ? draft.size : 0,
+          fileName: typeof draft.fileName === "string" ? draft.fileName : "",
+        };
+      });
+
+      localStorage.setItem(
+        IMAGE_DRAFTS_STORAGE_KEY,
+        JSON.stringify({
+          version: 1,
+          updatedAt: Date.now(),
+          drafts,
+        }),
+      );
+    } catch (error) {
+      // Ignore storage errors.
+    }
+  }
+
   function restoreMarkdownDrafts() {
     const storedDrafts = readStoredMarkdownDrafts();
     if (storedDrafts.size === 0) {
@@ -1475,6 +1551,18 @@
     state.drafts.forEach((markdown, path) => {
       renderSectionFromDraft(path, markdown);
     });
+  }
+
+  function restoreImageDrafts() {
+    const storedDrafts = readStoredImageDrafts();
+    state.imageDrafts.clear();
+    storedDrafts.forEach((draft, path) => {
+      state.imageDrafts.set(path, draft);
+    });
+
+    if (state.imageDrafts.size > 0) {
+      applyStagedImagePreviews(document);
+    }
   }
 
   function readStoredEditorState() {
@@ -2093,9 +2181,6 @@
     }
     if (elements.modalCompareSelect) {
       elements.modalCompareSelect.disabled = disableToolbarActions;
-    }
-    if (elements.modalCompareRefresh) {
-      elements.modalCompareRefresh.disabled = disableToolbarActions;
     }
   }
 
@@ -2736,7 +2821,12 @@
   }
 
   function getDefaultSectionTitle(sectionId) {
-    return sectionId || "";
+    const normalized = String(sectionId || "").trim();
+    if (!normalized) {
+      return "";
+    }
+    const segments = normalized.split("/").filter(Boolean);
+    return segments.length ? segments[segments.length - 1] : normalized;
   }
 
   function setNewSectionMode(isNew) {
@@ -2792,6 +2882,7 @@
     state.newSectionDraft = {
       rawPath: "",
       sectionId: "",
+      draftPath: "",
       title: "",
       titleTouched: false,
       markdownTouched: false,
@@ -3208,6 +3299,50 @@
     }
   }
 
+  function syncNewSectionDraft() {
+    if (!state.newSectionDraft) {
+      return;
+    }
+
+    const rawPath = elements.modalPathInput ? elements.modalPathInput.value : state.newSectionDraft.rawPath;
+    const normalizedSectionId = normalizeSectionId(rawPath);
+    const nextPath = normalizedSectionId ? `sections/${normalizedSectionId}.md` : "";
+    const previousPath = state.newSectionDraft.draftPath || "";
+
+    if (previousPath && previousPath !== nextPath) {
+      state.drafts.delete(previousPath);
+    }
+
+    if (!normalizedSectionId || !nextPath || document.getElementById(normalizedSectionId)) {
+      state.newSectionDraft.draftPath = "";
+      storeMarkdownDrafts();
+      updateToolbar();
+      scheduleDiffPreviewRender();
+      return;
+    }
+
+    const snapshot = getEditorSnapshot();
+    let body = snapshot ? snapshot.value : state.newSectionDraft.markdown || "";
+    if (!state.newSectionDraft.markdownTouched || !body.trim()) {
+      body = buildSectionBodyTemplate();
+    }
+
+    const titleInput = elements.modalTitleInput ? elements.modalTitleInput.value : state.newSectionDraft.title;
+    const fallbackTitle = getDefaultSectionTitle(normalizedSectionId);
+    const title = normalizeTitleValue(titleInput, fallbackTitle);
+    const markdown = composeMarkdownWithTitle(title, body, fallbackTitle);
+
+    state.newSectionDraft.rawPath = String(rawPath || "");
+    state.newSectionDraft.sectionId = normalizedSectionId;
+    state.newSectionDraft.markdown = snapshot ? snapshot.value : state.newSectionDraft.markdown;
+    state.newSectionDraft.title = titleInput;
+    state.newSectionDraft.draftPath = nextPath;
+    state.drafts.set(nextPath, markdown);
+    storeMarkdownDrafts();
+    updateToolbar();
+    scheduleDiffPreviewRender();
+  }
+
   function syncCurrentEditorDraft() {
     const snapshot = getEditorSnapshot();
     if (!state.currentPath || !snapshot) {
@@ -3567,6 +3702,7 @@
         size: imageFile.size,
         fileName: imageFile.name || "",
       });
+      storeImageDrafts();
 
       const snapshot = getEditorSnapshot();
       if (!snapshot) {
@@ -3932,6 +4068,7 @@
 
     try {
       state.imageDrafts.clear();
+      storeImageDrafts();
       await restoreManualFromSource();
       state.drafts.clear();
       storeMarkdownDrafts();
@@ -4117,6 +4254,7 @@
       state.drafts.clear();
       storeMarkdownDrafts();
       state.imageDrafts.clear();
+      storeImageDrafts();
       updateToolbar();
       refreshRepoActivity(true);
       window.setTimeout(() => {
@@ -4155,9 +4293,8 @@
         <button id="inline-auth-action" type="button" class="inline-auth-icon-button" aria-label="Sign in with GitHub" title="Sign in with GitHub">?</button>
         <div class="editor-repo" aria-live="polite">
           <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
-          <a id="inline-repo-deploy" class="inline-repo-link inline-action-indicator is-failed" aria-label="Workflow status unavailable"></a>
         </div>
-        <button id="inline-section-add" type="button">Add Section</button>
+        <button id="inline-section-add" type="button">Add</button>
         <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
         <button id="inline-edit-clear" type="button" disabled>Reset</button>
       </div>
@@ -4199,18 +4336,25 @@
             </div>
           </div>
           <div class="editor-history-controls" role="toolbar" aria-label="History actions">
-            <button type="button" data-format-action="undo" title="Undo (Cmd/Ctrl+Z)" aria-label="Undo">
-              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                <path d="M9 4L5 8L9 12"></path>
-                <path d="M5 8H12C14.209 8 16 9.791 16 12C16 14.209 14.209 16 12 16H10"></path>
-              </svg>
-            </button>
-            <button type="button" data-format-action="redo" title="Redo (Cmd/Ctrl+Shift+Z)" aria-label="Redo">
-              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                <path d="M11 4L15 8L11 12"></path>
-                <path d="M15 8H8C5.791 8 4 9.791 4 12C4 14.209 5.791 16 8 16H10"></path>
-              </svg>
-            </button>
+            <div class="editor-header-side">
+              <div class="editor-history-controls-row" role="group" aria-label="Undo and redo">
+                <button type="button" data-format-action="undo" title="Undo (Cmd/Ctrl+Z)" aria-label="Undo">
+                  <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                    <path d="M9 4L5 8L9 12"></path>
+                    <path d="M5 8H12C14.209 8 16 9.791 16 12C16 14.209 14.209 16 12 16H10"></path>
+                  </svg>
+                </button>
+                <button type="button" data-format-action="redo" title="Redo (Cmd/Ctrl+Shift+Z)" aria-label="Redo">
+                  <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                    <path d="M11 4L15 8L11 12"></path>
+                    <path d="M15 8H8C5.791 8 4 9.791 4 12C4 14.209 5.791 16 8 16H10"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="editor-compare-toolbar" role="group" aria-label="Comparison controls">
+                <select id="editor-compare-commit" aria-label="Compare with commit"></select>
+              </div>
+            </div>
           </div>
         </div>
         <div class="editor-format-toolbar" role="toolbar" aria-label="Markdown formatting">
@@ -4340,23 +4484,13 @@
             </button>
           </div>
         </div>
-        <div class="editor-compare-toolbar" role="group" aria-label="Comparison controls">
-          <label for="editor-compare-commit">Compare:</label>
-          <select id="editor-compare-commit" aria-label="Compare with commit"></select>
-          <button type="button" id="editor-compare-refresh" title="Reload commit history" aria-label="Reload commit history">
-            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-              <path d="M16 10A6 6 0 1 1 14.24 5.76"></path>
-              <path d="M16 4V8H12"></path>
-            </svg>
-          </button>
-          <p id="editor-diff-summary" class="editor-diff-summary">Live diff preview</p>
-        </div>
         <div class="editor-diff-editor" role="region" aria-label="Live diff editor">
           <div id="editor-codemirror" class="editor-codemirror"></div>
         </div>
         <input id="editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
         <div class="editor-actions">
           <button type="button" id="editor-reset">Reset Section</button>
+          <p id="editor-diff-summary" class="editor-diff-summary">Live diff preview</p>
           <button class="primary" type="button" id="editor-save">Save Draft</button>
         </div>
       </div>
@@ -4393,7 +4527,6 @@
     elements.toolbarVisibilityButton = document.getElementById("inline-toolbar-toggle");
     elements.authButton = toolbar.querySelector("#inline-auth-action");
     elements.repoCommit = toolbar.querySelector("#inline-repo-commit");
-    elements.repoDeploy = toolbar.querySelector("#inline-repo-deploy");
     elements.addSectionButton = toolbar.querySelector("#inline-section-add");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
@@ -4412,7 +4545,6 @@
     elements.modalImageInput = modal.querySelector("#editor-image-upload");
     elements.modalCompareToolbar = modal.querySelector(".editor-compare-toolbar");
     elements.modalCompareSelect = modal.querySelector("#editor-compare-commit");
-    elements.modalCompareRefresh = modal.querySelector("#editor-compare-refresh");
     elements.modalDiffSummary = modal.querySelector("#editor-diff-summary");
     elements.modalSave = modal.querySelector("#editor-save");
     elements.modalReset = modal.querySelector("#editor-reset");
@@ -4521,6 +4653,7 @@
         } else {
           elements.modalPathInput.classList.remove("is-invalid");
         }
+        syncNewSectionDraft();
       });
     }
 
@@ -4530,6 +4663,7 @@
         if (state.newSectionDraft) {
           state.newSectionDraft.title = value;
           state.newSectionDraft.titleTouched = value.trim().length > 0;
+          syncNewSectionDraft();
           return;
         }
         if (!state.currentPath) {
@@ -4548,16 +4682,6 @@
           return;
         }
         applyCompareSelection(state.currentPath);
-      });
-    }
-
-    if (elements.modalCompareRefresh) {
-      elements.modalCompareRefresh.addEventListener("click", () => {
-        if (!state.currentPath) {
-          return;
-        }
-        const snapshot = getEditorSnapshot();
-        loadComparisonContext(state.currentPath, snapshot ? snapshot.value : "", true);
       });
     }
 
@@ -4691,6 +4815,7 @@
     restoreEditorState();
     storeAuthHeaderSessionToken(readStoredAuthHeaderSessionToken());
     setupEvents();
+    restoreImageDrafts();
     restoreMarkdownDrafts();
     ensureAllSectionOrderActions();
     updateToolbar();
