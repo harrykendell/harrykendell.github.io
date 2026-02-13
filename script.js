@@ -528,6 +528,7 @@ async function loadSections() {
 }
 
 async function loadPreface() {
+  console.time("Load preface introduction");
   const preface = document.getElementById("preface-content");
   if (!preface) {
     return;
