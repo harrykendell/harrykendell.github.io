@@ -800,10 +800,7 @@ async function fetchRepoStatusFromGitHub(options) {
         const runs = workflowRuns && Array.isArray(workflowRuns.workflow_runs)
             ? workflowRuns.workflow_runs
             : [];
-        const pagesRun = runs.find((run) => isPagesDeployRun(run)) || null;
-        // Prefer a pages/deploy workflow, but fall back to the latest run so
-        // the UI still shows current workflow health for repos with custom naming.
-        activity.deployRun = pagesRun || (runs.length > 0 ? runs[0] : null);
+        activity.deployRun = selectDeployRun(runs);
     } else {
         activity.runsError = runsResult.reason && runsResult.reason.message
             ? runsResult.reason.message
@@ -995,16 +992,63 @@ function summarizeCheckRunAnnotations(annotations, maxIssues) {
     return summary;
 }
 
-function isPagesDeployRun(run) {
+function selectDeployRun(runs) {
+    if (!Array.isArray(runs) || runs.length === 0) {
+        return null;
+    }
+
+    const deployRun = runs.find((run) => isPagesDeployRun(run)) || null;
+    if (deployRun) {
+        return deployRun;
+    }
+
+    // Fallback to a non-markdown workflow run when deploy heuristics do not match.
+    // This avoids accidentally showing markdown validation as deploy health.
+    const nonMarkdownRun = runs.find((run) => !isMarkdownValidationRun(run)) || null;
+    return nonMarkdownRun;
+}
+
+function isPushLikeEvent(run) {
+    const eventName = String(run && run.event ? run.event : "").toLowerCase();
+    return eventName === "push"
+        || eventName === "workflow_dispatch"
+        || eventName === "schedule"
+        || eventName === "workflow_run"
+        || eventName === "deployment"
+        || eventName === "deployment_status"
+        || eventName === "repository_dispatch"
+        || !eventName;
+}
+
+function isMarkdownValidationRun(run) {
     const name = String(run && run.name ? run.name : "").toLowerCase();
     const path = String(run && run.path ? run.path : "").toLowerCase();
     const title = String(run && run.display_title ? run.display_title : "").toLowerCase();
-    const eventName = String(run && run.event ? run.event : "").toLowerCase();
-    const looksLikePages = name.includes("pages")
+    const text = `${name} ${path} ${title}`;
+    const hasMarkdown = text.includes("markdown");
+    const hasValidationWord = text.includes("validate")
+        || text.includes("validation")
+        || text.includes("lint")
+        || text.includes("check");
+    return hasMarkdown && hasValidationWord;
+}
+
+function isPagesDeployRun(run) {
+    if (isMarkdownValidationRun(run) || !isPushLikeEvent(run)) {
+        return false;
+    }
+    const name = String(run && run.name ? run.name : "").toLowerCase();
+    const path = String(run && run.path ? run.path : "").toLowerCase();
+    const title = String(run && run.display_title ? run.display_title : "").toLowerCase();
+    const text = `${name} ${path} ${title}`;
+    const hasPages = text.includes("pages")
         || path.includes("pages")
-        || title.includes("pages")
-        || path.includes("deploy");
-    return looksLikePages && (eventName === "push" || eventName === "workflow_dispatch" || eventName === "schedule" || !eventName);
+        || text.includes("github pages");
+    const hasDeploy = text.includes("deploy")
+        || text.includes("deployment")
+        || text.includes("publish");
+    const hasBuild = text.includes("build");
+    return hasPages || (hasDeploy && hasBuild);
 }
 
 async function createPullRequestFromFork(options) {

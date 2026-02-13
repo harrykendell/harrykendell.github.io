@@ -1200,24 +1200,99 @@
     }
   }
 
-  function formatMarkdownValidationIssue(issue) {
-    if (!issue || typeof issue !== "object") {
-      return "";
+  function getValidationIssueLevel(issue) {
+    const level = String(issue && issue.level ? issue.level : "").toLowerCase();
+    if (level === "error" || level === "failure") {
+      return "error";
+    }
+    if (level === "warning" || level === "warn") {
+      return "warning";
+    }
+    return "notice";
+  }
+
+  function buildValidationCountsSummary(validation) {
+    const errorCount = Number(validation && validation.errorCount ? validation.errorCount : 0);
+    const warningCount = Number(validation && validation.warningCount ? validation.warningCount : 0);
+    const noticeCount = Number(validation && validation.noticeCount ? validation.noticeCount : 0);
+
+    const parts = [];
+    if (errorCount > 0) {
+      parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+    }
+    if (warningCount > 0) {
+      parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
+    }
+    if (noticeCount > 0) {
+      parts.push(`${noticeCount} notice${noticeCount === 1 ? "" : "s"}`);
+    }
+    return parts.join(", ");
+  }
+
+  function buildMarkdownIssueDialogText(validation) {
+    const issues = Array.isArray(validation && validation.issues)
+      ? validation.issues
+      : [];
+    const countsSummary = buildValidationCountsSummary(validation);
+
+    const levelWeight = {
+      error: 0,
+      warning: 1,
+      notice: 2,
+    };
+    const sorted = issues.slice().sort((a, b) => {
+      const aLevel = getValidationIssueLevel(a);
+      const bLevel = getValidationIssueLevel(b);
+      const aRank = Object.prototype.hasOwnProperty.call(levelWeight, aLevel) ? levelWeight[aLevel] : 3;
+      const bRank = Object.prototype.hasOwnProperty.call(levelWeight, bLevel) ? levelWeight[bLevel] : 3;
+      if (aRank !== bRank) {
+        return aRank - bRank;
+      }
+      const aPath = String(a && a.path ? a.path : "");
+      const bPath = String(b && b.path ? b.path : "");
+      if (aPath !== bPath) {
+        return aPath.localeCompare(bPath);
+      }
+      return Number(a && a.line ? a.line : 0) - Number(b && b.line ? b.line : 0);
+    });
+
+    const lines = [];
+    if (countsSummary) {
+      lines.push(`Summary: ${countsSummary}`);
+    }
+    lines.push("");
+    lines.push("Top issues:");
+
+    const visibleIssues = sorted.slice(0, 12);
+    if (visibleIssues.length === 0) {
+      lines.push("No issue details returned by GitHub API.");
+    } else {
+      visibleIssues.forEach((issue, index) => {
+        const level = getValidationIssueLevel(issue);
+        const badge = level === "error"
+          ? "[ERROR]"
+          : (level === "warning" ? "[WARN ]" : "[NOTE ]");
+        const path = typeof issue.path === "string" ? issue.path : "";
+        const line = Number.isFinite(Number(issue.line)) ? Number(issue.line) : 0;
+        const location = path
+          ? `${path}${line > 0 ? `:${line}` : ""}`
+          : "Unknown location";
+        const rawMessage = typeof issue.message === "string" && issue.message.trim()
+          ? issue.message
+          : (typeof issue.title === "string" ? issue.title : "");
+        const message = rawMessage.replace(/\s+/g, " ").trim() || "No details provided.";
+
+        lines.push(`${index + 1}. ${badge} ${location}`);
+        lines.push(`   ${message}`);
+      });
     }
 
-    const path = typeof issue.path === "string" ? issue.path : "";
-    const line = Number.isFinite(Number(issue.line)) ? Number(issue.line) : 0;
-    const title = typeof issue.title === "string" ? issue.title : "";
-    const message = typeof issue.message === "string" ? issue.message : "";
-    const detail = message || title;
-    if (!detail) {
-      return "";
+    if (validation && validation.issuesTruncated) {
+      lines.push("");
+      lines.push("Additional issues were omitted.");
     }
 
-    const location = path
-      ? `${path}${line > 0 ? `:${line}` : ""}`
-      : "";
-    return location ? `${location} ${detail}` : detail;
+    return lines.join("\n");
   }
 
   function updateRepoActivityUi() {
@@ -1314,12 +1389,8 @@
         issues.length,
       );
 
-      const issueDetails = issues
-        .map((issue) => formatMarkdownValidationIssue(issue))
-        .filter(Boolean)
-        .slice(0, 6);
-      const issueSummary = issueDetails.length > 0 ? `\n${issueDetails.join("\n")}` : "";
-      const truncatedNote = validation.issuesTruncated ? "\nAdditional issues omitted." : "";
+      const countsSummary = buildValidationCountsSummary(validation);
+      const detailsSuffix = countsSummary ? ` (${countsSummary})` : "";
 
       if (status && status !== "completed") {
         applyMarkdownStatus({
@@ -1327,7 +1398,7 @@
           href: url,
           baseClass: "is-muted",
           statusClass: "is-running",
-          title: `${checkName} is running.${issueSummary}${truncatedNote}`,
+          title: `${checkName} is running${detailsSuffix}.`,
           ariaLabel: `${checkName} is running.`,
           hasIssues: issueCount > 0,
         });
@@ -1341,7 +1412,7 @@
             href: url,
             baseClass: "",
             statusClass: "is-failed",
-            title: `${checkName} reported ${errorCount} error${errorCount === 1 ? "" : "s"}.${issueSummary}${truncatedNote}`,
+            title: `${checkName} failed: ${errorCount} error${errorCount === 1 ? "" : "s"}. Click for details.`,
             ariaLabel: `${checkName} reported ${errorCount} errors.`,
             hasIssues: true,
           });
@@ -1355,7 +1426,7 @@
             href: url,
             baseClass: "",
             statusClass: "is-warning",
-            title: `${checkName} completed with ${nonErrorCount || issueCount} warning/notice issue${(nonErrorCount || issueCount) === 1 ? "" : "s"}.${issueSummary}${truncatedNote}`,
+            title: `${checkName} has ${nonErrorCount || issueCount} warning/notice issue${(nonErrorCount || issueCount) === 1 ? "" : "s"}. Click for details.`,
             ariaLabel: `${checkName} completed with warnings.`,
             hasIssues: true,
           });
@@ -1380,7 +1451,7 @@
           href: url,
           baseClass: "",
           statusClass: "is-failed",
-          title: `${checkName} failed.${issueSummary}${truncatedNote}`,
+          title: `${checkName} failed${detailsSuffix}. Click for details.`,
           ariaLabel: `${checkName} failed.`,
           hasIssues: issueCount > 0,
         });
@@ -1392,7 +1463,7 @@
         href: url,
         baseClass: "is-muted",
         statusClass: issueCount > 0 ? "is-warning" : "",
-        title: `${checkName} status: ${conclusion || "unknown"}.${issueSummary}${truncatedNote}`,
+        title: `${checkName} status: ${conclusion || "unknown"}${detailsSuffix}.`,
         ariaLabel: `${checkName} status: ${conclusion || "unknown"}.`,
         hasIssues: issueCount > 0,
       });
@@ -1547,35 +1618,7 @@
     const checkName = typeof validation.name === "string" && validation.name
       ? validation.name
       : "Markdown validation";
-    const summaryParts = [];
-    if (Number(validation.errorCount || 0) > 0) {
-      summaryParts.push(`${validation.errorCount} error${Number(validation.errorCount) === 1 ? "" : "s"}`);
-    }
-    if (Number(validation.warningCount || 0) > 0) {
-      summaryParts.push(`${validation.warningCount} warning${Number(validation.warningCount) === 1 ? "" : "s"}`);
-    }
-    if (Number(validation.noticeCount || 0) > 0) {
-      summaryParts.push(`${validation.noticeCount} notice${Number(validation.noticeCount) === 1 ? "" : "s"}`);
-    }
-    if (summaryParts.length === 0 && Number(validation.annotationsCount || 0) > 0) {
-      summaryParts.push(`${validation.annotationsCount} issue${Number(validation.annotationsCount) === 1 ? "" : "s"}`);
-    }
-
-    const issueLines = issues
-      .map((issue) => formatMarkdownValidationIssue(issue))
-      .filter(Boolean)
-      .slice(0, 12);
-    const listText = issueLines.length > 0
-      ? issueLines.map((line, index) => `${index + 1}. ${line}`).join("\n")
-      : "No issue details returned by GitHub API.";
-
-    const truncatedNote = validation.issuesTruncated
-      ? "\n\nAdditional issues were omitted."
-      : "";
-    const summaryText = summaryParts.length > 0
-      ? `${summaryParts.join(", ")}\n\n`
-      : "";
-    const dialogMessage = `${summaryText}${listText}${truncatedNote}`;
+    const dialogMessage = buildMarkdownIssueDialogText(validation);
 
     const canOpenRun = typeof validation.url === "string" && !!validation.url;
     const dialog = await openAppDialog({
