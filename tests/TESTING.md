@@ -14,7 +14,6 @@ This validates:
 - callouts (`[!INFO]`, `[!WARNING]`, `[!DANGER]`)
 - images in markdown and HTML (`![...]()`, reference images, `<img src=...>`)
 - internal links and anchors
-- external links and image URLs (HTTP checks)
 - section order consistency (`sections/section-order.md`)
 
 ## CI

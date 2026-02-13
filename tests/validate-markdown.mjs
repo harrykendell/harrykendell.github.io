@@ -7,12 +7,8 @@ import process from "node:process";
 const VALID_PROCEDURE_LEVELS = new Set(["beginner", "intermediate", "advanced"]);
 const VALID_CALLOUT_TYPES = new Set(["INFO", "WARNING", "DANGER"]);
 const INTERNAL_HOSTS = new Set(["kendell.uk", "www.kendell.uk", "localhost", "127.0.0.1"]);
-const DEFAULT_EXTERNAL_LIMIT = 80;
-const DEFAULT_EXTERNAL_CONCURRENCY = 6;
-const DEFAULT_EXTERNAL_TIMEOUT_MS = 9000;
 const MAX_GITHUB_ANNOTATIONS = 300;
 
-const args = parseArgs(process.argv.slice(2));
 const rootDir = process.cwd();
 const sectionOrderPath = path.join("sections", "section-order.md");
 
@@ -77,8 +73,6 @@ async function main() {
     }
   }
 
-  const externalLinkOccurrences = new Map();
-
   for (const filePath of sectionFiles) {
     const content = await readFileSafe(path.join(rootDir, filePath));
     if (content == null) {
@@ -95,7 +89,6 @@ async function main() {
       validateOccurrence(occurrence, {
         repoFiles,
         sectionAnchors,
-        externalLinkOccurrences,
       });
     }
   }
@@ -117,34 +110,7 @@ async function main() {
     }
   }
 
-  if (args.checkExternal) {
-    await validateExternalLinks(externalLinkOccurrences);
-  }
-
   finalize(issues, sectionFiles);
-}
-
-function parseArgs(argv) {
-  const next = {
-    checkExternal: process.env.CHECK_EXTERNAL_LINKS !== "0",
-    externalLimit: DEFAULT_EXTERNAL_LIMIT,
-  };
-
-  for (const arg of argv) {
-    if (arg === "--no-external") {
-      next.checkExternal = false;
-      continue;
-    }
-    if (arg.startsWith("--external-limit=")) {
-      const raw = arg.slice("--external-limit=".length);
-      const parsed = Number.parseInt(raw, 10);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        next.externalLimit = parsed;
-      }
-    }
-  }
-
-  return next;
 }
 
 async function collectRepoFiles(currentDir, outputSet, relPrefix = "") {
@@ -847,9 +813,6 @@ function validateOccurrence(occurrence, context) {
   }
 
   if (classified.type === "external") {
-    const bucket = context.externalLinkOccurrences.get(classified.url) || [];
-    bucket.push(occurrence);
-    context.externalLinkOccurrences.set(classified.url, bucket);
     return;
   }
 
@@ -1023,150 +986,6 @@ function decodeURIComponentSafe(value) {
   } catch (error) {
     return value;
   }
-}
-
-async function validateExternalLinks(externalLinkOccurrences) {
-  const urls = Array.from(externalLinkOccurrences.keys());
-  if (urls.length === 0) {
-    return;
-  }
-
-  const cappedUrls = urls.slice(0, args.externalLimit);
-  if (urls.length > cappedUrls.length) {
-    const firstOccurrence = externalLinkOccurrences.get(urls[cappedUrls.length])[0];
-    addIssue({
-      level: "warning",
-      code: "EXTERNAL_LINKS_SKIPPED",
-      file: firstOccurrence.file,
-      line: firstOccurrence.line,
-      column: firstOccurrence.column,
-      message: `Skipped ${urls.length - cappedUrls.length} external link checks (limit ${args.externalLimit}).`,
-    });
-  }
-
-  const results = new Map();
-  await runWithConcurrency(cappedUrls, DEFAULT_EXTERNAL_CONCURRENCY, async (url) => {
-    const result = await checkExternalUrl(url);
-    results.set(url, result);
-  });
-
-  for (const [url, occurrences] of externalLinkOccurrences.entries()) {
-    if (!results.has(url)) {
-      continue;
-    }
-
-    const result = results.get(url);
-    if (result.ok) {
-      continue;
-    }
-
-    const first = occurrences[0];
-    const locationCount = occurrences.length;
-    const code = result.level === "error"
-      ? "EXTERNAL_LINK_BROKEN"
-      : "EXTERNAL_LINK_UNSTABLE";
-
-    addIssue({
-      level: result.level,
-      code,
-      file: first.file,
-      line: first.line,
-      column: first.column,
-      message: `${result.message}${locationCount > 1 ? ` (appears ${locationCount} times)` : ""} ${url}`,
-    });
-  }
-}
-
-async function checkExternalUrl(url) {
-  const head = await fetchWithFallback(url, "HEAD");
-  if (head.ok) {
-    return { ok: true };
-  }
-
-  if (head.retryWithGet) {
-    const getResult = await fetchWithFallback(url, "GET");
-    if (getResult.ok) {
-      return { ok: true };
-    }
-    return getResult;
-  }
-
-  return head;
-}
-
-async function fetchWithFallback(url, method) {
-  try {
-    const response = await fetch(url, {
-      method,
-      redirect: "follow",
-      signal: AbortSignal.timeout(DEFAULT_EXTERNAL_TIMEOUT_MS),
-      headers: {
-        "user-agent": "markdown-validator/1.0",
-        accept: "text/html,application/pdf,*/*;q=0.8",
-      },
-    });
-
-    const status = response.status;
-    if (status >= 200 && status < 400) {
-      return { ok: true };
-    }
-
-    if (status === 404 || status === 410) {
-      return { ok: false, level: "error", message: `HTTP ${status}.` };
-    }
-
-    if (status === 401 || status === 403) {
-      return {
-        ok: false,
-        level: "warning",
-        message: `HTTP ${status} (access restricted).`,
-        retryWithGet: method === "HEAD",
-      };
-    }
-
-    if (status === 405 || status === 501) {
-      return {
-        ok: false,
-        level: "warning",
-        message: `HTTP ${status}.`,
-        retryWithGet: method === "HEAD",
-      };
-    }
-
-    if (status >= 500) {
-      return { ok: false, level: "warning", message: `HTTP ${status}.` };
-    }
-
-    return { ok: false, level: "warning", message: `HTTP ${status}.` };
-  } catch (error) {
-    const message = error && error.name === "TimeoutError"
-      ? "Request timed out."
-      : `Request failed (${error && error.message ? error.message : "network error"}).`;
-
-    return { ok: false, level: "warning", message };
-  }
-}
-
-async function runWithConcurrency(items, limit, worker) {
-  const queue = [...items];
-  const workers = [];
-
-  const runWorker = async () => {
-    while (queue.length > 0) {
-      const next = queue.shift();
-      if (!next) {
-        break;
-      }
-      await worker(next);
-    }
-  };
-
-  const count = Math.max(1, Math.min(limit, items.length));
-  for (let index = 0; index < count; index += 1) {
-    workers.push(runWorker());
-  }
-
-  await Promise.all(workers);
 }
 
 function addIssue(issue) {

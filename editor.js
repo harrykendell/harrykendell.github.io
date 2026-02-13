@@ -92,12 +92,12 @@
     toolbarVisibilityButton: null,
     authButton: null,
     repoCommit: null,
-    repoMarkdown: null,
     addSectionButton: null,
     submitButton: null,
     clearButton: null,
     status: null,
     appDialog: null,
+    appDialogPanel: null,
     appDialogTitle: null,
     appDialogMessage: null,
     appDialogInput: null,
@@ -1205,42 +1205,90 @@
     if (level === "error" || level === "failure") {
       return "error";
     }
-    if (level === "warning" || level === "warn") {
-      return "warning";
-    }
-    return "notice";
+    return "warning";
   }
 
-  function buildValidationCountsSummary(validation) {
-    const errorCount = Number(validation && validation.errorCount ? validation.errorCount : 0);
-    const warningCount = Number(validation && validation.warningCount ? validation.warningCount : 0);
-    const noticeCount = Number(validation && validation.noticeCount ? validation.noticeCount : 0);
-
-    const parts = [];
-    if (errorCount > 0) {
-      parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+  function escapeDialogHtml(value) {
+    const text = String(value == null ? "" : value);
+    if (appUtils && typeof appUtils.escapeHtml === "function") {
+      return appUtils.escapeHtml(text);
     }
-    if (warningCount > 0) {
-      parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
-    }
-    if (noticeCount > 0) {
-      parts.push(`${noticeCount} notice${noticeCount === 1 ? "" : "s"}`);
-    }
-    return parts.join(", ");
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
-  function buildMarkdownIssueDialogText(validation) {
-    const issues = Array.isArray(validation && validation.issues)
-      ? validation.issues
-      : [];
-    const countsSummary = buildValidationCountsSummary(validation);
+  function getValidationIssueLocation(issue) {
+    const path = typeof issue.path === "string" ? issue.path : "";
+    const line = Number.isFinite(Number(issue.line)) ? Number(issue.line) : 0;
+    return path
+      ? `${path}${line > 0 ? `:${line}` : ""}`
+      : "Unknown location";
+  }
 
+  function getValidationIssueMessage(issue) {
+    const rawMessage = typeof issue.message === "string" && issue.message.trim()
+      ? issue.message
+      : (typeof issue.title === "string" ? issue.title : "");
+    return rawMessage.replace(/\s+/g, " ").trim() || "No details provided.";
+  }
+
+  function getDeployStatusSummary(activity) {
+    const deployRun = activity && activity.deployRun && typeof activity.deployRun === "object"
+      ? activity.deployRun
+      : null;
+    if (!deployRun) {
+      return {
+        label: "Unavailable",
+        className: "is-error",
+      };
+    }
+
+    const deployState = classifyDeployState(deployRun);
+
+    if (deployState.cssClass === "running") {
+      return {
+        label: "Running",
+        className: "is-warning",
+      };
+    }
+    if (deployState.cssClass === "success") {
+      return {
+        label: "Success",
+        className: "is-success",
+      };
+    }
+
+    return {
+      label: "Failed",
+      className: "is-error",
+    };
+  }
+
+  function buildDeployStatusDialogText(activity) {
+    const summary = getDeployStatusSummary(activity);
+    return `Deploy status: ${summary.label}`;
+  }
+
+  function buildDeployStatusDialogHtml(activity) {
+    const summary = getDeployStatusSummary(activity);
+    return `
+      <div class="markdown-validation-deploy">
+        <p class="markdown-validation-deploy-title">Deploy status:</p>
+        <p class="markdown-validation-deploy-state ${summary.className}">${escapeDialogHtml(summary.label)}</p>
+      </div>
+    `;
+  }
+
+  function sortValidationIssues(issues) {
     const levelWeight = {
       error: 0,
       warning: 1,
-      notice: 2,
     };
-    const sorted = issues.slice().sort((a, b) => {
+    return issues.slice().sort((a, b) => {
       const aLevel = getValidationIssueLevel(a);
       const bLevel = getValidationIssueLevel(b);
       const aRank = Object.prototype.hasOwnProperty.call(levelWeight, aLevel) ? levelWeight[aLevel] : 3;
@@ -1255,6 +1303,123 @@
       }
       return Number(a && a.line ? a.line : 0) - Number(b && b.line ? b.line : 0);
     });
+  }
+
+  function readValidationCounts(validation, issues) {
+    const errorCount = Number.isFinite(Number(validation && validation.errorCount))
+      ? Number(validation.errorCount)
+      : 0;
+    const warningCount = Number.isFinite(Number(validation && validation.warningCount))
+      ? Number(validation.warningCount)
+      : 0;
+    const issueList = Array.isArray(issues)
+      ? issues
+      : (Array.isArray(validation && validation.issues) ? validation.issues : []);
+    const issueCount = Math.max(
+      errorCount + warningCount,
+      issueList.length,
+    );
+
+    return {
+      errorCount,
+      warningCount,
+      issueCount,
+      issues: issueList,
+    };
+  }
+
+  function buildValidationCountsSummary(validation) {
+    const counts = readValidationCounts(validation);
+    const errorCount = counts.errorCount;
+    const warningCount = counts.warningCount;
+
+    const parts = [];
+    if (errorCount > 0) {
+      parts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
+    }
+    if (warningCount > 0) {
+      parts.push(`${warningCount} warning${warningCount === 1 ? "" : "s"}`);
+    }
+    return parts.join(", ");
+  }
+
+  function buildMarkdownIssueDialogHtml(validation) {
+    const issues = Array.isArray(validation && validation.issues)
+      ? validation.issues
+      : [];
+    const counts = readValidationCounts(validation, issues);
+    const sorted = sortValidationIssues(counts.issues);
+    const visibleIssues = sorted.slice(0, 18);
+    const grouped = {
+      error: [],
+      warning: [],
+    };
+
+    visibleIssues.forEach((issue) => {
+      const level = getValidationIssueLevel(issue);
+      grouped[level].push(issue);
+    });
+
+    const bodyParts = [];
+    const groups = [
+      { level: "error", label: "Errors" },
+      { level: "warning", label: "Warnings" },
+    ];
+
+    groups.forEach((group) => {
+      const entries = grouped[group.level];
+      if (!entries || entries.length === 0) {
+        return;
+      }
+
+      const rows = entries.map((issue) => {
+        const location = escapeDialogHtml(getValidationIssueLocation(issue));
+        const message = escapeDialogHtml(getValidationIssueMessage(issue));
+        return `
+          <li class="markdown-validation-issue is-${group.level}">
+            <p class="markdown-validation-location"><code>${location}</code></p>
+            <p class="markdown-validation-message">${message}</p>
+          </li>
+        `;
+      }).join("");
+
+      bodyParts.push(`
+        <section class="markdown-validation-group is-${group.level}">
+          <h4>${group.label} (${entries.length})</h4>
+          <ol>${rows}</ol>
+        </section>
+      `);
+    });
+
+    if (visibleIssues.length === 0) {
+      bodyParts.push("<p class=\"markdown-validation-empty\">No issue details returned by GitHub API.</p>");
+    }
+
+    const hiddenIssueCount = Math.max(0, counts.issueCount - visibleIssues.length);
+    const showTruncatedMessage = !!(validation && validation.issuesTruncated)
+      || hiddenIssueCount > 0;
+    if (showTruncatedMessage) {
+      bodyParts.push(`
+        <p class="markdown-validation-truncated">
+          Showing ${visibleIssues.length} of ${counts.issueCount} issue${counts.issueCount === 1 ? "" : "s"}.
+          Open the commit for full annotations.
+        </p>
+      `);
+    }
+
+    return `
+      <div class="markdown-validation-summary">
+      </div>
+      <div class="markdown-validation-groups">${bodyParts.join("")}</div>
+    `;
+  }
+
+  function buildMarkdownIssueDialogText(validation) {
+    const issues = Array.isArray(validation && validation.issues)
+      ? validation.issues
+      : [];
+    const countsSummary = buildValidationCountsSummary(validation);
+    const sorted = sortValidationIssues(issues);
 
     const lines = [];
     if (countsSummary) {
@@ -1269,18 +1434,9 @@
     } else {
       visibleIssues.forEach((issue, index) => {
         const level = getValidationIssueLevel(issue);
-        const badge = level === "error"
-          ? "[ERROR]"
-          : (level === "warning" ? "[WARN ]" : "[NOTE ]");
-        const path = typeof issue.path === "string" ? issue.path : "";
-        const line = Number.isFinite(Number(issue.line)) ? Number(issue.line) : 0;
-        const location = path
-          ? `${path}${line > 0 ? `:${line}` : ""}`
-          : "Unknown location";
-        const rawMessage = typeof issue.message === "string" && issue.message.trim()
-          ? issue.message
-          : (typeof issue.title === "string" ? issue.title : "");
-        const message = rawMessage.replace(/\s+/g, " ").trim() || "No details provided.";
+        const badge = level === "error" ? "[ERROR]" : "[WARN ]";
+        const location = getValidationIssueLocation(issue);
+        const message = getValidationIssueMessage(issue);
 
         lines.push(`${index + 1}. ${badge} ${location}`);
         lines.push(`   ${message}`);
@@ -1300,68 +1456,43 @@
       return;
     }
 
-    const applyCommitStatus = ({
+    const applyCombinedStatus = ({
       text = "—",
       href = "",
       baseClass = "",
-      statusClass = "is-failed",
-      title = "",
-      ariaLabel = "",
-    } = {}) => {
-      const className = [baseClass, statusClass].filter(Boolean).join(" ").trim();
-      setActivityLink(elements.repoCommit, text, href, className);
-      setAttributeIfChanged(elements.repoCommit, "aria-label", ariaLabel || title || text);
-      setAttributeIfChanged(elements.repoCommit, "title", title || ariaLabel || text);
-    };
-
-    const applyMarkdownStatus = ({
-      text = "MD —",
-      href = "",
-      baseClass = "is-muted",
       statusClass = "",
       title = "",
       ariaLabel = "",
       hasIssues = false,
     } = {}) => {
-      if (!elements.repoMarkdown) {
-        return;
-      }
       const className = [baseClass, statusClass].filter(Boolean).join(" ").trim();
-      setActivityLink(elements.repoMarkdown, text, href, className);
-      setAttributeIfChanged(elements.repoMarkdown, "aria-label", ariaLabel || title || text);
-      setAttributeIfChanged(elements.repoMarkdown, "title", title || ariaLabel || text);
-      setAttributeIfChanged(elements.repoMarkdown, "data-has-issues", hasIssues ? "true" : "false");
+      setActivityLink(elements.repoCommit, text, href, className);
+      setAttributeIfChanged(elements.repoCommit, "aria-label", ariaLabel || title || text);
+      setAttributeIfChanged(elements.repoCommit, "title", title || ariaLabel || text);
+      setAttributeIfChanged(elements.repoCommit, "data-has-issues", hasIssues ? "true" : "false");
     };
 
-    const applyValidationFromActivity = (validation) => {
-      if (!elements.repoMarkdown) {
-        return;
-      }
-
+    const getValidationState = (validation) => {
       if (!validation || typeof validation !== "object") {
-        applyMarkdownStatus({
-          text: "MD —",
-          href: "",
-          baseClass: "is-muted",
-          statusClass: "",
-          title: "Markdown validation status unavailable.",
-          ariaLabel: "Markdown validation status unavailable.",
+        return {
+          unavailable: true,
+          running: false,
+          hasErrors: true,
+          hasWarnings: false,
           hasIssues: false,
-        });
-        return;
+          title: "Markdown validation status unavailable.",
+        };
       }
 
       if (validation.error) {
-        applyMarkdownStatus({
-          text: "MD ?",
-          href: "",
-          baseClass: "is-warning",
-          statusClass: "is-failed",
-          title: `Markdown validation status unavailable: ${validation.error}`,
-          ariaLabel: "Markdown validation status unavailable.",
+        return {
+          unavailable: true,
+          running: false,
+          hasErrors: true,
+          hasWarnings: false,
           hasIssues: false,
-        });
-        return;
+          title: `Markdown validation status unavailable: ${validation.error}`,
+        };
       }
 
       const checkName = typeof validation.name === "string" && validation.name
@@ -1369,163 +1500,70 @@
         : "Markdown validation";
       const status = String(validation.status || "").toLowerCase();
       const conclusion = String(validation.conclusion || "").toLowerCase();
-      const url = typeof validation.url === "string" ? validation.url : "";
-      const errorCount = Number.isFinite(Number(validation.errorCount))
-        ? Number(validation.errorCount)
-        : 0;
-      const warningCount = Number.isFinite(Number(validation.warningCount))
-        ? Number(validation.warningCount)
-        : 0;
-      const noticeCount = Number.isFinite(Number(validation.noticeCount))
-        ? Number(validation.noticeCount)
-        : 0;
-      const annotationsCount = Number.isFinite(Number(validation.annotationsCount))
-        ? Number(validation.annotationsCount)
-        : 0;
-      const issues = Array.isArray(validation.issues) ? validation.issues : [];
-      const issueCount = Math.max(
-        errorCount + warningCount + noticeCount,
-        annotationsCount,
-        issues.length,
-      );
-
+      const counts = readValidationCounts(validation);
       const countsSummary = buildValidationCountsSummary(validation);
       const detailsSuffix = countsSummary ? ` (${countsSummary})` : "";
+      const running = !!(status && status !== "completed");
+      const hasErrors = counts.errorCount > 0
+        || (!running
+          && (conclusion === "failure" || conclusion === "cancelled" || conclusion === "timed_out" || conclusion === "action_required"));
+      const hasWarnings = !hasErrors && counts.warningCount > 0;
+      const hasIssues = counts.issueCount > 0;
 
-      if (status && status !== "completed") {
-        applyMarkdownStatus({
-          text: "MD …",
-          href: url,
-          baseClass: "is-muted",
-          statusClass: "is-running",
-          title: `${checkName} is running${detailsSuffix}.`,
-          ariaLabel: `${checkName} is running.`,
-          hasIssues: issueCount > 0,
-        });
-        return;
+      let title = `${checkName} status unavailable.`;
+      if (running) {
+        title = `${checkName} is running${detailsSuffix}.`;
+      } else if (hasErrors) {
+        title = `${checkName} has errors${detailsSuffix}.`;
+      } else if (hasWarnings) {
+        title = `${checkName} has warnings${detailsSuffix}.`;
+      } else {
+        title = `${checkName} passed${detailsSuffix}.`;
       }
 
-      if (conclusion === "success") {
-        if (errorCount > 0) {
-          applyMarkdownStatus({
-            text: `MD ${issueCount || errorCount}`,
-            href: url,
-            baseClass: "",
-            statusClass: "is-failed",
-            title: `${checkName} failed: ${errorCount} error${errorCount === 1 ? "" : "s"}. Click for details.`,
-            ariaLabel: `${checkName} reported ${errorCount} errors.`,
-            hasIssues: true,
-          });
-          return;
-        }
-
-        if (issueCount > 0) {
-          const nonErrorCount = warningCount + noticeCount;
-          applyMarkdownStatus({
-            text: `MD ${issueCount}`,
-            href: url,
-            baseClass: "",
-            statusClass: "is-warning",
-            title: `${checkName} has ${nonErrorCount || issueCount} warning/notice issue${(nonErrorCount || issueCount) === 1 ? "" : "s"}. Click for details.`,
-            ariaLabel: `${checkName} completed with warnings.`,
-            hasIssues: true,
-          });
-          return;
-        }
-
-        applyMarkdownStatus({
-          text: "MD ok",
-          href: url,
-          baseClass: "",
-          statusClass: "is-success",
-          title: `${checkName} passed.`,
-          ariaLabel: `${checkName} passed.`,
-          hasIssues: false,
-        });
-        return;
-      }
-
-      if (conclusion === "cancelled" || conclusion === "timed_out" || conclusion === "failure" || conclusion === "action_required") {
-        applyMarkdownStatus({
-          text: issueCount > 0 ? `MD ${issueCount}` : "MD fail",
-          href: url,
-          baseClass: "",
-          statusClass: "is-failed",
-          title: `${checkName} failed${detailsSuffix}. Click for details.`,
-          ariaLabel: `${checkName} failed.`,
-          hasIssues: issueCount > 0,
-        });
-        return;
-      }
-
-      applyMarkdownStatus({
-        text: issueCount > 0 ? `MD ${issueCount}` : "MD ?",
-        href: url,
-        baseClass: "is-muted",
-        statusClass: issueCount > 0 ? "is-warning" : "",
-        title: `${checkName} status: ${conclusion || "unknown"}${detailsSuffix}.`,
-        ariaLabel: `${checkName} status: ${conclusion || "unknown"}.`,
-        hasIssues: issueCount > 0,
-      });
+      return {
+        unavailable: false,
+        running,
+        hasErrors,
+        hasWarnings,
+        hasIssues,
+        title,
+      };
     };
 
     const activity = state.repoActivity;
     if (state.repoActivityBusy && !activity) {
-      applyCommitStatus({
+      applyCombinedStatus({
         text: "…",
         href: "",
         baseClass: "is-muted",
         statusClass: "is-running",
-        title: "Checking latest commit and workflow status",
-        ariaLabel: "Checking latest commit and workflow status",
-      });
-      applyMarkdownStatus({
-        text: "MD …",
-        href: "",
-        baseClass: "is-muted",
-        statusClass: "is-running",
-        title: "Checking markdown validation status",
-        ariaLabel: "Checking markdown validation status",
+        title: "Checking deploy and markdown validation status.",
+        ariaLabel: "Checking deploy and markdown validation status.",
       });
       return;
     }
 
     if (!activity) {
-      applyCommitStatus({
+      applyCombinedStatus({
         text: "—",
         href: "",
         baseClass: "is-muted",
         statusClass: "is-failed",
-        title: "Latest commit unavailable. Workflow status unavailable.",
-        ariaLabel: "Latest commit unavailable. Workflow status unavailable.",
-      });
-      applyMarkdownStatus({
-        text: "MD —",
-        href: "",
-        baseClass: "is-muted",
-        statusClass: "",
-        title: "Markdown validation status unavailable.",
-        ariaLabel: "Markdown validation status unavailable.",
+        title: "Deploy and markdown validation status unavailable.",
+        ariaLabel: "Deploy and markdown validation status unavailable.",
       });
       return;
     }
 
     if (activity.error) {
-      applyCommitStatus({
+      applyCombinedStatus({
         text: "—",
         href: "",
-        baseClass: "is-warning",
+        baseClass: "is-muted",
         statusClass: "is-failed",
-        title: "Latest commit unavailable. Workflow status unavailable.",
-        ariaLabel: "Latest commit unavailable. Workflow status unavailable.",
-      });
-      applyMarkdownStatus({
-        text: "MD ?",
-        href: "",
-        baseClass: "is-warning",
-        statusClass: "is-failed",
-        title: "Markdown validation status unavailable.",
-        ariaLabel: "Markdown validation status unavailable.",
+        title: activity.error,
+        ariaLabel: "Deploy and markdown validation status unavailable.",
       });
       return;
     }
@@ -1542,48 +1580,45 @@
       : "Latest commit unavailable";
 
     const deployRun = activity.deployRun;
-    if (!deployRun) {
-      const statusLabel = activity.runsError || "No recent workflow run";
-      applyCommitStatus({
-        text: commitText,
-        href: activity.commitUrl,
-        baseClass: commitBaseClass,
-        statusClass: "is-failed",
-        title: `${commitTitle}. ${statusLabel}.`,
-        ariaLabel: `${commitTitle}. ${statusLabel}.`,
-      });
-    } else {
-      const deployState = classifyDeployState(deployRun);
-      if (deployState.cssClass === "running") {
-        applyCommitStatus({
-          text: commitText,
-          href: activity.commitUrl,
-          baseClass: commitBaseClass,
-          statusClass: "is-running",
-          title: `${commitTitle}. Workflow running.`,
-          ariaLabel: `${commitTitle}. Workflow running.`,
-        });
-      } else if (deployState.cssClass === "success") {
-        applyCommitStatus({
-          text: commitText,
-          href: activity.commitUrl,
-          baseClass: commitBaseClass,
-          statusClass: "is-success",
-          title: `${commitTitle}. Workflow successful.`,
-          ariaLabel: `${commitTitle}. Workflow successful.`,
-        });
-      } else {
-        applyCommitStatus({
-          text: commitText,
-          href: activity.commitUrl,
-          baseClass: commitBaseClass,
-          statusClass: "is-failed",
-          title: `${commitTitle}. Workflow failed or unavailable.`,
-          ariaLabel: `${commitTitle}. Workflow failed or unavailable.`,
-        });
-      }
+    const deployState = classifyDeployState(deployRun);
+    const deployRunning = !!deployRun && deployState.cssClass === "running";
+    const deploySuccess = !!deployRun && deployState.cssClass === "success";
+    const deployFailed = !deployRun || (!deployRunning && !deploySuccess);
+
+    const validationState = getValidationState(activity.markdownValidation);
+    const hasMdErrors = validationState.hasErrors;
+    const hasMdWarningsOnly = !hasMdErrors && validationState.hasWarnings;
+    const hasMdIssues = validationState.hasIssues;
+    const isRunning = state.repoActivityBusy || deployRunning || validationState.running;
+
+    const deployTitle = !deployRun
+      ? (activity.runsError || "Deploy workflow status unavailable.")
+      : (deployRunning
+        ? "Deploy workflow running."
+        : (deploySuccess ? "Deploy workflow successful." : "Deploy workflow failed."));
+    const mdTitle = validationState.title + (hasMdIssues ? " Click for details." : "");
+    const combinedTitle = `${commitTitle}. ${deployTitle} ${mdTitle}`.trim();
+
+    let statusClass = "is-muted";
+    if (isRunning) {
+      statusClass = "is-running";
+    } else if (deployFailed || hasMdErrors) {
+      statusClass = "is-failed";
+    } else if (hasMdWarningsOnly) {
+      statusClass = "is-warning";
+    } else if (deploySuccess) {
+      statusClass = "is-success";
     }
-    applyValidationFromActivity(activity.markdownValidation);
+
+    applyCombinedStatus({
+      text: commitText,
+      href: activity.commitUrl,
+      baseClass: commitBaseClass,
+      statusClass,
+      title: combinedTitle,
+      ariaLabel: combinedTitle,
+      hasIssues: hasMdIssues,
+    });
   }
 
   async function showMarkdownValidationIssues(event) {
@@ -1604,9 +1639,7 @@
       : [];
     const hasIssues = issues.length > 0
       || Number(validation.errorCount || 0) > 0
-      || Number(validation.warningCount || 0) > 0
-      || Number(validation.noticeCount || 0) > 0
-      || Number(validation.annotationsCount || 0) > 0;
+      || Number(validation.warningCount || 0) > 0;
     if (!hasIssues) {
       return;
     }
@@ -1615,22 +1648,26 @@
       event.preventDefault();
     }
 
-    const checkName = typeof validation.name === "string" && validation.name
-      ? validation.name
-      : "Markdown validation";
-    const dialogMessage = buildMarkdownIssueDialogText(validation);
+    const deployStatusText = buildDeployStatusDialogText(activity);
+    const deployStatusHtml = buildDeployStatusDialogHtml(activity);
+    const dialogMessage = `${deployStatusText}\n\n${buildMarkdownIssueDialogText(validation)}`;
+    const dialogMessageHtml = `${deployStatusHtml}${buildMarkdownIssueDialogHtml(validation)}`;
 
-    const canOpenRun = typeof validation.url === "string" && !!validation.url;
+    const commitUrl = activity && typeof activity.commitUrl === "string" ? activity.commitUrl : "";
+    const canOpenCommit = !!commitUrl;
     const dialog = await openAppDialog({
-      title: checkName,
+      title: "",
       message: dialogMessage,
-      confirmText: canOpenRun ? "Open run" : "OK",
+      messageHtml: dialogMessageHtml,
+      messageClassName: "markdown-validation-dialog",
+      panelClassName: "markdown-validation-dialog-panel",
+      confirmText: canOpenCommit ? "Open commit" : "OK",
       cancelText: "Close",
-      showCancel: canOpenRun,
+      showCancel: canOpenCommit,
     });
 
-    if (canOpenRun && dialog.confirmed) {
-      window.open(validation.url, "_blank", "noopener,noreferrer");
+    if (canOpenCommit && dialog.confirmed) {
+      window.open(commitUrl, "_blank", "noopener,noreferrer");
     }
   }
 
@@ -2496,7 +2533,8 @@
     }
 
     const config = options || {};
-    const title = config.title || "Confirm";
+    const hasExplicitTitle = Object.prototype.hasOwnProperty.call(config, "title");
+    const title = hasExplicitTitle ? String(config.title || "") : "Confirm";
     const message = config.message || "";
     const confirmText = config.confirmText || "OK";
     const cancelText = config.cancelText || "Cancel";
@@ -2505,12 +2543,29 @@
     const inputValue = config.inputValue || "";
     const inputPlaceholder = config.inputPlaceholder || "";
     const inputLabel = config.inputLabel || "";
+    const messageClassName = typeof config.messageClassName === "string"
+      ? config.messageClassName.trim()
+      : "";
+    const panelClassName = typeof config.panelClassName === "string"
+      ? config.panelClassName.trim()
+      : "";
+    const messageHtml = typeof config.messageHtml === "string" ? config.messageHtml : "";
+
+    if (elements.appDialogPanel) {
+      elements.appDialogPanel.className = ["app-dialog-panel", panelClassName].filter(Boolean).join(" ");
+    }
 
     if (elements.appDialogTitle) {
       elements.appDialogTitle.textContent = title;
+      elements.appDialogTitle.hidden = !title;
     }
     if (elements.appDialogMessage) {
-      elements.appDialogMessage.textContent = message;
+      elements.appDialogMessage.className = ["app-dialog-message", messageClassName].filter(Boolean).join(" ");
+      if (messageHtml) {
+        elements.appDialogMessage.innerHTML = messageHtml;
+      } else {
+        elements.appDialogMessage.textContent = message;
+      }
     }
     if (elements.appDialogInput) {
       elements.appDialogInput.hidden = !wantsInput;
@@ -4719,8 +4774,7 @@
           <span class="inline-auth-glyph inline-auth-glyph-github">${AUTH_GITHUB_ICON}</span>
         </button>
         <div class="editor-repo" aria-live="polite">
-          <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Latest commit">—</a>
-          <a id="inline-repo-markdown" class="inline-repo-link is-muted" aria-label="Markdown validation status">MD —</a>
+          <a id="inline-repo-commit" class="inline-repo-link is-muted" aria-label="Repository status">—</a>
         </div>
         <button id="inline-section-add" type="button">Add</button>
         <button id="inline-edit-submit" type="button" disabled>Push (0)</button>
@@ -4933,7 +4987,7 @@
       <div class="app-dialog-backdrop"></div>
       <div class="app-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="app-dialog-title">
         <h3 id="app-dialog-title" class="app-dialog-title">Confirm</h3>
-        <p id="app-dialog-message" class="app-dialog-message"></p>
+        <div id="app-dialog-message" class="app-dialog-message"></div>
         <input
           id="app-dialog-input"
           class="app-dialog-input"
@@ -4955,12 +5009,12 @@
     elements.toolbarVisibilityButton = document.getElementById("inline-toolbar-toggle");
     elements.authButton = toolbar.querySelector("#inline-auth-action");
     elements.repoCommit = toolbar.querySelector("#inline-repo-commit");
-    elements.repoMarkdown = toolbar.querySelector("#inline-repo-markdown");
     elements.addSectionButton = toolbar.querySelector("#inline-section-add");
     elements.submitButton = toolbar.querySelector("#inline-edit-submit");
     elements.clearButton = toolbar.querySelector("#inline-edit-clear");
     elements.status = toolbar.querySelector("#editor-status");
     elements.appDialog = appDialog;
+    elements.appDialogPanel = appDialog.querySelector(".app-dialog-panel");
     elements.appDialogTitle = appDialog.querySelector("#app-dialog-title");
     elements.appDialogMessage = appDialog.querySelector("#app-dialog-message");
     elements.appDialogInput = appDialog.querySelector("#app-dialog-input");
@@ -5008,8 +5062,8 @@
       });
     }
 
-    if (elements.repoMarkdown) {
-      elements.repoMarkdown.addEventListener("click", (event) => {
+    if (elements.repoCommit) {
+      elements.repoCommit.addEventListener("click", (event) => {
         showMarkdownValidationIssues(event);
       });
     }

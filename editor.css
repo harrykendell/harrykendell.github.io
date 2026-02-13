@@ -191,7 +191,9 @@
     gap: 0;
 }
 
-#editor-toolbar.is-auth-only .inline-toolbar-row-main > :not(#inline-auth-action) {
+#editor-toolbar.is-auth-only
+    .inline-toolbar-row-main
+    > :not(#inline-auth-action) {
     display: none;
 }
 
@@ -253,15 +255,10 @@
 }
 
 #inline-repo-commit {
-    min-width: 52px;
+    min-width: 70px;
     position: relative;
     isolation: isolate;
-}
-
-#inline-repo-markdown {
-    min-width: 52px;
-    position: relative;
-    isolation: isolate;
+    font-variant-numeric: tabular-nums;
 }
 
 #inline-repo-commit.is-failed {
@@ -272,13 +269,11 @@
     border-color: var(--info);
 }
 
-#inline-repo-commit.is-running,
-#inline-repo-markdown.is-running {
+#inline-repo-commit.is-running {
     border-color: var(--border-subtle);
 }
 
-#inline-repo-commit.is-running::before,
-#inline-repo-markdown.is-running::before {
+#inline-repo-commit.is-running::before {
     content: "";
     position: absolute;
     inset: -1px;
@@ -427,6 +422,138 @@ body.editor-modal-open {
     font-size: 0.82rem;
     color: var(--text-soft);
     white-space: pre-wrap;
+}
+
+.app-dialog-panel.markdown-validation-dialog-panel {
+    width: min(780px, calc(100vw - 24px));
+}
+
+.app-dialog-message.markdown-validation-dialog {
+    white-space: normal;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: min(60vh, 520px);
+    overflow: auto;
+    padding-right: 3px;
+}
+
+.markdown-validation-summary {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.markdown-validation-deploy {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.markdown-validation-deploy-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+.markdown-validation-deploy-state {
+    margin: 0;
+    text-align: right;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.markdown-validation-deploy-state.is-success {
+    color: var(--info);
+}
+
+.markdown-validation-deploy-state.is-warning {
+    color: var(--warning);
+}
+
+.markdown-validation-deploy-state.is-error {
+    color: var(--danger);
+}
+
+.markdown-validation-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.markdown-validation-group {
+    border: var(--border-subtle-line);
+    border-radius: 10px;
+    padding: 8px;
+    margin: 1px;
+}
+
+.markdown-validation-group h4 {
+    margin: 0 0 7px;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+.markdown-validation-group.is-error {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+}
+
+.markdown-validation-group.is-warning {
+    border-color: var(--warn);
+    background: var(--warn-soft);
+}
+
+.markdown-validation-group ol {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.markdown-validation-issue {
+    color: var(--text-main);
+}
+
+.markdown-validation-location {
+    margin: 0 0 2px;
+}
+
+.markdown-validation-location code {
+    display: inline-block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: rgba(148, 163, 184, 0.13);
+    border-radius: 5px;
+    padding: 1px 6px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.markdown-validation-message {
+    margin: 0;
+    font-size: 0.79rem;
+    line-height: 1.36;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.markdown-validation-empty {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-soft);
+}
+
+.markdown-validation-truncated {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
 }
 
 .app-dialog-input {
@@ -862,7 +989,6 @@ body.editor-modal-open {
     overscroll-behavior: contain;
 }
 
-
 .editor-codemirror .cm-content {
     color: var(--text-main);
     font-family:
@@ -925,7 +1051,7 @@ body.editor-modal-open {
 
 @media (max-width: 860px) {
     .editor-codemirror {
-    height: 100%;
+        height: 100%;
     }
 
     .editor-codemirror .cm-editor {

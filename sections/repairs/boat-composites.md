@@ -36,12 +36,6 @@ Useful reading:
       <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>
     </div>
   </figure>
-    <figure class="figure">
-    <img src="imgs/hull_repair_scarf.jpg" alt="Prepared scarf joint area before layup" />
-    <div class="figure-body">
-      <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>
-    </div>
-  </figure>
 </div>
 
 **Repair decision rules (practical):**

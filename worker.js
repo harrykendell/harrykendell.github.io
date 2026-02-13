@@ -864,7 +864,6 @@ async function buildMarkdownValidationSummary(options) {
             : 0,
         errorCount: 0,
         warningCount: 0,
-        noticeCount: 0,
         issues: [],
         issuesTruncated: false,
     };
@@ -883,7 +882,6 @@ async function buildMarkdownValidationSummary(options) {
 
     summary.errorCount = annotationSummary.errorCount;
     summary.warningCount = annotationSummary.warningCount;
-    summary.noticeCount = annotationSummary.noticeCount;
     summary.issues = annotationSummary.issues;
     summary.issuesTruncated = summary.annotationsCount > annotations.length;
 
@@ -942,7 +940,6 @@ function summarizeCheckRunAnnotations(annotations, maxIssues) {
     const summary = {
         errorCount: 0,
         warningCount: 0,
-        noticeCount: 0,
         issues: [],
     };
 
@@ -953,16 +950,16 @@ function summarizeCheckRunAnnotations(annotations, maxIssues) {
     annotations.forEach((annotation) => {
         const levelRaw = String(annotation && annotation.annotation_level ? annotation.annotation_level : "")
             .toLowerCase();
-        const level = levelRaw === "failure"
-            ? "error"
-            : (levelRaw === "warning" ? "warning" : "notice");
+        const level = levelRaw === "failure" ? "error" : "warning";
+
+        if (isIgnorableMarkdownAnnotation(annotation)) {
+            return;
+        }
 
         if (level === "error") {
             summary.errorCount += 1;
-        } else if (level === "warning") {
-            summary.warningCount += 1;
         } else {
-            summary.noticeCount += 1;
+            summary.warningCount += 1;
         }
 
         if (summary.issues.length >= maxIssues) {
@@ -990,6 +987,16 @@ function summarizeCheckRunAnnotations(annotations, maxIssues) {
     });
 
     return summary;
+}
+
+function isIgnorableMarkdownAnnotation(annotation) {
+    const path = annotation && typeof annotation.path === "string" ? annotation.path : "";
+    const title = annotation && typeof annotation.title === "string" ? annotation.title : "";
+    const message = annotation && typeof annotation.message === "string" ? annotation.message : "";
+    const combined = `${title} ${message}`.toLowerCase();
+    return !path
+        && (combined.includes("process completed with exit code")
+            || combined.includes("failed with exit code"));
 }
 
 function selectDeployRun(runs) {
