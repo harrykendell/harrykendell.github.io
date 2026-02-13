@@ -847,6 +847,7 @@ body.editor-modal-open {
 
 .editor-codemirror .cm-editor {
     height: 100%;
+    padding: 10px;
 }
 
 .editor-codemirror .cm-scroller {
@@ -915,7 +916,12 @@ body.editor-modal-open {
 }
 
 @media (max-width: 860px) {
-    .editor-codemirror .cm-editor {
+    .editor-codemirror {
+    height: 100%;
+    }
+
+    editor-codemirror .cm-editor {
+        padding: 0px;
         font-size: 16px;
     }
 
