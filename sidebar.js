@@ -5,6 +5,12 @@
   const SEARCH_RESULT_LIMIT = 12;
   const SEARCH_MIN_QUERY_LENGTH = 2;
   const SEARCH_NODE_ID_ATTR = "search-node-id";
+  const SECTION_GROUP_LABELS = {
+    maintenance: "Maintenance",
+    repairs: "Repairs",
+    supplement: "Supplement",
+    other: "Other",
+  };
 
   let initialized = false;
   let searchIndex = [];
@@ -60,6 +66,64 @@
       unique.push(value);
     });
     return unique;
+  }
+
+  function formatSectionGroupLabel(groupKey) {
+    const key = String(groupKey || "").trim().toLowerCase();
+    if (!key) {
+      return "";
+    }
+
+    const knownLabel = SECTION_GROUP_LABELS[key];
+    if (knownLabel) {
+      return knownLabel;
+    }
+
+    return key
+      .split(/[-_]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }
+
+  function isSectionLevelResult(item) {
+    if (!item || item.kind === "procedure") {
+      return false;
+    }
+
+    const sectionId = String(item.sectionId || "").trim();
+    if (!sectionId) {
+      return false;
+    }
+
+    const headingLevel = Number.isFinite(item.headingLevel) ? item.headingLevel : NaN;
+    const isSectionHeading = item.kind === "heading" && headingLevel <= 2;
+    const isSectionContent = item.kind === "content" && item.targetId === sectionId;
+    const isSectionResult = item.kind === "section";
+    return isSectionHeading || isSectionContent || isSectionResult;
+  }
+
+  function getSectionLevelDedupeKey(item) {
+    if (!isSectionLevelResult(item)) {
+      return "";
+    }
+
+    const sectionId = String(item.sectionId || "").trim();
+    const normalizedTitle = normalizeSearchText(item.title || "");
+    if (!sectionId || !normalizedTitle) {
+      return "";
+    }
+
+    return `${sectionId}|${normalizedTitle}`;
+  }
+
+  function getSectionTitleDisambiguationKey(item) {
+    if (!isSectionLevelResult(item)) {
+      return "";
+    }
+
+    const normalizedTitle = normalizeSearchText(item.sectionTitle || item.title || "");
+    return normalizedTitle || "";
   }
 
   function escapeRegExp(value) {
@@ -200,14 +264,23 @@
 
     const corpus = item.normalizedCorpus;
     const title = item.normalizedTitle || "";
+    const sectionTitle = item.normalizedSectionTitle || "";
+    const preview = item.normalizedPreview || "";
     let score = item.baseWeight;
     let matchedTokenCount = 0;
     let directTokenCount = 0;
+    let matchedInSection = false;
+    let matchedInTitleOrPreview = false;
 
     const phraseIndex = corpus.indexOf(normalizedQuery);
     if (phraseIndex >= 0) {
       score += 84;
       score += Math.max(0, 22 - Math.floor(phraseIndex / 14));
+      if (title.includes(normalizedQuery) || preview.includes(normalizedQuery)) {
+        matchedInTitleOrPreview = true;
+      } else if (sectionTitle.includes(normalizedQuery)) {
+        matchedInSection = true;
+      }
     }
 
     queryTokens.forEach((token) => {
@@ -217,11 +290,21 @@
 
       const directIndex = corpus.indexOf(token);
       if (directIndex >= 0) {
+        const tokenInTitle = title.includes(token);
+        const tokenInPreview = preview.includes(token);
+        const tokenInSection = sectionTitle.includes(token);
+
+        if (tokenInTitle || tokenInPreview) {
+          matchedInTitleOrPreview = true;
+        } else if (tokenInSection) {
+          matchedInSection = true;
+        }
+
         matchedTokenCount += 1;
         directTokenCount += 1;
         score += 24;
         score += Math.max(0, 10 - Math.floor(directIndex / 20));
-        if (title.includes(token)) {
+        if (tokenInTitle) {
           score += 14;
         }
         if (new RegExp(`\\b${escapeRegExp(token)}`).test(corpus)) {
@@ -232,8 +315,15 @@
 
       const fuzzyCorpus = fuzzySubsequenceScore(token, corpus);
       const fuzzyTitle = fuzzySubsequenceScore(token, title);
+      const fuzzyPreview = fuzzySubsequenceScore(token, preview);
+      const fuzzySection = fuzzySubsequenceScore(token, sectionTitle);
       const fuzzyScore = Math.max(fuzzyCorpus, fuzzyTitle);
       if (fuzzyScore >= 0.74) {
+        if (fuzzyTitle >= 0.74 || fuzzyPreview >= 0.74) {
+          matchedInTitleOrPreview = true;
+        } else if (fuzzySection >= 0.74) {
+          matchedInSection = true;
+        }
         matchedTokenCount += 1;
         score += Math.round(fuzzyScore * 16);
         if (fuzzyTitle >= 0.85) {
@@ -259,6 +349,12 @@
     }
 
     score += Math.round((matchedTokenCount / queryTokens.length) * 22);
+
+    // Filter out non-section-level matches that only matched the section title.
+    if (!isSectionLevelResult(item) && matchedInSection && !matchedInTitleOrPreview) {
+      return null;
+    }
+
     return score;
   }
 
@@ -345,6 +441,8 @@
     items.push({
       ...item,
       normalizedTitle,
+      normalizedSectionTitle,
+      normalizedPreview,
       normalizedCorpus,
     });
   }
@@ -773,6 +871,18 @@
     }
 
     const snippetTokens = buildHighlightTokens(tokens, normalizedQuery);
+    const sectionTitleGroups = new Map();
+    results.forEach((result) => {
+      const key = getSectionTitleDisambiguationKey(result);
+      if (!key) {
+        return;
+      }
+      const groupKey = String(result.sectionGroup || "").trim().toLowerCase() || "__none__";
+      const groups = sectionTitleGroups.get(key) || new Set();
+      groups.add(groupKey);
+      sectionTitleGroups.set(key, groups);
+    });
+
     const rows = results.map((result) => {
       const isProcedureContext = result.kind === "procedure";
       const isHeadingResult = result.kind === "heading";
@@ -790,6 +900,15 @@
       const snippetHtml = showSnippet ? highlightSearchText(snippet, snippetTokens) : "";
 
       const contextParts = [];
+      const sectionGroupLabel = formatSectionGroupLabel(result.sectionGroup);
+      const includesSectionInMeta = result.kind === "section"
+        || (result.sectionTitle && result.sectionTitle !== result.title);
+      const sectionTitleKey = getSectionTitleDisambiguationKey(result);
+      const groupSet = sectionTitleKey ? sectionTitleGroups.get(sectionTitleKey) : null;
+      const hasCrossGroupTitleDuplicate = !!(groupSet && groupSet.size > 1);
+      if (sectionGroupLabel && (includesSectionInMeta || hasCrossGroupTitleDuplicate)) {
+        contextParts.push(sectionGroupLabel);
+      }
       if (result.sectionTitle && result.sectionTitle !== result.title) {
         contextParts.push(result.sectionTitle);
       }
@@ -861,7 +980,7 @@
       content: 3,
     };
 
-    return Array.from(bestByTarget.values())
+    const sorted = Array.from(bestByTarget.values())
       .sort((left, right) => {
         if (right.score !== left.score) {
           return right.score - left.score;
@@ -880,9 +999,27 @@
         }
 
         return left.item.targetId.localeCompare(right.item.targetId);
-      })
-      .slice(0, SEARCH_RESULT_LIMIT)
-      .map((entry) => entry.item);
+      });
+
+    const dedupedResults = [];
+    const seenSectionLevelKeys = new Set();
+    sorted.forEach((entry) => {
+      if (dedupedResults.length >= SEARCH_RESULT_LIMIT) {
+        return;
+      }
+
+      const sectionLevelKey = getSectionLevelDedupeKey(entry.item);
+      if (sectionLevelKey) {
+        if (seenSectionLevelKeys.has(sectionLevelKey)) {
+          return;
+        }
+        seenSectionLevelKeys.add(sectionLevelKey);
+      }
+
+      dedupedResults.push(entry.item);
+    });
+
+    return dedupedResults;
   }
 
   function isTypingContext(target) {

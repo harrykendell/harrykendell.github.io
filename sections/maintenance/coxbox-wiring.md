@@ -85,4 +85,4 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 
 ## Related
 
-- See **[Harness build and repair](/#repairs/electronics-harness)** for the build/repair procedure.
+- See **[Harness build and repair](/#repairs/coxbox-wiring)** for the build/repair procedure.

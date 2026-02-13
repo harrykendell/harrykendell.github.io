@@ -2,16 +2,18 @@
 let hashUpdateEnabled = false;
 const SECTION_ORDER_PATH = "sections/section-order.md";
 const EDITOR_MARKDOWN_DRAFTS_STORAGE_KEY = "editor-markdown-drafts-v1";
+const PREFACE_PATH = "sections/supplement/introduction.md";
 let sectionFiles = [];
-let nextSectionIds = null;
 
 let sidebarLinksCache = [];
 const ACTIVATION_OFFSET = 120;
+const SCROLL_RETRY_DELAY_MS = 160;
+const SCROLL_BOTTOM_PADDING = 32;
 let activeTrackingObserver = null;
 let activeTrackingResizeHandler = null;
-let activeTrackingScrollHandler = null;
 let sectionToggleBound = false;
 let sidebarLinksBound = false;
+let tocToggleBound = false;
 
 const SECTION_GROUPS = {
   order: ["maintenance", "repairs", "supplement", "other"],
@@ -91,6 +93,10 @@ function parseSectionOrderMarkdown(markdown) {
   return Array.from(unique);
 }
 
+function getSectionPath(sectionId) {
+  return `sections/${sectionId}.md`;
+}
+
 function readStoredMarkdownDraftMap() {
   try {
     const raw = localStorage.getItem(EDITOR_MARKDOWN_DRAFTS_STORAGE_KEY);
@@ -110,6 +116,28 @@ function readStoredMarkdownDraftMap() {
   }
 }
 
+function getDraftMarkdown(path, draftMap) {
+  if (!(draftMap instanceof Map)) {
+    return null;
+  }
+  const value = draftMap.get(path);
+  return typeof value === "string" ? value : null;
+}
+
+async function fetchMarkdownForPath(path) {
+  const draftMap = readStoredMarkdownDraftMap();
+  const draftMarkdown = getDraftMarkdown(path, draftMap);
+  if (typeof draftMarkdown === "string") {
+    return draftMarkdown;
+  }
+
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.text();
+}
+
 async function resolveSectionFiles() {
   const response = await fetch(SECTION_ORDER_PATH, { cache: "no-store" });
   if (!response.ok) {
@@ -122,22 +150,18 @@ async function resolveSectionFiles() {
   }
 
   const draftMap = readStoredMarkdownDraftMap();
-  const draftManifest = draftMap.get(SECTION_ORDER_PATH);
-  if (typeof draftManifest === "string") {
-    const parsedDraft = parseSectionOrderMarkdown(draftManifest);
-    if (parsedDraft.length > 0) {
-      nextSectionIds = parsedDraft;
-    }
-  }
-
-  const nextIds = nextSectionIds || parsed;
+  const draftManifest = getDraftMarkdown(SECTION_ORDER_PATH, draftMap);
+  const parsedDraft = draftManifest
+    ? parseSectionOrderMarkdown(draftManifest)
+    : [];
+  const nextIds = parsedDraft.length > 0 ? parsedDraft : parsed;
   const seenIds = new Set(nextIds);
   const draftOnlyIds = [];
   draftMap.forEach((draft, path) => {
     if (typeof draft !== "string") {
       return;
     }
-    if (!path || path === SECTION_ORDER_PATH || path === "sections/supplement/introduction.md") {
+    if (!path || path === SECTION_ORDER_PATH || path === PREFACE_PATH) {
       return;
     }
     const normalizedId = appNormalizeSectionId(path);
@@ -174,7 +198,7 @@ function loadEditorAssets() {
   }
 }
 
-const sectionMetaCache = new Map();
+const sectionRenderPromises = new Map();
 const renderedSections = new Set();
 let sectionRenderObserver = null;
 let searchIndexRefreshTimer = null;
@@ -185,7 +209,7 @@ const SECTION_RENDER_INITIAL_COUNT = 1;
 function createSectionShell(sectionId, title) {
   const safeTitle = escapeHtml(title || sectionId);
   const safeSectionId = escapeAttribute(sectionId);
-  const sectionPath = `sections/${sectionId}.md`;
+  const sectionPath = getSectionPath(sectionId);
   const editUrl = appGetGitHubEditUrl(sectionPath);
   const editLinkHtml = editUrl
     ? `<a class="section-edit-link" data-source-path="${escapeAttribute(sectionPath)}" href="${escapeAttribute(editUrl)}" target="_blank" rel="noopener noreferrer">Edit</a>`
@@ -206,6 +230,16 @@ function createSectionShell(sectionId, title) {
     </section>
   `;
   return template.content.firstElementChild;
+}
+
+function createSectionGroupElement(groupLabel) {
+  const groupEl = document.createElement("div");
+  groupEl.className = "section-group";
+  groupEl.innerHTML = `
+    <div class="section-group-divider" aria-hidden="true"></div>
+    <div class="section-group-title">${escapeHtml(groupLabel)}</div>
+  `;
+  return groupEl;
 }
 
 function scheduleSearchIndexRefresh() {
@@ -246,6 +280,28 @@ function renderSectionSubItems(section) {
   }).join("");
 }
 
+async function ensureSectionRendered(sectionId) {
+  if (!sectionId) {
+    return false;
+  }
+  if (renderedSections.has(sectionId)) {
+    return true;
+  }
+
+  const inFlight = sectionRenderPromises.get(sectionId);
+  if (inFlight) {
+    await inFlight;
+    return renderedSections.has(sectionId);
+  }
+
+  renderSectionContent(sectionId);
+  const nextInFlight = sectionRenderPromises.get(sectionId);
+  if (nextInFlight) {
+    await nextInFlight;
+  }
+  return renderedSections.has(sectionId);
+}
+
 function updateSidebarSectionTitle(sectionId, title) {
   const sidebarLink = document.querySelector(
     `#toc-list a[data-section="${sectionId}"]`,
@@ -255,12 +311,51 @@ function updateSidebarSectionTitle(sectionId, title) {
   }
 }
 
+function applySectionTitle(sectionId, title) {
+  if (!sectionId || !title) {
+    return;
+  }
+  const section = document.getElementById(sectionId);
+  if (section) {
+    const heading = section.querySelector(".section-header h2");
+    if (heading && heading.textContent !== title) {
+      heading.textContent = title;
+    }
+  }
+  updateSidebarSectionTitle(sectionId, title);
+}
+
+function extractMarkdownMeta(markdown, fallbackTitle) {
+  const parsed = typeof extractTitleAndContentFromMarkdown === "function"
+    ? extractTitleAndContentFromMarkdown(markdown)
+    : { title: null, content: markdown };
+  const rawTitle = parsed && typeof parsed.title === "string"
+    ? parsed.title
+    : "";
+  const content = parsed && typeof parsed.content === "string"
+    ? parsed.content
+    : markdown;
+  const title = rawTitle || String(fallbackTitle || "");
+  return { title, content };
+}
+
+async function fetchSectionMarkdown(sectionId) {
+  if (!sectionId) {
+    return null;
+  }
+  try {
+    return await fetchMarkdownForPath(getSectionPath(sectionId));
+  } catch (error) {
+    console.error(`Failed to load section: ${sectionId}`, error);
+    return null;
+  }
+}
+
 function renderSectionContent(sectionId) {
   if (!sectionId || renderedSections.has(sectionId)) {
     return;
   }
-  const meta = sectionMetaCache.get(sectionId);
-  if (!meta) {
+  if (sectionRenderPromises.has(sectionId)) {
     return;
   }
   const section = document.getElementById(sectionId);
@@ -272,37 +367,54 @@ function renderSectionContent(sectionId) {
     return;
   }
 
-  const rendered = typeof renderMarkdownContent === "function"
-    ? renderMarkdownContent(contentEl, meta.content, {
-      documentTitle: meta.title || sectionId,
-      headingScopeId: sectionId,
-      downgradeHeadings: true,
-    })
-    : false;
+  const renderPromise = (async () => {
+    const markdown = await fetchSectionMarkdown(sectionId);
+    if (typeof markdown !== "string") {
+      return;
+    }
 
-  if (!rendered) {
-    contentEl.textContent = meta.content;
-  }
+    const meta = extractMarkdownMeta(markdown, formatSectionTitleFromId(sectionId));
+    if (meta && meta.title) {
+      applySectionTitle(sectionId, meta.title);
+    }
 
-  renderedSections.add(sectionId);
-  section.dataset.rendered = "true";
+    const rendered = typeof renderMarkdownContent === "function"
+      ? renderMarkdownContent(contentEl, meta.content, {
+        documentTitle: meta.title || sectionId,
+        headingScopeId: sectionId,
+        downgradeHeadings: true,
+      })
+      : false;
 
-  appNormalizeInternalHashLinks(section);
+    if (!rendered) {
+      contentEl.textContent = meta.content;
+    }
 
-  const subList = document.querySelector(
-    `.sidebar .sub-list[data-parent-section="${sectionId}"]`,
-  );
-  if (subList) {
-    subList.innerHTML = renderSectionSubItems(section);
-  }
+    renderedSections.add(sectionId);
+    section.dataset.rendered = "true";
 
-  refreshSidebarLinksCache();
-  scheduleSearchIndexRefresh();
-  scheduleActiveTrackingRefresh();
+    appNormalizeInternalHashLinks(section);
 
-  if (sectionRenderObserver && renderedSections.size >= sectionFiles.length) {
-    sectionRenderObserver.disconnect();
-  }
+    const subList = document.querySelector(
+      `.sidebar .sub-list[data-parent-section="${sectionId}"]`,
+    );
+    if (subList) {
+      subList.innerHTML = renderSectionSubItems(section);
+    }
+
+    refreshSidebarLinksCache();
+    scheduleSearchIndexRefresh();
+    scheduleActiveTrackingRefresh();
+
+    if (sectionRenderObserver && renderedSections.size >= sectionFiles.length) {
+      sectionRenderObserver.disconnect();
+    }
+  })();
+
+  sectionRenderPromises.set(sectionId, renderPromise);
+  renderPromise.finally(() => {
+    sectionRenderPromises.delete(sectionId);
+  });
 }
 
 function setupSectionRenderObserver() {
@@ -373,74 +485,34 @@ async function loadSections() {
   if (!container) {
     return;
   }
-  const markdownDraftMap = readStoredMarkdownDraftMap();
-
   let currentGroup = null;
   const groupLabels = SECTION_GROUPS.labels;
-
-  const loadedSections = await Promise.all(sectionFiles.map(async (section) => {
-    try {
-      const sectionPath = `sections/${section}.md`;
-      const draftMarkdown = markdownDraftMap.get(sectionPath);
-      let markdown = null;
-      if (typeof draftMarkdown === "string") {
-        markdown = draftMarkdown;
-      } else {
-        const response = await fetch(sectionPath);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        markdown = await response.text();
-      }
-      const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
-        ? extractTitleAndContentFromMarkdown(markdown)
-        : { title: null, content: markdown };
-      const title = (titleAndContent && titleAndContent.title) || formatSectionTitleFromId(section);
-      const content = (titleAndContent && titleAndContent.content) || markdown;
-      sectionMetaCache.set(section, { title, content });
-      const sectionEl = createSectionShell(section, title);
-      return { section, sectionEl, title };
-    } catch (error) {
-      console.error(`Failed to load section: ${section}`, error);
-      return null;
-    }
-  }));
-
   const fragment = document.createDocumentFragment();
-  loadedSections.forEach((loadedSection) => {
-    if (!loadedSection) {
-      return;
-    }
 
-    const { section, sectionEl, title } = loadedSection;
-    const groupKey = getSectionGroup(section);
+  sectionFiles.forEach((sectionId) => {
+    const groupKey = getSectionGroup(sectionId);
     if (groupKey !== currentGroup) {
       currentGroup = groupKey;
       const groupLabel = groupLabels[groupKey];
       if (groupLabel) {
-        const groupEl = document.createElement("div");
-        groupEl.className = "section-group";
-        groupEl.innerHTML = `
-          <div class="section-group-divider" aria-hidden="true"></div>
-          <div class="section-group-title">${escapeHtml(groupLabel)}</div>
-        `;
-        fragment.appendChild(groupEl);
+        fragment.appendChild(createSectionGroupElement(groupLabel));
       }
     }
+
+    const title = formatSectionTitleFromId(sectionId);
+    const sectionEl = createSectionShell(sectionId, title);
     fragment.appendChild(sectionEl);
     if (title) {
-      updateSidebarSectionTitle(section, title);
+      updateSidebarSectionTitle(sectionId, title);
     }
   });
 
   container.appendChild(fragment);
   appNormalizeInternalHashLinks(container);
 
-  // Setup click handlers after all sections are loaded
+  // Setup click handlers after sections are in the DOM
   setupSectionToggle();
   setupSidebarLinks();
-  setupTocToggle();
-  setupSearchBar();
 
   // Restore scroll position after sections are loaded
   restoreScrollPosition();
@@ -462,32 +534,12 @@ async function loadPreface() {
   }
 
   try {
-    const introPath = "sections/supplement/introduction.md";
-    const markdownDraftMap = readStoredMarkdownDraftMap();
-    const draftMarkdown = markdownDraftMap.get(introPath);
-    let markdown = null;
-    if (typeof draftMarkdown === "string") {
-      markdown = draftMarkdown;
-    } else {
-      const response = await fetch(introPath);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      markdown = await response.text();
-    }
-    const titleAndContent = typeof extractTitleAndContentFromMarkdown === "function"
-      ? extractTitleAndContentFromMarkdown(markdown)
-      : { content: markdown };
-    const introTitle = titleAndContent && typeof titleAndContent.title === "string"
-      ? titleAndContent.title
-      : "";
-    const content = titleAndContent && typeof titleAndContent.content === "string"
-      ? titleAndContent.content
-      : markdown;
-    const introEditUrl = appGetGitHubEditUrl("sections/supplement/introduction.md");
+    const markdown = await fetchMarkdownForPath(PREFACE_PATH);
+    const { title: introTitle, content } = extractMarkdownMeta(markdown, "");
+    const introEditUrl = appGetGitHubEditUrl(PREFACE_PATH);
     const introEditLink = document.getElementById("intro-edit-link");
     if (introEditLink) {
-      introEditLink.setAttribute("data-source-path", "sections/supplement/introduction.md");
+      introEditLink.setAttribute("data-source-path", PREFACE_PATH);
       if (introEditUrl) {
         introEditLink.setAttribute("href", introEditUrl);
         introEditLink.setAttribute("target", "_blank");
@@ -515,6 +567,9 @@ function refreshSidebarLinksCache() {
 }
 
 function setupTocToggle() {
+  if (tocToggleBound) {
+    return;
+  }
   const toggleButton = document.getElementById("toc-toggle");
   const sidebar = document.getElementById("sidebar");
   const mainContent = document.querySelector("main");
@@ -549,6 +604,8 @@ function setupTocToggle() {
       toggleButton.focus();
     }
   });
+
+  tocToggleBound = true;
 }
 
 function getSectionGroup(sectionId) {
@@ -562,6 +619,78 @@ function getSectionGroup(sectionId) {
     return "supplement";
   }
   return "other";
+}
+
+function groupItemsBySection(items, resolveSectionId) {
+  const grouped = SECTION_GROUPS.order.reduce((acc, groupKey) => {
+    acc[groupKey] = [];
+    return acc;
+  }, {});
+
+  items.forEach((item) => {
+    const sectionId = resolveSectionId(item);
+    if (!sectionId) {
+      return;
+    }
+    const groupKey = getSectionGroup(sectionId);
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = [];
+    }
+    grouped[groupKey].push(item);
+  });
+
+  return grouped;
+}
+
+function buildTocGroupHtml(groupKey, itemsHtml) {
+  const groupLabel = SECTION_GROUPS.labels[groupKey];
+  const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
+  const titleHtml = safeGroupLabel
+    ? `<div class="toc-group-title">${safeGroupLabel}</div>`
+    : "";
+
+  return `
+      <li class="toc-group">
+        ${titleHtml}
+        <ul class="toc-group-list">
+          ${itemsHtml}
+        </ul>
+      </li>
+    `;
+}
+
+function renderSidebarGroups(groupedSections, renderItem) {
+  return SECTION_GROUPS.order.map((groupKey) => {
+    const groupItems = groupedSections[groupKey] || [];
+    if (groupItems.length === 0) {
+      return "";
+    }
+    const groupItemsHtml = groupItems.map((item) => renderItem(item)).join("");
+    return buildTocGroupHtml(groupKey, groupItemsHtml);
+  }).join("");
+}
+
+function renderInitialSectionNavItem(sectionId) {
+  const sectionTitle = formatSectionTitleFromId(sectionId);
+  const safeSectionId = escapeAttribute(sectionId);
+  const safeSectionTitle = escapeHtml(sectionTitle);
+  return `
+        <li>
+          <div class="nav-row">
+            <button class="nav-arrow collapsed" type="button" data-section="${safeSectionId}" aria-label="Toggle section">▼</button>
+            <a href="#${safeSectionId}" data-section="${safeSectionId}">${safeSectionTitle}</a>
+          </div>
+          <ul class="sub-list collapsed" data-parent-section="${safeSectionId}"></ul>
+        </li>
+      `;
+}
+
+function updateSidebarHtml(sidebarList, html) {
+  if (!sidebarList) {
+    return;
+  }
+  sidebarList.innerHTML = html;
+  refreshSidebarLinksCache();
 }
 
 function renderSectionNavItem(section) {
@@ -644,72 +773,25 @@ function formatSectionTitleFromId(sectionId) {
 
 function renderInitialSidebar() {
   const sidebarList = document.getElementById("toc-list");
-  if (!sidebarList) {
+  if (!(sidebarList instanceof Element)) {
     return;
   }
 
-  const groupOrder = SECTION_GROUPS.order;
-  const groupLabels = SECTION_GROUPS.labels;
-  const groupedSections = groupOrder.reduce((acc, groupKey) => {
-    acc[groupKey] = [];
-    return acc;
-  }, {});
-
-  sectionFiles.forEach((sectionId) => {
-    const groupKey = getSectionGroup(sectionId);
-    if (!groupedSections[groupKey]) {
-      groupedSections[groupKey] = [];
-    }
-    groupedSections[groupKey].push(sectionId);
-  });
-
-  const sidebarHtml = groupOrder.map((groupKey) => {
-    const groupSectionIds = groupedSections[groupKey] || [];
-    if (groupSectionIds.length === 0) {
-      return "";
-    }
-
-    const groupItemsHtml = groupSectionIds.map((sectionId) => {
-      const sectionTitle = formatSectionTitleFromId(sectionId);
-      const safeSectionId = escapeAttribute(sectionId);
-      const safeSectionTitle = escapeHtml(sectionTitle);
-      return `
-        <li>
-          <div class="nav-row">
-            <button class="nav-arrow collapsed" type="button" data-section="${safeSectionId}" aria-label="Toggle section">▼</button>
-            <a href="#${safeSectionId}" data-section="${safeSectionId}">${safeSectionTitle}</a>
-          </div>
-          <ul class="sub-list collapsed" data-parent-section="${safeSectionId}"></ul>
-        </li>
-      `;
-    }).join("");
-
-    const groupLabel = groupLabels[groupKey];
-    const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
-    const titleHtml = safeGroupLabel
-      ? `<div class="toc-group-title">${safeGroupLabel}</div>`
-      : "";
-
-    return `
-      <li class="toc-group">
-        ${titleHtml}
-        <ul class="toc-group-list">
-          ${groupItemsHtml}
-        </ul>
-      </li>
-    `;
-  }).join("");
-
-  sidebarList.innerHTML = sidebarHtml;
-  refreshSidebarLinksCache();
+  const groupedSections = groupItemsBySection(sectionFiles, (sectionId) => sectionId);
+  const sidebarHtml = renderSidebarGroups(groupedSections, renderInitialSectionNavItem);
+  updateSidebarHtml(sidebarList, sidebarHtml);
 }
 
 async function initApp() {
+  setupTocToggle();
+  setupSearchBar();
+
+  loadPreface();
+
   await resolveSectionFiles();
   renderInitialSidebar();
   setupSidebarLinks();
-
-  await Promise.all([loadPreface(), loadSections()]);
+  await loadSections();
   scheduleNonCriticalWork(() => {
     refreshSearchBarIndex();
   });
@@ -752,56 +834,13 @@ document.addEventListener("click", function (event) {
 function generateSidebar() {
   const sections = document.querySelectorAll(".section");
   const sidebarList = document.getElementById("toc-list");
-  if (!sidebarList) {
+  if (!(sidebarList instanceof Element)) {
     return;
   }
 
-  const groupOrder = SECTION_GROUPS.order;
-  const groupLabels = SECTION_GROUPS.labels;
-
-  const groupedSections = groupOrder.reduce((acc, groupKey) => {
-    acc[groupKey] = [];
-    return acc;
-  }, {});
-
-  Array.from(sections).forEach((section) => {
-    const groupKey = getSectionGroup(section.id);
-    if (!groupedSections[groupKey]) {
-      groupedSections[groupKey] = [];
-    }
-    groupedSections[groupKey].push(section);
-  });
-
-  const sidebarHtml = groupOrder.map((groupKey) => {
-    const groupSections = groupedSections[groupKey] || [];
-    if (groupSections.length === 0) {
-      return "";
-    }
-
-    const groupItemsHtml = groupSections
-      .map((section) => renderSectionNavItem(section))
-      .join("");
-
-    const groupLabel = groupLabels[groupKey];
-    const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
-    const titleHtml = safeGroupLabel
-      ? `<div class="toc-group-title">${safeGroupLabel}</div>`
-      : "";
-
-    return `
-      <li class="toc-group">
-        ${titleHtml}
-        <ul class="toc-group-list">
-          ${groupItemsHtml}
-        </ul>
-      </li>
-    `;
-  }).join("");
-
-  // Clear existing sidebar content
-  sidebarList.innerHTML = sidebarHtml;
-
-  refreshSidebarLinksCache();
+  const groupedSections = groupItemsBySection(Array.from(sections), (section) => section.id);
+  const sidebarHtml = renderSidebarGroups(groupedSections, renderSectionNavItem);
+  updateSidebarHtml(sidebarList, sidebarHtml);
 }
 
 function setupActiveTracking() {
@@ -812,10 +851,6 @@ function setupActiveTracking() {
   if (activeTrackingResizeHandler) {
     window.removeEventListener("resize", activeTrackingResizeHandler);
     activeTrackingResizeHandler = null;
-  }
-  if (activeTrackingScrollHandler) {
-    window.removeEventListener("scroll", activeTrackingScrollHandler);
-    activeTrackingScrollHandler = null;
   }
 
   const headings = Array.from(document.querySelectorAll(
@@ -907,6 +942,77 @@ function setupActiveTracking() {
   updateActiveLink();
 }
 
+function expandCollapsedAncestors(target) {
+  let expanded = false;
+  if (!target) {
+    return expanded;
+  }
+
+  const section = target.classList && target.classList.contains("section")
+    ? target
+    : target.closest(".section");
+  if (section && section.classList.contains("collapsed")) {
+    setSectionCollapsed(section, false, { syncActive: false });
+    expanded = true;
+  }
+
+  const procedure = target.closest && target.closest(".procedure");
+  if (procedure && procedure.classList.contains("collapsed")) {
+    if (typeof setProcedureCollapsed === "function") {
+      setProcedureCollapsed(procedure, false);
+      expanded = true;
+    } else {
+      const header = procedure.querySelector(".procedure-header");
+      if (header) {
+        header.click();
+        expanded = true;
+      }
+    }
+  }
+
+  return expanded;
+}
+
+function scrollToTargetElement(target, behavior) {
+  if (!target) {
+    return;
+  }
+  const targetTop = target.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({
+    top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0),
+    behavior,
+  });
+}
+
+function ensureTargetVisibility(target) {
+  if (!target) {
+    return;
+  }
+  const rect = target.getBoundingClientRect();
+  const topLimit = ACTIVATION_OFFSET;
+  const bottomLimit = window.innerHeight - SCROLL_BOTTOM_PADDING;
+  const isTallTarget = rect.height > window.innerHeight - SCROLL_BOTTOM_PADDING;
+
+  if (rect.top < topLimit) {
+    window.scrollBy({ top: rect.top - topLimit, behavior: "auto" });
+    return;
+  }
+
+  if (!isTallTarget && rect.bottom > bottomLimit) {
+    const delta = rect.bottom - bottomLimit;
+    window.scrollBy({ top: delta, behavior: "auto" });
+  }
+}
+
+function findMatchingSectionId(targetId) {
+  if (!targetId) {
+    return null;
+  }
+  return sectionFiles.find((sectionId) => (
+    targetId === sectionId || targetId.startsWith(`${sectionId}/`)
+  )) || null;
+}
+
 function scrollToSection(hash, behavior = "smooth") {
   const normalizedHash = appNormalizeHashValue(hash);
   if (!normalizedHash) {
@@ -918,30 +1024,59 @@ function scrollToSection(hash, behavior = "smooth") {
     return false;
   }
 
-  let targetElement = document.getElementById(targetId);
-  if (!targetElement) {
-    const matchingSection = sectionFiles.find((sectionId) => (
-      targetId === sectionId || targetId.startsWith(`${sectionId}/`)
-    ));
-    if (matchingSection) {
-      renderSectionContent(matchingSection);
-      targetElement = document.getElementById(targetId);
+  const attemptScroll = (scrollBehavior, needsRetry) => {
+    const targetElement = document.getElementById(targetId);
+    if (!targetElement) {
+      return false;
     }
+
+    const expanded = expandCollapsedAncestors(targetElement);
+    const targetSection = targetElement.closest(".section");
+    if (targetSection && targetSection.id) {
+      renderSectionContent(targetSection.id);
+    }
+    scrollToTargetElement(targetElement, scrollBehavior);
+
+    const followUp = () => {
+      const refreshedTarget = document.getElementById(targetId);
+      if (!refreshedTarget) {
+        return;
+      }
+      scrollToTargetElement(refreshedTarget, "auto");
+      ensureTargetVisibility(refreshedTarget);
+    };
+
+    if (expanded || needsRetry) {
+      window.setTimeout(() => {
+        window.requestAnimationFrame(followUp);
+      }, SCROLL_RETRY_DELAY_MS);
+    } else {
+      window.requestAnimationFrame(() => {
+        ensureTargetVisibility(targetElement);
+      });
+    }
+
+    return true;
+  };
+
+  if (attemptScroll(behavior, false)) {
+    return true;
   }
-  if (!targetElement) {
+
+  const matchingSection = findMatchingSectionId(targetId);
+  if (!matchingSection) {
     return false;
   }
 
-  const parentSection = targetElement.closest(".section");
-  if (parentSection && parentSection.classList.contains("collapsed")) {
-    setSectionCollapsed(parentSection, false, { syncActive: false });
-  }
-
-  const targetTop = targetElement.getBoundingClientRect().top + window.scrollY;
-  window.scrollTo({
-    top: Math.max(targetTop - ACTIVATION_OFFSET + 5, 0),
-    behavior,
+  ensureSectionRendered(matchingSection).then((rendered) => {
+    if (!rendered) {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      attemptScroll("auto", true);
+    });
   });
+
   return true;
 }
 
