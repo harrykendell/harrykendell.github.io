@@ -1,0 +1,23 @@
+name: Markdown Validation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-markdown:
+    name: Validate Markdown
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate markdown content
+        run: node tests/validate-markdown.mjs

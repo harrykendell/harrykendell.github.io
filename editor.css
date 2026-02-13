@@ -258,6 +258,12 @@
     isolation: isolate;
 }
 
+#inline-repo-markdown {
+    min-width: 52px;
+    position: relative;
+    isolation: isolate;
+}
+
 #inline-repo-commit.is-failed {
     border-color: var(--danger);
 }
@@ -266,11 +272,13 @@
     border-color: var(--info);
 }
 
-#inline-repo-commit.is-running {
+#inline-repo-commit.is-running,
+#inline-repo-markdown.is-running {
     border-color: var(--border-subtle);
 }
 
-#inline-repo-commit.is-running::before {
+#inline-repo-commit.is-running::before,
+#inline-repo-markdown.is-running::before {
     content: "";
     position: absolute;
     inset: -1px;
@@ -854,6 +862,7 @@ body.editor-modal-open {
     overscroll-behavior: contain;
 }
 
+
 .editor-codemirror .cm-content {
     color: var(--text-main);
     font-family:
@@ -864,7 +873,6 @@ body.editor-modal-open {
         sans-serif;
     font-size: 1rem;
     line-height: 1.6;
-    background: var(--bg-elevated);
 }
 
 .cm-diff-ins {
@@ -920,7 +928,7 @@ body.editor-modal-open {
     height: 100%;
     }
 
-    editor-codemirror .cm-editor {
+    .editor-codemirror .cm-editor {
         padding: 0px;
         font-size: 16px;
     }

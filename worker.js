@@ -810,11 +810,189 @@ async function fetchRepoStatusFromGitHub(options) {
             : "Could not load deploy workflow runs.";
     }
 
+    if (activity.commitSha) {
+        try {
+            const checkRunsPayload = await githubApiRequest(
+                `${repoPrefix}/commits/${encodeURIComponent(activity.commitSha)}/check-runs?per_page=100`,
+                { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
+            );
+            const markdownValidation = await buildMarkdownValidationSummary({
+                token,
+                repoPrefix,
+                checkRunsPayload,
+            });
+            if (markdownValidation) {
+                activity.markdownValidation = markdownValidation;
+            }
+        } catch (error) {
+            activity.markdownValidation = {
+                error: error && error.message ? error.message : "Could not load markdown validation check.",
+            };
+        }
+    }
+
     if (!activity.commitSha && !activity.deployRun) {
         activity.error = activity.commitError || activity.runsError || "Could not load repo activity.";
     }
 
     return activity;
+}
+
+async function buildMarkdownValidationSummary(options) {
+    const { token, repoPrefix, checkRunsPayload } = options;
+    const checkRuns = checkRunsPayload && Array.isArray(checkRunsPayload.check_runs)
+        ? checkRunsPayload.check_runs
+        : [];
+    const checkRun = findMarkdownValidationCheckRun(checkRuns);
+    if (!checkRun) {
+        return null;
+    }
+
+    const output = checkRun.output && typeof checkRun.output === "object"
+        ? checkRun.output
+        : {};
+    const summary = {
+        name: typeof checkRun.name === "string" ? checkRun.name : "Markdown Validation",
+        status: typeof checkRun.status === "string" ? checkRun.status : "",
+        conclusion: typeof checkRun.conclusion === "string" ? checkRun.conclusion : "",
+        url: typeof checkRun.details_url === "string" && checkRun.details_url
+            ? checkRun.details_url
+            : (typeof checkRun.html_url === "string" ? checkRun.html_url : ""),
+        startedAt: typeof checkRun.started_at === "string" ? checkRun.started_at : "",
+        completedAt: typeof checkRun.completed_at === "string" ? checkRun.completed_at : "",
+        title: typeof output.title === "string" ? output.title : "",
+        summary: typeof output.summary === "string" ? output.summary : "",
+        annotationsCount: Number.isFinite(Number(output.annotations_count))
+            ? Number(output.annotations_count)
+            : 0,
+        errorCount: 0,
+        warningCount: 0,
+        noticeCount: 0,
+        issues: [],
+        issuesTruncated: false,
+    };
+
+    if (!checkRun.id || summary.annotationsCount <= 0) {
+        return summary;
+    }
+
+    const perPage = Math.min(80, Math.max(20, summary.annotationsCount));
+    const annotationsPayload = await githubApiRequest(
+        `${repoPrefix}/check-runs/${encodeURIComponent(checkRun.id)}/annotations?per_page=${perPage}`,
+        { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
+    );
+    const annotations = Array.isArray(annotationsPayload) ? annotationsPayload : [];
+    const annotationSummary = summarizeCheckRunAnnotations(annotations, 25);
+
+    summary.errorCount = annotationSummary.errorCount;
+    summary.warningCount = annotationSummary.warningCount;
+    summary.noticeCount = annotationSummary.noticeCount;
+    summary.issues = annotationSummary.issues;
+    summary.issuesTruncated = summary.annotationsCount > annotations.length;
+
+    return summary;
+}
+
+function findMarkdownValidationCheckRun(checkRuns) {
+    if (!Array.isArray(checkRuns) || checkRuns.length === 0) {
+        return null;
+    }
+
+    const scored = checkRuns
+        .map((checkRun) => {
+            const name = String(checkRun && checkRun.name ? checkRun.name : "").toLowerCase();
+            const title = String(
+                checkRun
+                && checkRun.output
+                && typeof checkRun.output === "object"
+                && checkRun.output.title
+                    ? checkRun.output.title
+                    : "",
+            ).toLowerCase();
+
+            const text = `${name} ${title}`.trim();
+            if (!text) {
+                return null;
+            }
+
+            const hasMarkdown = text.includes("markdown");
+            const hasValidationWord = text.includes("validate")
+                || text.includes("validation")
+                || text.includes("lint")
+                || text.includes("check");
+            if (!hasMarkdown || !hasValidationWord) {
+                return null;
+            }
+
+            return checkRun;
+        })
+        .filter(Boolean);
+
+    if (scored.length === 0) {
+        return null;
+    }
+
+    scored.sort((a, b) => {
+        const aTime = Date.parse(a && a.started_at ? a.started_at : a && a.created_at ? a.created_at : "") || 0;
+        const bTime = Date.parse(b && b.started_at ? b.started_at : b && b.created_at ? b.created_at : "") || 0;
+        return bTime - aTime;
+    });
+
+    return scored[0] || null;
+}
+
+function summarizeCheckRunAnnotations(annotations, maxIssues) {
+    const summary = {
+        errorCount: 0,
+        warningCount: 0,
+        noticeCount: 0,
+        issues: [],
+    };
+
+    if (!Array.isArray(annotations)) {
+        return summary;
+    }
+
+    annotations.forEach((annotation) => {
+        const levelRaw = String(annotation && annotation.annotation_level ? annotation.annotation_level : "")
+            .toLowerCase();
+        const level = levelRaw === "failure"
+            ? "error"
+            : (levelRaw === "warning" ? "warning" : "notice");
+
+        if (level === "error") {
+            summary.errorCount += 1;
+        } else if (level === "warning") {
+            summary.warningCount += 1;
+        } else {
+            summary.noticeCount += 1;
+        }
+
+        if (summary.issues.length >= maxIssues) {
+            return;
+        }
+
+        const path = typeof annotation.path === "string" ? annotation.path : "";
+        const line = Number.isFinite(Number(annotation.start_line))
+            ? Number(annotation.start_line)
+            : 0;
+        const title = typeof annotation.title === "string"
+            ? annotation.title
+            : "";
+        const message = typeof annotation.message === "string"
+            ? annotation.message
+            : "";
+
+        summary.issues.push({
+            level,
+            path,
+            line,
+            title: title.slice(0, 220),
+            message: message.slice(0, 420),
+        });
+    });
+
+    return summary;
 }
 
 function isPagesDeployRun(run) {
