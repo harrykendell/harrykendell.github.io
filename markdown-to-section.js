@@ -311,13 +311,17 @@ function downgradeHeadings(rootEl) {
 function wrapTables(rootEl) {
     const tables = Array.from(rootEl.querySelectorAll("table"));
     tables.forEach((table) => {
-        if (
-            table.parentElement && table.parentElement.classList.contains("table-scroll")) {
+        const parentElement = table.parentElement;
+        if (parentElement && parentElement.classList.contains("table-scroll")) {
+            return;
+        }
+        const parentNode = table.parentNode;
+        if (!parentNode) {
             return;
         }
         const wrapper = document.createElement("div");
         wrapper.className = "table-scroll";
-        table.parentElement.insertBefore(wrapper, table);
+        parentNode.insertBefore(wrapper, table);
         wrapper.appendChild(table);
     });
 }
@@ -472,22 +476,27 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
     }
 
     const transformedMarkdown = transformProcedureBlocks(sourceMarkdown);
-    rootEl.innerHTML = marked.parse(transformedMarkdown);
+    const renderedHtml = marked.parse(transformedMarkdown);
+    const template = document.createElement("template");
+    template.innerHTML = renderedHtml;
+    const fragment = template.content;
 
     if (shouldDowngradeHeadings) {
-        downgradeHeadings(rootEl);
+        downgradeHeadings(fragment);
     }
 
-    initProcedures(rootEl);
-    transformCallouts(rootEl);
-    transformYouTubeEmbeds(rootEl);
-    initYouTubeEmbeds(rootEl);
-    wrapTables(rootEl);
-    optimizeSectionMedia(rootEl);
+    initProcedures(fragment);
+    transformCallouts(fragment);
+    transformYouTubeEmbeds(fragment);
+    initYouTubeEmbeds(fragment);
+    wrapTables(fragment);
+    optimizeSectionMedia(fragment);
 
     if (headingScopeId) {
-        addHeadingIds(rootEl, headingScopeId);
+        addHeadingIds(fragment, headingScopeId);
     }
+
+    rootEl.replaceChildren(fragment);
 
     return true;
 }

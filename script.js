@@ -205,6 +205,8 @@ let searchIndexRefreshTimer = null;
 let activeTrackingRefreshTimer = null;
 const SECTION_RENDER_IDLE_TIME_MS = 12;
 const SECTION_RENDER_INITIAL_COUNT = 1;
+const SECTION_RENDER_ROOT_MARGIN = "300px 0px";
+const SECTION_RENDER_LOOKAHEAD_COUNT = 2;
 
 function createSectionShell(sectionId, title) {
   const safeTitle = escapeHtml(title || sectionId);
@@ -417,6 +419,23 @@ function renderSectionContent(sectionId) {
   });
 }
 
+function renderSectionLookahead(sectionId) {
+  const currentIndex = sectionFiles.indexOf(sectionId);
+  if (currentIndex < 0) {
+    return;
+  }
+
+  for (let offset = 1; offset <= SECTION_RENDER_LOOKAHEAD_COUNT; offset += 1) {
+    const nextSectionId = sectionFiles[currentIndex + offset];
+    if (!nextSectionId) {
+      break;
+    }
+    scheduleNonCriticalWork(() => {
+      renderSectionContent(nextSectionId);
+    });
+  }
+}
+
 function setupSectionRenderObserver() {
   if (!("IntersectionObserver" in window)) {
     return;
@@ -430,12 +449,13 @@ function setupSectionRenderObserver() {
         const section = entry.target;
         if (section && section.id) {
           renderSectionContent(section.id);
+          renderSectionLookahead(section.id);
         }
       }
     });
   }, {
     root: null,
-    rootMargin: "800px 0px",
+    rootMargin: SECTION_RENDER_ROOT_MARGIN,
     threshold: 0.01,
   });
 
@@ -518,13 +538,8 @@ async function loadSections() {
   restoreScrollPosition();
 
   setupSectionRenderObserver();
-  const initialQueue = sectionFiles.slice(0);
+  const initialQueue = sectionFiles.slice(0, SECTION_RENDER_INITIAL_COUNT);
   processSectionRenderQueue(initialQueue);
-
-  // Render a few sections early so there is content near the top.
-  sectionFiles.slice(0, SECTION_RENDER_INITIAL_COUNT).forEach((sectionId) => {
-    scheduleNonCriticalWork(() => renderSectionContent(sectionId));
-  });
 }
 
 async function loadPreface() {
@@ -1035,6 +1050,7 @@ function scrollToSection(hash, behavior = "smooth") {
     const targetSection = targetElement.closest(".section");
     if (targetSection && targetSection.id) {
       renderSectionContent(targetSection.id);
+      renderSectionLookahead(targetSection.id);
     }
     scrollToTargetElement(targetElement, scrollBehavior);
 
