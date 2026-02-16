@@ -462,9 +462,11 @@
       .then(([stateModule, viewModule, basicModule, markdownModule]) => {
         const modules = {
           EditorState: stateModule.EditorState || (stateModule.default && stateModule.default.EditorState),
+          Prec: stateModule.Prec || (stateModule.default && stateModule.default.Prec),
           StateField: stateModule.StateField || (stateModule.default && stateModule.default.StateField),
           StateEffect: stateModule.StateEffect || (stateModule.default && stateModule.default.StateEffect),
           EditorView: viewModule.EditorView || (viewModule.default && viewModule.default.EditorView),
+          keymap: viewModule.keymap || (viewModule.default && viewModule.default.keymap),
           Decoration: viewModule.Decoration || (viewModule.default && viewModule.default.Decoration),
           WidgetType: viewModule.WidgetType || (viewModule.default && viewModule.default.WidgetType),
           minimalSetup: basicModule.minimalSetup || (basicModule.default && basicModule.default.minimalSetup),
@@ -473,9 +475,11 @@
 
         if (
           !modules.EditorState
+          || !modules.Prec
           || !modules.StateField
           || !modules.StateEffect
           || !modules.EditorView
+          || !modules.keymap
           || !modules.Decoration
           || !modules.WidgetType
           || !modules.minimalSetup
@@ -626,6 +630,40 @@
     setDiffSummary(summaryText, summaryError);
   }
 
+  function shouldExitListOnEnter(view) {
+    if (!view || !view.state || !view.state.selection) {
+      return false;
+    }
+    const selection = view.state.selection.main;
+    if (!selection || !selection.empty) {
+      return false;
+    }
+
+    const line = view.state.doc.lineAt(selection.head);
+    if (!line) {
+      return false;
+    }
+
+    const offsetInLine = selection.head - line.from;
+    const beforeCursor = line.text.slice(0, offsetInLine);
+    const afterCursor = line.text.slice(offsetInLine);
+    if (!/^\s*$/.test(afterCursor)) {
+      return false;
+    }
+
+    // Empty list item markers like "-", "*", "+", "1.", "1)", including task list forms.
+    if (!/^\s*(?:[-+*]|\d+[.)])(?:\s+\[[ xX]\])?\s*$/.test(beforeCursor)) {
+      return false;
+    }
+
+    view.dispatch({
+      changes: { from: line.from, to: line.to, insert: "" },
+      selection: { anchor: line.from },
+      scrollIntoView: true,
+    });
+    return true;
+  }
+
   async function ensureEditorView() {
     if (state.editorView) {
       return state.editorView;
@@ -690,6 +728,10 @@
             extensions: [
               modules.minimalSetup,
               modules.markdown(),
+              modules.Prec.highest(modules.keymap.of([{
+                key: "Enter",
+                run: shouldExitListOnEnter,
+              }])),
               modules.EditorView.lineWrapping,
               theme,
               state.editorDiffField,
