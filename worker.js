@@ -7,6 +7,13 @@ const SESSION_EXCHANGE_MAX_AGE_SECONDS = 60 * 2;
 const OAUTH_MAX_AGE_SECONDS = 60 * 10;
 const REPO_STATUS_MIN_POLL_MS = 10 * 1000;
 const REPO_STATUS_REQUEST_TIMEOUT_MS = 7 * 1000;
+const REPO_STATUS_RUNS_PER_PAGE = 8;
+const REPO_STATUS_CHECK_RUNS_PER_PAGE = 40;
+const REPO_STATUS_MAX_ANNOTATIONS_PER_PAGE = 40;
+const REPO_STATUS_MIN_ANNOTATIONS_PER_PAGE = 10;
+const REPO_STATUS_MAX_ISSUES = 12;
+const GITHUB_API_DEFAULT_TIMEOUT_MS = 12 * 1000;
+const REPO_ACCESS_CACHE_TTL_MS = 60 * 1000;
 
 const DEFAULT_ALLOWED_ORIGINS = [
     "https://kendell.uk",
@@ -20,6 +27,8 @@ const textDecoder = new TextDecoder();
 const hmacKeyCache = new Map();
 const repoStatusCache = new Map();
 const repoStatusInFlight = new Map();
+const repoAccessCache = new Map();
+const repoAccessInFlight = new Map();
 
 export default {
     async fetch(request, env) {
@@ -302,7 +311,12 @@ async function handleApiSession(request, env, corsHeaders) {
     let repoAccess = null;
     if (owner && repo) {
         try {
-            repoAccess = await getRepoAccessForUser(session.token, owner, repo);
+            repoAccess = await getRepoAccessWithCache({
+                token: session.token,
+                owner,
+                repo,
+                userLogin: session && session.user && session.user.login ? session.user.login : "",
+            });
         } catch (error) {
             if (error.status === 401) {
                 const response = jsonResponse({ authenticated: false, error: "GitHub session expired." }, 401, corsHeaders);
@@ -452,6 +466,14 @@ function parsePositiveInteger(value, min, max) {
     return parsed;
 }
 
+function parseBooleanQuery(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return normalized === "1"
+        || normalized === "true"
+        || normalized === "yes"
+        || normalized === "on";
+}
+
 function normalizeGitReference(value) {
     if (!value) {
         return "";
@@ -509,6 +531,7 @@ async function handleApiFileHistory(request, env, corsHeaders) {
     const branch = normalizeBranchName(url.searchParams.get("branch")) || "main";
     const path = normalizeMarkdownRepoPath(url.searchParams.get("path"));
     const perPage = parsePositiveInteger(url.searchParams.get("per_page"), 1, 80);
+    const compact = parseBooleanQuery(url.searchParams.get("compact"));
 
     if (!owner || !repo || !path) {
         return jsonResponse({ error: "owner, repo, and path are required." }, 400, corsHeaders);
@@ -524,13 +547,23 @@ async function handleApiFileHistory(request, env, corsHeaders) {
     ]);
 
     const commits = Array.isArray(fileCommits) ? fileCommits : [];
+    const summarizedHead = summarizeGitHubCommit(headCommit);
+    const summarizedCommits = commits.map((commit) => summarizeGitHubCommit(commit));
+
+    if (compact) {
+        return jsonResponse({
+            head: summarizedHead,
+            commits: summarizedCommits,
+        }, 200, corsHeaders);
+    }
+
     return jsonResponse({
         owner,
         repo,
         branch,
         path,
-        head: summarizeGitHubCommit(headCommit),
-        commits: commits.map((commit) => summarizeGitHubCommit(commit)),
+        head: summarizedHead,
+        commits: summarizedCommits,
     }, 200, corsHeaders);
 }
 
@@ -541,6 +574,7 @@ async function handleApiFileContent(request, env, corsHeaders) {
     const repo = normalizeRepoName(url.searchParams.get("repo"));
     const path = normalizeMarkdownRepoPath(url.searchParams.get("path"));
     const ref = normalizeGitReference(url.searchParams.get("ref"));
+    const compact = parseBooleanQuery(url.searchParams.get("compact"));
 
     if (!owner || !repo || !path || !ref) {
         return jsonResponse({ error: "owner, repo, path, and ref are required." }, 400, corsHeaders);
@@ -563,12 +597,17 @@ async function handleApiFileContent(request, env, corsHeaders) {
         return jsonResponse({ error: "Could not decode file content from base64." }, 502, corsHeaders);
     }
 
+    const sha = file && typeof file.sha === "string" ? file.sha : "";
+    if (compact) {
+        return jsonResponse({ sha, markdown }, 200, corsHeaders);
+    }
+
     return jsonResponse({
         owner,
         repo,
         path,
         ref,
-        sha: file && typeof file.sha === "string" ? file.sha : "",
+        sha,
         markdown,
     }, 200, corsHeaders);
 }
@@ -635,7 +674,12 @@ async function handleApiSubmit(request, env, corsHeaders) {
 
     let canPush = false;
     try {
-        const access = await getRepoAccessForUser(session.token, owner, repo);
+        const access = await getRepoAccessWithCache({
+            token: session.token,
+            owner,
+            repo,
+            userLogin: session && session.user && session.user.login ? session.user.login : "",
+        });
         canPush = !!(access && access.canPush);
     } catch (error) {
         if (error.status === 401) {
@@ -772,7 +816,10 @@ async function fetchRepoStatusFromGitHub(options) {
 
     const [commitResult, runsResult] = await Promise.allSettled([
         githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS }),
-        githubApiRequest(`${repoPrefix}/actions/runs?branch=${branchRef}&per_page=20`, { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS }),
+        githubApiRequest(
+            `${repoPrefix}/actions/runs?branch=${branchRef}&per_page=${REPO_STATUS_RUNS_PER_PAGE}`,
+            { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
+        ),
     ]);
 
     const activity = {
@@ -810,7 +857,7 @@ async function fetchRepoStatusFromGitHub(options) {
     if (activity.commitSha) {
         try {
             const checkRunsPayload = await githubApiRequest(
-                `${repoPrefix}/commits/${encodeURIComponent(activity.commitSha)}/check-runs?per_page=100`,
+                `${repoPrefix}/commits/${encodeURIComponent(activity.commitSha)}/check-runs?per_page=${REPO_STATUS_CHECK_RUNS_PER_PAGE}`,
                 { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
             );
             const markdownValidation = await buildMarkdownValidationSummary({
@@ -872,18 +919,23 @@ async function buildMarkdownValidationSummary(options) {
         return summary;
     }
 
-    const perPage = Math.min(80, Math.max(20, summary.annotationsCount));
+    const perPage = Math.min(
+        REPO_STATUS_MAX_ANNOTATIONS_PER_PAGE,
+        Math.max(REPO_STATUS_MIN_ANNOTATIONS_PER_PAGE, summary.annotationsCount),
+    );
     const annotationsPayload = await githubApiRequest(
         `${repoPrefix}/check-runs/${encodeURIComponent(checkRun.id)}/annotations?per_page=${perPage}`,
         { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
     );
     const annotations = Array.isArray(annotationsPayload) ? annotationsPayload : [];
-    const annotationSummary = summarizeCheckRunAnnotations(annotations, 25);
+    const annotationSummary = summarizeCheckRunAnnotations(annotations, REPO_STATUS_MAX_ISSUES);
+    const filteredAnnotationCount = annotationSummary.errorCount + annotationSummary.warningCount;
 
+    summary.annotationsCount = filteredAnnotationCount;
     summary.errorCount = annotationSummary.errorCount;
     summary.warningCount = annotationSummary.warningCount;
     summary.issues = annotationSummary.issues;
-    summary.issuesTruncated = summary.annotationsCount > annotations.length;
+    summary.issuesTruncated = filteredAnnotationCount > summary.issues.length;
 
     return summary;
 }
@@ -994,9 +1046,19 @@ function isIgnorableMarkdownAnnotation(annotation) {
     const title = annotation && typeof annotation.title === "string" ? annotation.title : "";
     const message = annotation && typeof annotation.message === "string" ? annotation.message : "";
     const combined = `${title} ${message}`.toLowerCase();
-    return !path
-        && (combined.includes("process completed with exit code")
-            || combined.includes("failed with exit code"));
+    const isGenericExitFailure = combined.includes("process completed with exit code")
+        || combined.includes("failed with exit code");
+    if (!path && isGenericExitFailure) {
+        return true;
+    }
+
+    const normalizedPath = path.toLowerCase();
+    const isWorkflowFile = normalizedPath === ".github"
+        || normalizedPath.startsWith(".github/");
+    const isSyntheticMarkdownFailure = combined.includes("markdown validation failed")
+        && combined.includes("file-level annotations");
+
+    return isWorkflowFile && (isGenericExitFailure || isSyntheticMarkdownFailure);
 }
 
 function selectDeployRun(runs) {
@@ -1006,13 +1068,31 @@ function selectDeployRun(runs) {
 
     const deployRun = runs.find((run) => isPagesDeployRun(run)) || null;
     if (deployRun) {
-        return deployRun;
+        return summarizeDeployRun(deployRun);
     }
 
     // Fallback to a non-markdown workflow run when deploy heuristics do not match.
     // This avoids accidentally showing markdown validation as deploy health.
     const nonMarkdownRun = runs.find((run) => !isMarkdownValidationRun(run)) || null;
-    return nonMarkdownRun;
+    return nonMarkdownRun ? summarizeDeployRun(nonMarkdownRun) : null;
+}
+
+function summarizeDeployRun(run) {
+    if (!run || typeof run !== "object") {
+        return null;
+    }
+
+    return {
+        id: Number.isFinite(Number(run.id)) ? Number(run.id) : 0,
+        name: typeof run.name === "string" ? run.name : "",
+        status: typeof run.status === "string" ? run.status : "",
+        conclusion: typeof run.conclusion === "string" ? run.conclusion : "",
+        html_url: typeof run.html_url === "string" ? run.html_url : "",
+        run_number: Number.isFinite(Number(run.run_number)) ? Number(run.run_number) : 0,
+        event: typeof run.event === "string" ? run.event : "",
+        created_at: typeof run.created_at === "string" ? run.created_at : "",
+        updated_at: typeof run.updated_at === "string" ? run.updated_at : "",
+    };
 }
 
 function isPushLikeEvent(run) {
@@ -1334,6 +1414,38 @@ async function getRepoAccessForUser(token, owner, repo) {
     };
 }
 
+async function getRepoAccessWithCache(options) {
+    const { token, owner, repo, userLogin } = options || {};
+    const cacheKey = `${String(userLogin || "").toLowerCase()}|${owner.toLowerCase()}/${repo.toLowerCase()}`;
+    const now = Date.now();
+
+    const cached = repoAccessCache.get(cacheKey);
+    if (cached && now - cached.fetchedAt < REPO_ACCESS_CACHE_TTL_MS) {
+        return cached.data;
+    }
+
+    const inFlight = repoAccessInFlight.get(cacheKey);
+    if (inFlight) {
+        return inFlight;
+    }
+
+    const fetchPromise = (async () => {
+        const data = await getRepoAccessForUser(token, owner, repo);
+        repoAccessCache.set(cacheKey, {
+            fetchedAt: Date.now(),
+            data,
+        });
+        return data;
+    })();
+
+    repoAccessInFlight.set(cacheKey, fetchPromise);
+    try {
+        return await fetchPromise;
+    } finally {
+        repoAccessInFlight.delete(cacheKey);
+    }
+}
+
 async function exchangeCodeForAccessToken(options) {
     const {
         code,
@@ -1383,7 +1495,7 @@ async function exchangeCodeForAccessToken(options) {
 }
 
 async function githubApiRequest(path, options) {
-    const { method = "GET", token, body, timeoutMs = 0 } = options || {};
+    const { method = "GET", token, body, timeoutMs = GITHUB_API_DEFAULT_TIMEOUT_MS } = options || {};
     const controller = timeoutMs ? new AbortController() : null;
     let timeoutId = null;
     if (controller) {

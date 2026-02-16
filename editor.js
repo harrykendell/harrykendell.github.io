@@ -890,6 +890,7 @@
       branch: repo.baseBranch,
       path: normalizedPath,
       per_page: "35",
+      compact: "1",
     });
     const payload = await authRequest(`/api/file-history?${params.toString()}`, {
       includeSessionHeader: false,
@@ -923,6 +924,7 @@
       repo: repo.name,
       path: normalizedPath,
       ref: normalizedRef,
+      compact: "1",
     });
     const payload = await authRequest(`/api/file-content?${params.toString()}`, {
       includeSessionHeader: false,
