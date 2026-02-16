@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Harness segment build (sealed + strain relieved)</text>
+
+  <!-- Cable -->
+  <rect x="80" y="215" width="260" height="30" class="box"/>
+  <text x="95" y="208" class="small">Jacketed cable</text>
+
+  <!-- Heatshrink -->
+  <rect x="320" y="195" width="160" height="70" class="dash"/>
+  <text x="330" y="240" class="label">Adhesive heatshrink</text>
+
+  <!-- Connector -->
+  <rect x="500" y="200" width="220" height="60" class="box"/>
+  <text x="545" y="238" class="label">Connector housing</text>
+
+  <!-- Crimps -->
+  <rect x="470" y="210" width="35" height="40" class="thin"/>
+  <text x="420" y="260" class="small">Crimp contacts</text>
+  <line x1="455" y1="255" x2="487" y2="250" class="thin"/>
+
+  <!-- Pull test -->
+  <text x="80" y="320" class="label">Quality checks</text>
+  <text x="80" y="350" class="small">• Pull test each crimp</text>
+  <text x="80" y="375" class="small">• Continuity + no shorts</text>
+  <text x="80" y="400" class="small">• Connector takes no cable load</text>
+</svg>

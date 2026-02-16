@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Boat inspection zones (what to look at)</text>
+
+  <!-- Side profile hull -->
+  <path d="M90 280 Q220 330 400 335 Q580 330 710 280 Q560 295 400 295 Q240 295 90 280 Z" class="box"/>
+  <line x1="90" y1="280" x2="710" y2="280" class="thin"/>
+
+  <!-- Zones -->
+  <rect x="120" y="235" width="140" height="70" class="dash"/>
+  <text x="125" y="230" class="small">Bow deck / hatch</text>
+
+  <rect x="300" y="220" width="200" height="100" class="dash"/>
+  <text x="305" y="215" class="small">Rigger / seat track zone</text>
+
+  <rect x="540" y="240" width="130" height="80" class="dash"/>
+  <text x="545" y="235" class="small">Fin box / rudder</text>
+
+  <!-- Callouts -->
+  <line x1="190" y1="305" x2="160" y2="370" class="thin"/>
+  <text x="40" y="395" class="label">Water ingress / seals</text>
+
+  <line x1="380" y1="320" x2="380" y2="380" class="thin"/>
+  <text x="270" y="410" class="label">Cracks, movement, inserts</text>
+
+  <line x1="610" y1="320" x2="650" y2="380" class="thin"/>
+  <text x="520" y="410" class="label">Leaks after fin strike</text>
+
+  <text x="30" y="85" class="small">Map damage with tape + photos. If unsure, stop-use and escalate.</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+<text x="30" y="45" class="title">Vacuum bag stack (outside-in)</text>
+<rect x="160" y="90" width="520" height="40" class="thin"/>
+<text x="180" y="117" class="label">Bag film</text>
+<rect x="160" y="140" width="520" height="40" class="thin"/>
+<text x="180" y="167" class="label">Breather</text>
+<rect x="160" y="190" width="520" height="40" class="thin"/>
+<text x="180" y="217" class="label">Perforated release film</text>
+<rect x="160" y="240" width="520" height="40" class="thin"/>
+<text x="180" y="267" class="label">Peel ply</text>
+<rect x="160" y="290" width="520" height="40" class="box"/>
+<text x="180" y="317" class="label">Wet layup (cloth + resin)</text>
+<rect x="160" y="340" width="520" height="40" class="box"/>
+<text x="180" y="367" class="label">Substrate (boat)</text>
+<circle cx="650" cy="110" r="18" class="box"/>
+<text x="540" y="118" class="small">Vacuum port</text>
+<line x1="632" y1="120" x2="560" y2="130" class="thin"/>
+<text x="30" y="420" class="small">Avoid bridging. Check for dry spots and resin starvation. Use peel ply so you can bond/finish cleanly.</text>
+</svg>

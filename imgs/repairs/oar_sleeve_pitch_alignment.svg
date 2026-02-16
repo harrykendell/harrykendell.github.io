@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Sleeve pitch alignment (Concept2 style)</text>
+
+  <!-- Blade back face -->
+  <rect x="120" y="110" width="250" height="220" class="box"/>
+  <text x="150" y="145" class="label">Blade back face</text>
+  <text x="150" y="175" class="small">Use this flat as reference</text>
+
+  <!-- Sleeve -->
+  <rect x="420" y="165" width="250" height="110" class="box"/>
+  <text x="450" y="200" class="label">Sleeve</text>
+
+  <!-- P/S marking -->
+  <text x="500" y="245" class="label">P / S mark</text>
+  <line x1="520" y1="250" x2="520" y2="320" class="dash"/>
+  <text x="440" y="345" class="small">Align back face to mark line</text>
+
+  <!-- Angle note -->
+  <text x="30" y="390" class="label">Rule</text>
+  <text x="30" y="420" class="small">Dry-fit, mark, then bond. Hold alignment until full cure. Verify pitch afterwards on the boat.</text>
+</svg>

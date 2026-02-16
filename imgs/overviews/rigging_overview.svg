@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Rigging measurements overview</text>
+
+  <!-- Boat outline -->
+  <path d="M120 360 Q400 420 680 360 L640 120 Q400 60 160 120 Z" class="box"/>
+  <text x="330" y="250" class="label">Shell (top view)</text>
+
+  <!-- Pins -->
+  <circle cx="250" cy="220" r="12" class="box"/>
+  <circle cx="550" cy="220" r="12" class="box"/>
+  <text x="210" y="205" class="small">Pin</text>
+  <text x="560" y="205" class="small">Pin</text>
+
+  <!-- Span -->
+  <line x1="262" y1="220" x2="538" y2="220" class="dash"/>
+  <polygon points="262,220 275,212 275,228" fill="#111"/>
+  <polygon points="538,220 525,212 525,228" fill="#111"/>
+  <text x="360" y="200" class="label">Span / spread</text>
+
+  <!-- Gate height (schematic) -->
+  <rect x="90" y="80" width="240" height="140" class="thin"/>
+  <text x="100" y="105" class="label">Gate height</text>
+  <line x1="140" y1="185" x2="140" y2="110" class="dash"/>
+  <polygon points="140,110 132,125 148,125" fill="#111"/>
+  <polygon points="140,185 132,170 148,170" fill="#111"/>
+  <text x="155" y="155" class="small">Measure from reference to centreline</text>
+
+  <!-- Pitch -->
+  <rect x="470" y="80" width="260" height="140" class="thin"/>
+  <text x="480" y="105" class="label">Pitch</text>
+  <line x1="520" y1="170" x2="680" y2="120" class="dash"/>
+  <text x="535" y="190" class="small">Set by bushing orientation</text>
+
+  <!-- Footplate marker -->
+  <rect x="360" y="310" width="80" height="40" class="box"/>
+  <text x="340" y="305" class="small">Footplate</text>
+
+  <text x="30" y="420" class="small">Rule: restore to the boat rigging sheet. Do not “tweak” geometry without recording it.</text>
+</svg>

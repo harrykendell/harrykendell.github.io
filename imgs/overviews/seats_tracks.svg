@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Seat on tracks (what to clean and inspect)</text>
+
+  <!-- Tracks -->
+  <rect x="140" y="260" width="520" height="25" class="box"/>
+  <rect x="140" y="310" width="520" height="25" class="box"/>
+  <text x="60" y="277" class="label">Track</text>
+  <text x="60" y="327" class="label">Track</text>
+
+  <!-- Seat body -->
+  <rect x="300" y="155" width="200" height="70" class="box"/>
+  <text x="368" y="198" class="label">Seat</text>
+
+  <!-- Wheels -->
+  <circle cx="320" cy="260" r="14" class="box"/>
+  <circle cx="480" cy="260" r="14" class="box"/>
+  <circle cx="320" cy="322" r="14" class="box"/>
+  <circle cx="480" cy="322" r="14" class="box"/>
+  <line x1="320" y1="240" x2="320" y2="225" class="thin"/>
+  <text x="255" y="220" class="label">Wheels</text>
+
+  <!-- Grit callout -->
+  <line x1="580" y1="272" x2="720" y2="272" class="dash"/>
+  <text x="590" y="255" class="small">Grit here → noise + wear</text>
+
+  <!-- End stops -->
+  <rect x="130" y="250" width="15" height="95" class="box"/>
+  <rect x="660" y="250" width="15" height="95" class="box"/>
+  <text x="300" y="380" class="label">Check end stops are present and tight</text>
+
+  <text x="30" y="420" class="small">Do not oil tracks. Clean, inspect wheels, and fix loose fasteners before inserts strip.</text>
+</svg>

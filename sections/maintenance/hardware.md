@@ -1,5 +1,15 @@
 # Hardware
 
+<figure class="figure figure-float-right">
+  <img src="imgs/overviews/hardware_washer_stack.svg" alt="Diagram showing safe washer stack: bolt head, flat washer, hull/rigger, flat washer, optional lock washer, nyloc nut." />
+  <div class="figure-body">
+    <p class="figure-title">Washer rule against composite</p>
+    <p class="figure-caption">
+      Split/spring washers can crush paint and bruise laminate. Always use a flat washer against the hull.
+    </p>
+  </div>
+</figure>
+
 We buy generic hardware from [Westfield Fasteners](https://www.westfieldfasteners.co.uk/). Rowing-specific parts are typically from:
 
 - [Neaves](https://neaves-rowing.com/)
@@ -12,6 +22,7 @@ We buy generic hardware from [Westfield Fasteners](https://www.westfieldfastener
 > - **A2** stainless is roughly **304** grade; **A4** is roughly **316** grade (better chloride resistance).
 > - Prefer **A4/316** for any hardware that regularly gets wet (especially salt/brackish).
 > - Where stainless mates to aluminium (riggers, backstays), use isolating washers and a corrosion inhibitor to reduce galvanic corrosion.
+> - If the fleet sees brackish water, budget for replacement hardware rather than trying to “save” corroded fasteners.
 
 > [!WARNING] Split washers: never against composite
 > Split/spring washers can **crush paint**, **bruise laminate**, and create stress concentrations.
@@ -42,13 +53,16 @@ Example supplier reference: [Westfield Fasteners example order (PDF)](https://dr
 
 **Other commonly used items:** cable clamps/blocks, hatch-cover string, hose clamps.
 
+> [!INFO] When to replace nylocs
+> If the nut spins on easily by hand with little resistance, the nylon insert is worn. Replace it.
+
 ## Hardware audit and reassembly
 
 [!PROCEDURE:Intermediate] Hardware audit (riggers + critical fittings)
 Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catch corrosion, missing washers, and loose fasteners before they cause damage.
 
 > [!WARNING] Important
-> Spinning insert/stripped thread: stop and escalate. Avoid over-tightening and crushing hull. Do not apply heat near composite without understanding risk; if applying force risks ripping an insert from the hull: stop and escalate.
+> Spinning insert/stripped thread: stop and escalate. Avoid over-tightening and crushing hull. If applying force risks ripping an insert from the hull: stop and escalate.
 
 **Tools:** Spanners/Allen keys, spare washers/nuts, marker, bags for hardware
 
@@ -57,10 +71,10 @@ Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catc
 1. Pick a boat and work systematically: bow to stern.
 2. For each critical fastener (rigger bolts, pins, stretcher mounts):
    - Check tightness.
-   - Check correct washer stack.
+   - Check correct washer stack (flat washer against composite).
    - Replace any corroded or stripped nuts (nyloc that spins freely is done).
 3. If disassembling: bag and label washers/spacers per location.
-4. Reassemble using the standard washer rule.
+4. Reassemble using the standard washer rule and add witness marks where used.
 
 **Check:** No missing washers; no loose fittings; riggers not rocking. Do monthly and after transport.
 
@@ -72,15 +86,19 @@ Monthly systematic check of all rigger bolts, pins, and stretcher mounts to catc
 [!PROCEDURE:Intermediate] Freeing a seized stainless fastener (basic)
 Free a stuck stainless bolt or nut caused by corrosion or galling so it can be removed and replaced.
 
-**Tools:** Penetrating oil, correct sockets/spanners, heat (optional), replacement hardware
+> [!WARNING] Important
+> If the fastener is bonded into a composite insert and force risks tearing the insert out, stop and escalate.
+
+**Tools:** Penetrating oil, correct sockets/spanners, replacement hardware, anti‑seize (for reassembly)
 
 **Steps:**
 
-1. Clean exposed threads. Apply penetrating oil. Wait.
+1. Clean exposed threads. Apply penetrating oil. Wait (repeat if needed).
 2. Use correctly sized tools; avoid rounding.
-3. Try tightening slightly then loosening.
-4. If still stuck: consider controlled heat on the nut only (last resort).
-5. Replace hardware after removal.
+3. Try tightening slightly then loosening (breaks corrosion bonds).
+4. If still stuck: increase leverage **carefully** (avoid twisting inserts).
+5. Replace the hardware after removal; reassemble with correct washer stack.
+6. Apply a small amount of anti‑seize to stainless threads that will be removed regularly (avoid contaminating bonding areas).
 
 **Check:** Threads intact; mating surfaces undamaged. Do when a nut/bolt will not turn.
 [!/PROCEDURE]

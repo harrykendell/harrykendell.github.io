@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Footplate and heel restraint</text>
+
+  <!-- Footplate panel -->
+  <rect x="180" y="90" width="440" height="280" class="box"/>
+  <text x="330" y="120" class="label">Footplate</text>
+
+  <!-- Shoes -->
+  <path d="M250 260 Q270 210 330 210 Q380 210 395 250 Q405 290 350 300 Q300 310 250 260 Z" class="thin"/>
+  <path d="M420 260 Q440 210 500 210 Q550 210 565 250 Q575 290 520 300 Q470 310 420 260 Z" class="thin"/>
+  <text x="285" y="205" class="small">Shoe</text>
+  <text x="455" y="205" class="small">Shoe</text>
+
+  <!-- Heel ties -->
+  <line x1="305" y1="300" x2="305" y2="340" class="dash"/>
+  <line x1="490" y1="300" x2="490" y2="340" class="dash"/>
+  <text x="260" y="360" class="label">Heel restraints</text>
+
+  <!-- 7 cm callout -->
+  <line x1="120" y1="140" x2="120" y2="210" class="dash"/>
+  <polygon points="120,140 112,155 128,155" fill="#111"/>
+  <polygon points="120,210 112,195 128,195" fill="#111"/>
+  <text x="30" y="180" class="label">Max heel lift 7 cm</text>
+
+  <text x="30" y="420" class="small">Heel restraints must be present, independent per shoe, and allow self-acting release.</text>
+</svg>

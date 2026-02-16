@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Coxbox 5‑pin plug (front view)</text>
+
+  <!-- Connector outline -->
+  <circle cx="400" cy="240" r="150" class="box"/>
+  <rect x="370" y="70" width="60" height="30" class="box"/>
+  <text x="330" y="115" class="small">Keyway / notch</text>
+  <line x1="400" y1="100" x2="400" y2="155" class="thin"/>
+
+  <!-- Pins -->
+  <circle cx="350" cy="210" r="18" class="box"/>
+  <circle cx="450" cy="210" r="18" class="box"/>
+  <circle cx="400" cy="240" r="18" class="box"/>
+  <circle cx="350" cy="290" r="18" class="box"/>
+  <circle cx="450" cy="290" r="18" class="box"/>
+
+  <text x="342" y="217" class="label">A</text>
+  <text x="442" y="217" class="label">B</text>
+  <text x="392" y="247" class="label">C</text>
+  <text x="342" y="297" class="label">D</text>
+  <text x="442" y="297" class="label">E</text>
+
+  <!-- Notes -->
+  <text x="580" y="185" class="label">Typical uses</text>
+  <text x="580" y="215" class="small">A–D: rate switch</text>
+  <text x="580" y="240" class="small">B–C: speakers</text>
+  <text x="580" y="265" class="small">D–E: charging</text>
+
+  <text x="30" y="420" class="small">Never assume pinout: verify with a multimeter and a known-good device.</text>
+</svg>

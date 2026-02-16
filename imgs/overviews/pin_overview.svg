@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Gate and pin stack (exploded)</text>
+
+  <!-- Pin -->
+  <line x1="200" y1="90" x2="200" y2="380" class="box"/>
+  <text x="120" y="120" class="label">Pin</text>
+  <line x1="140" y1="125" x2="190" y2="150" class="thin"/>
+
+  <!-- Bushings -->
+  <rect x="260" y="150" width="80" height="70" class="box"/>
+  <rect x="260" y="230" width="80" height="70" class="box"/>
+  <text x="355" y="190" class="label">Pitch bushings</text>
+  <line x1="340" y1="195" x2="260" y2="185" class="thin"/>
+
+  <!-- Gate body -->
+  <rect x="360" y="170" width="160" height="110" class="box"/>
+  <circle cx="400" cy="225" r="12" class="box"/>
+  <text x="540" y="235" class="label">Gate body</text>
+  <line x1="520" y1="240" x2="520" y2="240" class="thin"/>
+  <line x1="520" y1="240" x2="360" y2="225" class="thin"/>
+
+  <!-- Washers -->
+  <rect x="240" y="310" width="200" height="18" class="box"/>
+  <rect x="240" y="335" width="200" height="18" class="box"/>
+  <text x="470" y="345" class="label">Washers / spacers</text>
+  <line x1="450" y1="350" x2="440" y2="344" class="thin"/>
+
+  <!-- Top nut -->
+  <rect x="165" y="60" width="70" height="25" class="box"/>
+  <text x="250" y="80" class="label">Top nut / retainer</text>
+  <line x1="240" y1="82" x2="235" y2="78" class="thin"/>
+
+  <!-- Assembly arrows -->
+  <line x1="600" y1="150" x2="600" y2="360" class="dash"/>
+  <polygon points="600,370 590,352 610,352" fill="#111"/>
+  <text x="620" y="260" class="label">Assembly direction</text>
+
+  <text x="30" y="420" class="small">Keep washer stacks in order. Mixing bushings or losing washers changes pitch/height and causes rattle.</text>
+</svg>

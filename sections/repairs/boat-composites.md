@@ -1,131 +1,254 @@
-# Boat Composites
+# Boat composite repairs
+
+## How to use this section
+
+This section is for hull/deck composite repairs on rowing shells. It aims to be safe and repeatable for **small** in‑house repairs and to clearly flag when to escalate.
+
+> [!WARNING] Stop-use
+> If the boat has structural cracking at rigger/seat track mounts, fin box damage, or widespread delamination, **do not attempt an in‑house fix**. Tag out and escalate.
+
+Use this page like a checklist:
+
+1. Classify the damage.
+2. Decide “seal now” vs “structural repair”.
+3. Execute a procedure block end‑to‑end.
+4. Pass the quality gates before return to service.
 
 ## Composite construction primer
 
-Most racing shells are sandwich structures:
+<figure class="figure">
+  <img src="imgs/repairs/sandwich_structure.svg" alt="Diagram of sandwich structure: paint/finish, outer skin, core, inner skin." />
+  <div class="figure-body">
+    <p class="figure-title">Rowing shells are typically sandwich panels</p>
+    <p class="figure-caption">
+      The core carries shear and keeps skins separated. The skins carry bending loads.
+      Even “tiny” skin cracks can allow water into the core: seal early.
+    </p>
+  </div>
+</figure>
 
-- **Outer and inner skins:** carbon and/or aramid (Kevlar) and/or glass fibre in multiple plies.
-- **Core:** often Nomex honeycomb.
-- **Finish:** 2K automotive-style paint (common in high-end shells) or gelcoat (older/cheaper builds).
+Most modern shells are a **sandwich**: thin composite skins (carbon/glass/aramid) over a lightweight core (honeycomb or foam). The most common failure escalation is:
 
-**Repair implications:**
+1. Skin crack → 
+2. Water into core → 
+3. Core degradation/crush → 
+4. Growing soft spot and major structural repair.
 
-- You can do strong wet layups and vacuum-bagging in-house.
-- You generally **cannot** replicate factory 2K paint safely without proper spray/ventilation.
-- You **cannot** oven-cure a whole boat; cure at ambient and avoid heat damage.
+## Damage classification (adapted from aircraft practice)
 
-## Composite repairs (overview)
+Use these buckets for decisions:
 
-Useful reading:
+- **Cosmetic scratch:** paint/gelcoat only; no fibres broken; no soft spot.
+- **Skin damage (shallow):** outer fibres broken but core intact; small area.
+- **Core exposure / core ingress path:** a crack/puncture reaches the core or opens a path to it (even if tiny).
+- **Delamination:** skin separated from core (tap test dull, can sometimes flex).
+- **Core crush:** soft spot; shape changes under hand pressure.
+- **Structural crack:** crack radiating from load points (riggers, tracks, fin box).
 
-- [Vacuum bagging (West System)](https://eu.westsystem.com/app/uploads/2022/10/VacuumBag-7th-Ed.pdf)
-- [Fibreglass manual (West System)](https://eu.westsystem.com/app/uploads/2022/10/Fibreglass-Manual-2015.pdf)
-- [Cobonded tapered scarf repairs (CompositesWorld)](https://www.compositesworld.com/articles/a-second-look-at-cobonded-tapered-scarf-repairs-for-composite-structures)
-- [Damage classification in sandwich structures](https://www.aircraftsystemstech.com/2019/06/damage-classification-sandwich.html)
+> [!WARNING] Rule of thumb
+> If the damage reaches the core or allows water ingress, treat it as time‑critical even if it is “only 1 cm”.
 
-<div class="figure-grid">
-  <figure class="figure">
-    <img src="imgs/hull_damage_example.jpg" alt="Localized hull damage before scarf repair" />
-    <div class="figure-body">
-      <p class="figure-caption">Example of localized hull damage before any prep work.</p>
-    </div>
-  </figure>
-  <figure class="figure">
-    <img src="imgs/hull_repair_scarf.jpg" alt="Prepared scarf joint area before layup" />
-    <div class="figure-body">
-      <p class="figure-caption">Same area after cutting a proper scarf, ready for layup.</p>
-    </div>
-  </figure>
-</div>
+## Standard repair workflow (inspection to return-to-service)
 
-**Repair decision rules (practical):**
+[!PROCEDURE:Intermediate] Standard composite repair workflow
+Consistent workflow from discovery → inspection → repair choice → execution → return to service.
 
-- **Seal and monitor (in-house, fast):** hairline paint cracks, superficial scratches, tiny gelcoat chips.
-- **In-house structural repair:** localised skin damage, small delamination, small punctures where core can be dried and replaced.
-- **Professional repair:** large-area delamination, fin box rebuild, major core crush, long cracks near rigger mounts, any damage that changes hull shape.
+**Tools:** Bright light, marker/tape, camera, coin/tap hammer, moisture check method (dry time), standard repair kit
+
+**Steps:**
+
+1. **Clean** the area so you can see the real damage.
+2. **Photograph** with a scale; mark boundary with tape.
+3. **Classify** using the categories above; do a small **tap test** around the area.
+4. **Decide**:
+   - Cosmetic scratch → seal.
+   - Any core ingress path → seal immediately, then decide if structural work is required.
+   - Soft spot / core crush / delam that grows → structural repair or professional.
+5. **Execute** the relevant procedure block below.
+6. **Quality gates:** pass the checks in “Quality gates before return to service”.
+7. **Record:** damage log entry with photos and what was done.
+
+**Check:** Damage classified; correct repair chosen; repair recorded.
+[!/PROCEDURE]
+
+## Materials and layup rules (adapted from laminate/fibre references)
+
+Practical rules that prevent common failures:
+
+- **Dryness matters:** do not bond over wet core. If in doubt, dry longer or escalate.
+- **Surface prep matters:** sand to clean fibre/solid surface; remove gloss.
+- **Mixing matters:** weigh resin/hardener where possible; mix thoroughly; avoid “eyeballing” structural mixes.
+- **Avoid hard steps:** use a scarf/taper and stepped plies to avoid a stress riser.
+- **Don’t crush core:** clamp with broad pads and release film; avoid dents.
+
+## Vacuum bagging and cure controls (adapted from layup/curing references)
+
+<figure class="figure">
+  <img src="imgs/repairs/vacuum_bag_stack.svg" alt="Diagram of vacuum bagging stack: bag film, breather, perforated release, peel ply, wet layup, substrate." />
+  <div class="figure-body">
+    <p class="figure-title">Vacuum bag stack (outside-in)</p>
+    <p class="figure-caption">
+      Vacuum bagging improves consolidation and reduces voids. Use peel ply so the surface is bondable after cure.
+    </p>
+  </div>
+</figure>
+
+Vacuum bagging is optional for small repairs but highly recommended for structural patches when you can access both geometry and sealing.
+
+- Use **peel ply** where you want a bondable surface after cure.
+- Use **perforated release film** to control resin bleed.
+- Use **breather** to distribute vacuum.
+- Confirm you are not bridging over concave surfaces.
 
 ## Composite repairs (procedures)
 
-[!PROCEDURE:Beginner] Cosmetic scratch/chip seal
-Quick seal of minor paint damage and scratches to prevent water ingress and further deterioration.
+### Scratch sealing and paint protection
 
-> [!WARNING] Escalation
-> If fibres are broken or area feels soft: treat as structural and escalate.
+[!PROCEDURE:Beginner] Seal a cosmetic scratch (paint/gelcoat only)
+Seal a scratch that has not broken fibres to prevent staining and reduce water ingress risk through microcracks.
 
-**Tools:** Fine sandpaper (400–800), IPA, small brush, epoxy or clearcoat/paint touch-up, gloves
-
-**Steps:**
-
-1. Clean and dry the area.
-2. Lightly sand the damaged paint edge to remove sharp flaking.
-3. Wipe with IPA; allow to dry.
-4. Apply a thin seal coat (epoxy or matching touch-up) over exposed fibre/primer.
-5. Allow to cure; lightly sand and blend if needed.
-
-**Check:** No exposed fibre; no sharp edges. Do as soon as practical to prevent water ingress.
-
-> [!WARNING] Safety
-> Avoid breathing sanding dust. Do not clamp too hard or dent hull; if delam is large or near structural attachments: scarf repair or professional.
-[!/PROCEDURE]
-
-[!PROCEDURE:Intermediate] Small delamination stabilisation (inject + clamp)
-Early intervention on small delaminations to prevent them from growing and becoming a major structural repair.
-
-**Tools:** Syringe, low-viscosity epoxy, masking tape, clamps/weights, wax paper/release film, gloves
+**Tools:** Mild soap, IPA, fine sandpaper (800–1200), clearcoat/touch-up, microfibre
 
 **Steps:**
 
-1. Define boundary with tap test; mark with tape.
-2. Drill a tiny injection hole at the edge of delam (only through outer skin).
-3. Warm the area slightly (optional) to reduce viscosity (do not overheat).
-4. Inject epoxy until it wets the delam area (watch for squeeze-out at boundary).
-5. Cover with release film/wax paper and clamp/weight to restore shape.
-6. Cure fully; sand/finish cosmetically.
+1. Wash and dry the area.
+2. Lightly sand to remove sharp edges and expose clean finish.
+3. Wipe with IPA and let dry.
+4. Apply compatible clearcoat/touch-up paint in thin coats.
+5. Allow full cure before launching.
 
-**Check:** Tap test sounds uniform; no flex by hand.
-
-> [!WARNING] Common failures
-> Watch for not enough epoxy penetration or clamping denting the hull.
+**Check:** Scratch is sealed; no exposed fibres; finish smooth to the touch.
 [!/PROCEDURE]
 
-[!PROCEDURE:Advanced] Scarf repair (structural skin + core)
-Structural repair for punctures, core crush, and structural cracks.
+[!PROCEDURE:Intermediate] Seal exposed fibres (small skin break)
+Seal a small skin break where fibres are visible but core is not crushed, to stop water ingress and stabilise the edge.
 
-> [!WARNING] Safety
-> This is advanced work requiring: Respirator, goggles, gloves, ventilation
-
-**Tools:** Grinder/sander, vacuum, carbon cloth/tape, core, epoxy, peel ply, perforated film, breather, bag film, tacky tape, vacuum pump, fairing filler, primers/paint
+**Tools:** Epoxy, filler (as needed), sandpaper, masking tape, gloves
 
 **Steps:**
 
-1. **Open up damage:** remove all broken laminate/core to sound material. Round corners.
-2. **Scarf/taper:** bevel skins to a shallow taper (typical **20:1–50:1**; practical minimum **12:1** where access is limited).
-3. **Dry-fit core:** cut replacement core flush with surrounding; bond in with thickened epoxy.
-4. **Layup:** cut plies to fill scarf (stepped patches); wet out and lay in order.
-5. **Vacuum bag:** peel ply → perf film → breather → bag. Pull vacuum and watch for resin starvation.
-6. **Cure:** allow full cure (do not disturb shape).
-7. **Sand/shape:** bring flush with surrounding.
-8. **Fair:** apply fairing compound; sand smooth.
-9. **Prime/paint:** apply compatible primer and paint (air-dry system). Blend and polish.
+1. Clean and dry.
+2. Feather back the damaged finish slightly (create a small taper).
+3. Wet-out with epoxy; add a small amount of filler if needed to stop runoff.
+4. Cover with release film and lightly clamp/weight to keep it flush.
+5. After cure, sand flush and re‑seal/paint.
 
-**Check:** Thickness matches surrounding; no hard steps; tap test uniform; finish sealed.
-
-**Common failure modes:** Leaving damaged laminate; too-steep scarf; starving laminate under vacuum; creating a stiff “hard patch” edge.
-
-> [!WARNING] Escalation
-> If you cannot restore shape/alignment, stop and send out.
+**Check:** Fibres encapsulated; edge stable; no sharp fibres protruding.
 [!/PROCEDURE]
+
+### Core ingress paths and small delamination (time‑critical)
+
+This is the common case: a **tiny crescent crack** from handling (e.g., bolt/riggers striking the hull) opens a path into honeycomb. Even if it’s not massively structural, it can spiral into a major repair if water gets in.
+
+<figure class="figure">
+  <img src="imgs/repairs/injection_clamp.svg" alt="Diagram showing epoxy injection into a small delamination pocket and clamping with release film." />
+  <div class="figure-body">
+    <p class="figure-title">Inject + clamp for small pockets</p>
+    <p class="figure-caption">
+      Goal: wet-out the pocket, restore contour, avoid denting from over‑clamping.
+    </p>
+  </div>
+</figure>
+
+[!PROCEDURE:Intermediate] Micro crack into core (resin injection + seal)
+Treat a small (~1–20 mm) crack that opens into honeycomb/foam core. This is a “seal now” procedure.
+
+> [!WARNING] Important
+> If the core is visibly crushed over a large area, or the panel is soft, do not rely on injection alone: escalate to a structural patch repair.
+
+**Tools:** Low‑viscosity epoxy, syringe (or fine tip), tape, release film, clamps/weights, hair dryer/heat gun (gentle), drill + tiny bit (optional vent holes)
+
+**Steps:**
+
+1. **Dry‑out:** keep the area warm and dry. If you suspect water in core, allow extended drying time (hours to days depending on access) before sealing.
+2. **Clean:** wash and dry; wipe with IPA.
+3. **Define the pocket:** tap test around the crack. Mark boundaries with tape.
+4. **Prepare injection points:**
+   - If the crack is open enough: inject directly along the crack.
+   - If not: drill one or two tiny holes (e.g., 1–2 mm) at the edge of the pocket for injection/venting.
+5. **Inject:** mix epoxy; inject slowly until you see it fill and wet-out (it may appear at the vent/crack).
+6. **Clamp/shape:** cover with release film and apply broad, gentle clamping/weights to restore original contour (avoid dents).
+7. **Cure:** hold until full cure.
+8. **Seal:** remove film; sand lightly; seal injection holes and the original crack line with epoxy/finish.
+9. **Recheck:** tap test again; confirm no “dull” expansion.
+
+**Check:** Crack sealed; no water ingress path; no soft spot; contour restored.
+[!/PROCEDURE]
+
+[!PROCEDURE:Intermediate] Small delamination stabilisation (inject epoxy)
+Stabilise a small delamination where skin has separated locally (often identified by a dull tap test area).
+
+**Tools:** Epoxy, syringe, release film, clamps/weights, sandpaper
+
+**Steps:**
+
+1. Mark delam boundary with tape.
+2. Drill small injection and vent holes at the boundary (if needed).
+3. Inject epoxy until it appears at vent points.
+4. Cover with release film; clamp/weight to restore contour.
+5. Cure fully; then seal holes and finish.
+
+**Check:** No flex; tap test returns to “sharp”; surface contour acceptable.
+[!/PROCEDURE]
+
+### Structural patch repairs (scarf/taper)
+
+<figure class="figure">
+  <img src="imgs/repairs/scarf_taper.svg" alt="Diagram showing a shallow scarf taper and stepped ply rebuild." />
+  <div class="figure-body">
+    <p class="figure-title">Shallow taper avoids a stress riser</p>
+    <p class="figure-caption">
+      Too-steep patch edges crack. Use a shallow taper and stepped ply schedule to rebuild thickness.
+    </p>
+  </div>
+</figure>
+
+[!PROCEDURE:Advanced] Scarf patch repair (skin + core involvement)
+Structural repair for crushed core, significant delamination, or holes where the core must be replaced and skins rebuilt.
+
+> [!WARNING] Important
+> If this is near riggers, tracks, fin box, or other load points, default to professional repair unless you have prior experience.
+
+**Tools:** Epoxy system, cloth (carbon/glass), core material, peel ply, release film, breather, bag film + tacky tape (optional), sanding tools, templates
+
+**Steps:**
+
+1. **Expose sound structure:** remove loose laminate and any wet/crushed core to sound material.
+2. **Create scarf:** sand a shallow taper around the damage; keep fibre dust controlled.
+3. **Fit core:** cut replacement core to match thickness; bond it in place; allow cure.
+4. **Rebuild skins:** lay stepped plies from largest to smallest to rebuild thickness; align fibres with original layup where possible.
+5. **Consolidate:** use release film + clamp, or vacuum bag if you can seal.
+6. **Cure:** maintain temperature per epoxy spec.
+7. **Finish:** sand fair, seal, prime/paint as required.
+
+**Check:** Contour restored, no voids, no soft spot; tap test consistent; finish sealed.
+[!/PROCEDURE]
+
+## Quality gates before return to service
+
+Before returning a boat to use, verify:
+
+- **Water ingress path is sealed** (no exposed core, no open cracks).
+- **Contour is acceptable** (no sharp edges; no dents that change fit).
+- **Tap test** indicates no growing delamination.
+- **Fasteners/riggers** in the area are secure and inserts are not compromised.
+- The repair is **recorded** with photos and date.
+
+> [!WARNING] If you are uncertain
+> Tag out and escalate. A wrong repair can hide a growing failure.
 
 ## Supplies and suppliers
 
-We keep supplies mainly from:
+- West System (resin, fillers, vacuum bag resources): [West System EU](https://eu.westsystem.com/)
+- Composite consumables: peel ply, release film, breather, bag film, tacky tape
+- Hardware and masking consumables: see **[Tools and consumables](/#supplement/tools-and-consumables)**
 
-- [YourSprayPaints](https://www.yourspraypaints.com/)
-- [EasyComposites](https://www.easycomposites.co.uk)
-- [EC Fibreglass Supplies](https://www.ecfibreglasssupplies.co.uk)
+## References
 
-**Stock list is in Appendix C.**
+- [West System Fiberglass Manual (2015)](https://eu.westsystem.com/app/uploads/2022/10/Fibreglass-Manual-2015.pdf)
+- [West System Vacuum Bagging (7th ed.)](https://eu.westsystem.com/app/uploads/2022/10/VacuumBag-7th-Ed.pdf)
 
 ## Related
 
-- See **[Boat maintenance](/#maintenance/boats)** for cleaning, storage, and inspection.
+- See **[Boats → Damage triage](/#maintenance/boats/inspection-and-damage-triage)** for classification and stop‑use triggers.
+- See **[Tools and consumables](/#supplement/tools-and-consumables)** for the kit list.

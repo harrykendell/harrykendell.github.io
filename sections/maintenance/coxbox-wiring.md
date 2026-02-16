@@ -1,16 +1,29 @@
 # Coxbox Wiring
 
 <figure class="figure figure-float-right">
-  <img src="imgs/wiring/coxbox_plug.jpg" alt="Close-up of a coxbox plug showing pin layout" />
+  <img src="imgs/wiring/coxbox_plug_pinout.svg" alt="Diagram of a 5-pin coxbox plug showing keyway orientation and pins A-E." />
   <div class="figure-body">
-    <p class="figure-title">Pin allocation of a coxbox plug</p>
-    <!-- <p class="figure-caption">
-      Match the pin numbering and keyway orientation shown here when assembling new harnesses or replacing plugs.
-    </p> -->
+    <p class="figure-title">5‑pin plug reference (front view)</p>
+    <p class="figure-caption">
+      Use the keyway to orient the connector. Do not assume pin functions: verify with a multimeter and a known‑good device.
+    </p>
   </div>
 </figure>
 
-The wiring harness is relatively simple, with 5 pins on the main plug. These are split into speakers, rate, and charging pins. Not all pins are used in every connector, so wiring can break out to 2-pin or 4-pin plugs where needed.
+The wiring harness is relatively simple, with 5 pins on the main plug. These are typically split into speakers, rate, and charging pins. Not all pins are used in every connector, so wiring can break out to 2‑pin or 4‑pin plugs where needed.
+
+> [!WARNING] Safety
+> Do not test wet connectors. Water + voltage can accelerate corrosion and produce misleading readings.
+
+## Quick reference (typical)
+
+This is a **common** arrangement, not a guarantee:
+
+| Pins | Typical function | Notes |
+|---|---|---|
+| A–D | Rate switch | Often a reed switch + magnet. Continuity pulses at the catch. |
+| B–C | Speakers | Polarity sometimes matters when multiple speakers are used. |
+| D–E | Charging / power | Polarity‑sensitive. Verify before connecting power. |
 
 ## Troubleshooting
 
@@ -18,8 +31,24 @@ Refer to this document for detailed troubleshooting:
 
 - [NK Coxbox repairs troubleshooting](http://www.redking.me.uk/sport/rowing/equipment/cox_box/nk_repairs.pdf)
 
+[!PROCEDURE:Beginner] Quick connector clean (water ingress prevention)
+Clean and dry connectors to prevent corrosion and intermittent failures.
+
+**Tools:** Microfibre, contact cleaner, cotton buds, dielectric grease (optional), adhesive heatshrink (if re‑sealing)
+
+**Steps:**
+
+1. Disconnect and inspect: green/white residue indicates corrosion.
+2. Dry fully (no water in the shell).
+3. Spray contact cleaner on pins and sockets; wipe residue off.
+4. If the connector is exposed to water routinely: re‑seal with adhesive‑lined heatshrink and add strain relief so the connector never takes cable load.
+5. Reconnect and test function.
+
+**Check:** Connector is clean, dry, and strain‑relieved. Do monthly and after any “wet boat” outing.
+[!/PROCEDURE]
+
 [!PROCEDURE:Intermediate] Quick electrical diagnosis (multimeter)
-Troubleshoot non-working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
+Troubleshoot non‑working rate, speakers, or charging by testing for continuity and proper voltage on the main connector pins.
 
 > [!WARNING] Important
 > Do not test wet connectors.
@@ -29,9 +58,10 @@ Troubleshoot non-working rate, speakers, or charging by testing for continuity a
 **Steps:**
 
 1. Dry connector; inspect for corrosion.
-2. **Rate:** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
-3. **Speakers:** C–B should read as a load/short when speakers are wired.
-4. **Charging:** D–E should read ~13.5–15 V from charger (where applicable).
+2. **Rate (example):** A–D should connect to a magnet switch. Manually shorting A–D periodically should show stroke rate.
+3. **Speakers (example):** B–C should read as a load/short when speakers are wired.
+4. **Charging (example):** D–E should read ~13.5–15 V from charger (where applicable).
+5. If readings are wrong: isolate which segment is broken by testing continuity section‑by‑section.
 
 **Check:** Values consistent; if not, locate break by testing each segment.
 [!/PROCEDURE]
@@ -40,7 +70,7 @@ Troubleshoot non-working rate, speakers, or charging by testing for continuity a
 
 Harness components are sold at significant markup by NK Sports, Oarsport, etc. The connectors appear to be based on the [Amphenol 44 series](https://www.amphenol-sine.com/pdf/catalog/44-Series.pdf).
 
-**Components (club standard):**
+**Components (club standard example):**
 
 - Coxbox plug: [044-104-10004-02](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-104-10004-02?qs=tA%252Bq7m13GXUySe5HIfp6fg%3D%3D)
 - 2-pin plugs: [044-103-10002](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-103-10002?qs=tA%252Bq7m13GXW6faQI3kLxYw%3D%3D), [044-104-10002-02](https://www.mouser.co.uk/ProductDetail/Amphenol-SINE-Systems/044-104-10002-02?qs=tA%252Bq7m13GXWv2d8caGUzFQ%3D%3D)
@@ -56,7 +86,7 @@ Harness components are sold at significant markup by NK Sports, Oarsport, etc. T
 
 Coxbox harnesses are only “standard” if **you make them standard**. Pinouts vary by device generation and by what the club has historically wired.
 
-**Rule:** never assume pin functions. Always verify with continuity testing and a known-good device.
+**Rule:** never assume pin functions. Always verify with continuity testing and a known‑good device.
 
 - Keep a **master pinout sheet** for each device type (CoxBox, SpeedCoach, amplifier, etc.) and each boat harness.
 - Label both ends of every cable with: boat ID, device type, and revision/date.
@@ -72,16 +102,17 @@ For Amphenol Sine Systems 44 Series (common on rowing electronics), use the manu
 
 | Connector | Pin | Function | Wire colour | Notes |
 |---|---:|---|---|---|
-| Boat harness (to coxbox) | 1 |  |  |  |
-| Boat harness (to coxbox) | 2 |  |  |  |
-| Boat harness (to coxbox) | 3 |  |  |  |
-| Boat harness (to coxbox) | 4 |  |  |  |
+| Boat harness (to coxbox) | A |  |  |  |
+| Boat harness (to coxbox) | B |  |  |  |
+| Boat harness (to coxbox) | C |  |  |  |
+| Boat harness (to coxbox) | D |  |  |  |
+| Boat harness (to coxbox) | E |  |  |  |
 
 ### Polarity and shielding notes
 
-- **Audio/speaker** lines are often polarity-insensitive, but keeping polarity consistent avoids phase issues when multiple speakers are used.
-- **Power** lines are polarity-sensitive: fuse appropriately and protect against shorts.
-- For long runs in wet boats, prefer a **jacketed cable** and seal every transition with adhesive-lined heatshrink.
+- **Audio/speaker** lines are often polarity‑insensitive, but keeping polarity consistent avoids phase issues when multiple speakers are used.
+- **Power** lines are polarity‑sensitive: fuse appropriately and protect against shorts.
+- For long runs in wet boats, prefer a **jacketed cable** and seal every transition with adhesive‑lined heatshrink.
 
 ## Related
 

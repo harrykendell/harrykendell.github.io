@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Typical rowing shell sandwich structure</text>
+
+  <!-- Layers -->
+  <rect x="120" y="120" width="560" height="35" class="box"/>
+  <text x="140" y="145" class="label">Outer skin (carbon / glass / aramid)</text>
+
+  <rect x="120" y="155" width="560" height="140" class="dash"/>
+  <text x="140" y="225" class="label">Core (honeycomb or foam)</text>
+  <text x="140" y="250" class="small">Core crush + water ingress is the common failure escalation.</text>
+
+  <rect x="120" y="295" width="560" height="35" class="box"/>
+  <text x="140" y="320" class="label">Inner skin</text>
+
+  <!-- Finish -->
+  <rect x="120" y="95" width="560" height="20" class="thin"/>
+  <text x="140" y="110" class="small">Paint / clearcoat / gelcoat</text>
+
+  <!-- Warning -->
+  <text x="30" y="390" class="label">Key rule</text>
+  <text x="30" y="420" class="small">Even “tiny” skin cracks can let water into the core. Seal quickly, then decide if a structural repair is needed.</text>
+</svg>

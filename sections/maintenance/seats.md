@@ -1,20 +1,34 @@
 # Seats
 
+<figure class="figure">
+  <img src="imgs/overviews/seats_tracks.svg" alt="Diagram of seat on tracks showing wheels, tracks, end stops, and grit hotspots." />
+  <div class="figure-body">
+    <p class="figure-title">Seats fail from grit and looseness</p>
+    <p class="figure-caption">
+      The two common causes of rough seats are (1) grit embedded in wheels/tracks and (2) track fasteners loosening until inserts strip.
+      Clean often; fix looseness immediately.
+    </p>
+  </div>
+</figure>
+
 ## Routine cleaning
 
 [!PROCEDURE:Beginner] Track and wheel wipe-down
-Quick post-outing wipe of tracks and wheels to remove grit and prevent noise.
+Quick post‑outing wipe of tracks and wheels to remove grit and prevent noise.
 
 **Tools:** Damp cloth, microfibre
 
 **Steps:**
 
-1. Wipe tracks end-to-end to remove grit.
+1. Wipe tracks end‑to‑end to remove grit (both rails).
 2. Wipe wheel treads; remove any embedded debris.
-3. Roll the seat end-to-end and listen/feel for new roughness.
+3. Roll the seat end‑to‑end and listen/feel for new roughness.
 
-**Check:** Seat rolls smoothly end-to-end. Do after every outing.
+**Check:** Seat rolls smoothly end‑to‑end. Do after every outing.
 [!/PROCEDURE]
+
+> [!INFO] Lubrication
+> Do not oil tracks or wheels. Oil attracts grit and makes the problem worse.
 
 ## Inspection and service
 
@@ -28,13 +42,13 @@ Weekly inspection of wheel condition and track integrity by removing the seat an
 1. Remove the seat and place it on a clean bench.
 2. Spin each wheel: it should run freely with no grinding, wobble, or tight spots.
 3. Check each wheel for flat spots, cracks, and loose bearings/axles.
-4. Inspect tracks for dents, burrs, and loose end-stops.
+4. Inspect tracks for dents, burrs, and loose end‑stops.
 
-**Check:** No wheel grinding, flats, or wobble; tracks are clean and end-stops secure. Do weekly or if a seat feels rough.
+**Check:** No wheel grinding, flats, or wobble; tracks are clean and end‑stops secure. Do weekly or if a seat feels rough.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Replace seat wheels (as a set)
-Annual or wear-based replacement of seat wheels to maintain smooth rolling.
+Annual or wear‑based replacement of seat wheels to maintain smooth rolling.
 
 > [!INFO] Important
 > Replace all wheels in a seat together to avoid mismatched diameters and uneven tracking.
@@ -44,9 +58,10 @@ Annual or wear-based replacement of seat wheels to maintain smooth rolling.
 **Steps:**
 
 1. Remove the seat.
-2. Replace all wheels in that seat assembly (do not mix worn and new wheels).
-3. Reuse the correct spacers/washer stack; tighten axles so wheels spin freely without side play.
-4. Reinstall the seat and test under load.
+2. Photograph the spacer/washer stack on each axle (order matters).
+3. Replace **all** wheels in that seat assembly (do not mix worn and new wheels).
+4. Reuse the correct spacers/washer stack; tighten axles so wheels spin freely without side play.
+5. Reinstall the seat and test under load.
 
 **Check:** Smooth travel with no wobble or binding. Replace annually or when wheels show flats/grinding.
 [!/PROCEDURE]
@@ -58,22 +73,22 @@ Monthly check that seat tracks are straight and parallel to catch misalignment b
 
 **Steps:**
 
-1. Clean the tracks so you are measuring metal-to-metal, not grit.
-2. Check track straightness with a straight edge (or a taut string line) along each track; mark any obvious bows.
-3. Measure track spacing at front, middle, and rear; compare values to confirm the tracks are parallel.
-4. If adjustment is needed: loosen fasteners just enough to re-set alignment, then re-tighten evenly (avoid over-tightening and stripping inserts).
-5. Re-test by rolling the seat end-to-end; confirm no tight spots.
+1. Clean the tracks so you are measuring metal‑to‑metal, not grit.
+2. Check track straightness with a straight edge (or taut string line) along each track; mark any obvious bows.
+3. Measure track spacing at front, middle, and rear; compare values to confirm tracks are parallel.
+4. If adjustment is needed: loosen fasteners just enough to re‑set alignment, then re‑tighten evenly (avoid over‑tightening and stripping inserts).
+5. Re‑test by rolling the seat end‑to‑end; confirm no tight spots.
 
-**Check:** Seat rolls freely end-to-end; track spacing consistent along the length. Do monthly, after transport, and if seats bind.
+**Check:** Seat rolls freely end‑to‑end; track spacing consistent along the length. Do monthly, after transport, and if seats bind.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Fix loose/spinning track fasteners
 Immediately address any track fasteners that are loose or spinning to prevent track movement relative to the hull.
 
 > [!WARNING] Important
-> Tighten only to the point the track is secure; over-tightening strips inserts and can crush the laminate. If an insert is spinning or pulled through, stop and escalate (often requires bonded insert repair).
+> Tighten only to the point the track is secure; over‑tightening strips inserts and can crush the laminate. If an insert is spinning or pulled through, stop and escalate (often requires bonded insert repair).
 
-**Tools:** Correct fasteners, suitable threadlocker or nyloc, washer stack per manufacturer, insert repair kit if required
+**Tools:** Correct fasteners, suitable threadlocker or nyloc, washer stack per manufacturer
 
 **Steps:**
 
@@ -90,9 +105,9 @@ Immediately address any track fasteners that are loose or spinning to prevent tr
 **Common causes:**
 
 - **Grit on tracks/wheels:** clean thoroughly.
-- **Flat-spotted wheels:** replace wheels (as a set).
+- **Flat‑spotted wheels:** replace wheels (as a set).
 - **Loose track fasteners:** secure with correct washer stack; do not strip inserts.
-- **Misaligned tracks:** re-align and re-tighten evenly.
+- **Misaligned tracks:** re‑align and re‑tighten evenly.
 
 > [!WARNING] Stop-use criteria (seats/tracks)
 >

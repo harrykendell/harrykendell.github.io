@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect x="0" y="0" width="800" height="450" fill="white"/>
+  <style>
+    .box{fill:none;stroke:#111;stroke-width:3}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .label{font: 20px sans-serif; fill:#111}
+    .small{font: 16px sans-serif; fill:#111}
+    .tiny{font: 13px sans-serif; fill:#111}
+    .title{font: 28px sans-serif; font-weight:700; fill:#111}
+  </style>
+
+  <text x="30" y="45" class="title">Scarf taper (why shallow matters)</text>
+
+  <!-- Original skin -->
+  <rect x="120" y="160" width="240" height="35" class="box"/>
+  <text x="130" y="185" class="small">Sound laminate</text>
+
+  <!-- Taper -->
+  <path d="M360 160 L650 160 L650 195 L360 195 Z" class="thin"/>
+  <path d="M360 160 L650 195" class="box"/>
+  <text x="430" y="145" class="label">Taper</text>
+
+  <!-- Patch plies -->
+  <path d="M360 195 L650 195 L650 230 L420 230 Z" class="thin"/>
+  <path d="M360 230 L650 230 L650 265 L480 265 Z" class="thin"/>
+  <text x="120" y="265" class="label">Stepped plies rebuild thickness</text>
+
+  <!-- Ratio arrow -->
+  <line x1="360" y1="310" x2="650" y2="310" class="dash"/>
+  <line x1="360" y1="310" x2="360" y2="200" class="dash"/>
+  <text x="370" y="335" class="small">Length</text>
+  <text x="325" y="255" class="small">Thickness</text>
+
+  <text x="30" y="420" class="small">Practical target: 20:1 to 50:1 taper where possible. Too steep → stress riser and crack at the patch edge.</text>
+</svg>

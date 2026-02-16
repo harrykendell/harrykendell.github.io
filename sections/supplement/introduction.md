@@ -1,27 +1,17 @@
 # Introduction
 
-This little document provides the references you need to look after our boats, with links to external resources where helpful. The content is split into **Maintenance** (routine care, troubleshooting, and replacement), **Repairs** (structural/adhesive work and rebuilds), and **Supplement** (quick reference and tooling).
+This manual is for **day‑to‑day care** (cleaning, checks, adjustment) and **repairs** (structural and adhesive work) on rowing shells and related equipment.
 
-If a procedure includes a **Stop-use** or **Escalation** warning, treat it as mandatory.
+The content is split into:
 
-Scope by section:
+- **Maintenance** — routine care, inspection, troubleshooting, and part replacement.
+- **Repairs** — structural composite work, adhesive rebuilds, and electronics harness rebuilds.
+- **Supplement** — quick reference and the tools/consumables you need to execute the procedures.
 
-| Section      | Page | In scope |
-|:------------ |:-----|:--------|
-| **Maintenance** | Boats | Care, storage/transport, inspection and triage |
-|              | Oars and blades | Handling, grips/suede, sleeves/collars |
-|              | Gates (oarlocks) | Checks, clean/rebuild, height and pitch |
-|              | Footplates and steering | Setup, heel restraints, steering checks |
-|              | Seats and tracks | Cleaning, wheel/track service, troubleshooting |
-|              | Coxbox wiring | Troubleshooting, pinout reference, diagnosis |
-|              | Hardware | Standards, audits, seized fasteners |
-| **Repairs**      | Boat composite repairs | Scratch sealing, delamination, scarf repairs |
-|              | Oar repairs | Spoon delamination, sleeve replacement, fixed handles |
-|              | Harness build and repair | Coxbox harness rebuilds |
-| **Supplement**   | Quick-reference checklists | Checklists for boat checks and maintenance |
-|              | Tools and consumables | Tools, consumables, and hardware details |
+## How to use this manual
 
-While performing repairs/maintenance it is important to be aware of your abilities. The skill tiers used throughout the manual are:
+1. **Prioritise Safety.** Take precautions with your health, every section also includes *stop‑use* criteria. If you trigger one, tag the equipment out and report it
+2. **Follow the procedure blocks.** Work inside the procedure block is written so someone of the targeted experience level can execute them end‑to‑end
 
 <div class="intro-skill-levels">
  <div class="intro-skill-level">
@@ -37,3 +27,18 @@ While performing repairs/maintenance it is important to be aware of your abiliti
   <span class="skill-desc">Experienced with hazardous or structural repairs where safety is critical.</span>
  </div>
 </div>
+
+3. **Record what you changed.** If you change the setup, replace parts, or make a repair, note it on the maintenance log
+
+### Callouts
+
+Keep any eye out for callouts throughout the manual, they come in three flavours:
+
+> [!DANGER] Stop‑use
+> Safety‑critical: do not disregard.
+
+> [!WARNING] WARNING
+> Non‑critical context or a safety reminder.
+
+> [!INFO] INFO
+> A shortcut or a best‑practice that prevents common mistakes.

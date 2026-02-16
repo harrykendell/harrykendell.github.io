@@ -1,92 +1,123 @@
 # Gates
 
-<figure class="figure">
-  <img src="imgs/overviews/pin_overview.jpg" alt="Gate and pin assembly on a rigged rowing shell" />
+<figure class="figure figure-float-right">
+  <img src="imgs/overviews/pin_overview.svg" alt="Exploded diagram of a rowing pin and gate stack with pitch bushings and washers." />
   <div class="figure-body">
-    <p class="figure-title">Typical gate and pin layout</p>
+    <p class="figure-title">Pin, bushings, washers, and top nut</p>
     <p class="figure-caption">
-      Example of a standard gate and pin assembly, showing the stack of washers and pitch bushings.
-      Use this as a visual reference when re-rigging after transport or repairs.
+      Keep washer stacks in order. Losing washers or swapping bushings changes pitch/height and causes rattle.
     </p>
   </div>
 </figure>
 
-The gate assembly consists of the **pin**, **oarlock/gate**, **pitch bushings**, **washers/spacers**, and a **top nut/retainer**.
+Gates (oarlocks) are safety‑critical: if a gate unlatches or a pin assembly loosens, the crew can lose an oar under load.
+
+They also define key rigging parameters:
+
+- **Gate height** is set by **washer stacks**.
+- **Pitch** is set by **bushing geometry and orientation**.
+
+> [!WARNING] Stop-use criteria (gates/pins)
+>
+> - Gate does not fully latch or the latch spring is weak.
+> - Top nut/retainer loose or missing.
+> - Pin bent, threads damaged, or bushings cracked.
+> - Excessive play you cannot remove by restoring the correct washer stack.
 
 ## Daily checks
 
 [!PROCEDURE:Beginner] Gate safety check
-Daily pre-outing check that the gate latch is secure and the gate cannot pop out under load. Latch failure, cracked gate, or loose pin: stop-use.
+Pre‑outing safety check that the gate latches, the pin stack is secure, and there is no abnormal play.
 
-**Tools:** None (or gate nut tool if something is loose)
+**Tools:** None (gate nut tool if top nut needs tightening)
 
 **Steps:**
 
-1. Close each gate and confirm latch fully engages.
-2. Lift the oar handle firmly to confirm the oar cannot pop out.
-3. Wiggle gate vertically: there should be minimal play (no rattle).
-4. Confirm top nut/retainer is tight.
+1. Open and close the gate. Confirm the latch fully engages and cannot be pulled open accidentally.
+2. Confirm the **top nut/retainer** is present and tight.
+3. Lift and twist the gate by hand:
+   - Small smooth rotation is normal.
+   - **Clunking** or large wobble is not.
+4. Visual check the pin: straight, no missing washers, no cracked bushings.
 
-**Check:** Secure closure; no rattle. Do this before every outing.
+**Check:** Gate latches reliably; top nut tight; no unusual wobble/clunk. Do before every outing.
 [!/PROCEDURE]
+
+> [!INFO] Witness marks
+> If your fleet allows it, add a witness mark across the top nut and pin so loosening is visible.
 
 ## Clean and rebuild
 
-[!PROCEDURE:Intermediate] Disassemble, clean, rebuild gate stack
-Maintenance day procedure to disassemble, clean, and reassemble gate hardware to eliminate corrosion and squeaking.
+[!PROCEDURE:Intermediate] Clean and rebuild a gate (pin stack service)
+Disassemble, clean, and reassemble a gate/pin stack to remove grit and restore correct washer/bushing configuration.
 
 > [!WARNING] Important
-> Do not oil anything on a boat asa it attracts grit; watch for missing washers (causes rattle and accelerated wear) and swapped bushings (changes pitch); bent pin, stripped threads, cracked gate body: replace parts/escalate. If you cannot match pitch across sides, replace pin/gate components.
+> Changing bushing orientation changes pitch. Keep parts in order. If you don’t know the target settings, stop and use the rigging sheet.
 
-**Tools:** Spanners, mild degreaser, brush, spare washers/bushings, lint-free cloth
+**Tools:** Correct spanners/Allen keys, parts tray/bags, IPA, cloths, replacement washers/bushings as needed
 
 **Steps:**
 
-1. Remove top nut/retainer and lift off gate.
-2. Keep washer stacks grouped (bottom vs top). Photograph if needed.
-3. Clean pin and all washers. Inspect for corrosion.
-4. Inspect pitch bushings for cracks/ovalisation; replace if worn.
-5. Reassemble: washers arranged to eliminate vertical play while allowing free rotation.
-6. Tighten top nut and re-check closure.
+1. Photograph the assembly (top nut, washer order, bushing orientation).
+2. Remove the top nut/retainer and lift off the gate.
+3. Remove bushings and washers **in order** and lay them out left‑to‑right.
+4. Clean:
+   - Wipe pin and bushing surfaces.
+   - Remove grit from inside the gate bore.
+5. Inspect:
+   - Bushings: cracks, ovality, wear flats.
+   - Washers: corrosion or deformation.
+   - Pin threads: damage or galling.
+6. Reassemble:
+   - Restore washer stacks exactly.
+   - Fit bushings with correct orientation to match pitch.
+   - Refit the gate and tighten the top nut/retainer to “snug” (do not crush bushings).
+7. Functional check:
+   - Gate rotates smoothly.
+   - Gate height feels consistent left/right.
+   - Latch functions reliably.
 
-**Check:** Gate rotates freely; no vertical play; latch closes cleanly.
+**Check:** Smooth rotation, correct pitch/height restored, latch reliable.
+
+> [!INFO] Lubrication
+> Do not oil gates/pins: oil traps grit. Clean and reassemble dry unless the manufacturer specifies otherwise.
+[!/PROCEDURE]
+
+[!PROCEDURE:Intermediate] Set/verify pitch (bushing orientation)
+Verify pitch matches the rigging sheet and correct it by re‑orienting pitch bushings.
+
+**Tools:** Pitch gauge, correct bushings, marker
+
+**Steps:**
+
+1. Confirm the target pitch from the rigging sheet (stern pitch / lateral pitch).
+2. Fit the pitch gauge to the pin and read pitch.
+3. If incorrect: remove gate and rotate/replace bushings as required.
+4. Reassemble and re‑measure until pitch matches target.
+5. Mark the bushing orientation if your fleet uses a standard convention.
+
+**Check:** Pitch matches rigging sheet and is symmetric left/right.
 [!/PROCEDURE]
 
 [!PROCEDURE:Intermediate] Adjust gate height (washer stack)
-When rigging changes or mismatched heights are observed, adjust the washer stack to achieve correct gate height.
+Adjust gate height by changing the washer stack above/below the gate, then verify symmetry.
 
-**Tools:** Gate washers/shims, calipers/ruler, rigging sheet
-
-**Steps:**
-
-1. Measure current height <https://lindig.github.io/pitch/> , Record.
-2. Add/remove washers **symmetrically** to achieve target.
-
-**Check:** Gate height matches rigging sheet; sides match.
-[!/PROCEDURE]
-
-[!PROCEDURE:Intermediate] Set/verify pitch
-After bushing replacement or suspected pitch drift, verify that both sides have correct and matching pitch.
-
-**Tools:** Pitch gauge, correct pitch bushings, rigging sheet
+**Tools:** Calipers/ruler, washer pack, rigging sheet
 
 **Steps:**
 
-1. Verify bushing pair angle markings.
-2. Install bushings correctly oriented.
-3. Measure pitch with gauge and confirm both sides match.
-4. Record bushing type/angle.
+1. Confirm target gate height from the rigging sheet.
+2. Measure current height using the club method (consistent reference).
+3. Add/remove washers to reach target:
+   - Adding washers below the gate typically raises it.
+   - Removing washers below typically lowers it.
+4. Reassemble and re‑measure.
+5. Repeat for the other side and confirm left/right symmetry.
 
-**Check:** No pitch drift; both sides match.
+**Check:** Gate height matches rigging sheet and is symmetric.
 [!/PROCEDURE]
-
-> [!WARNING] Stop-use criteria (gates)
->
-> - Gate latch does not fully close or opens under load.
-> - Cracked gate body, missing retainer, or bent pin.
-> - Severe rattle you cannot eliminate with correct washer stack.
 
 ## Related
 
-- See **[Rigging overview](/#maintenance/rigging)** for the full rigging audit workflow and what’s allowed at each capability tier.
-- If pins/riggers move or crack, follow **[Boats → Rigger and stay inspection](/#maintenance/boats/riggers-stays-and-structural-attachments)**.
+- See **[Rigging overview](/#maintenance/rigging)** for the full audit workflow.
+- See **[Hardware](/#maintenance/hardware)** for washer and nyloc standards.
