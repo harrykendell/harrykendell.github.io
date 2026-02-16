@@ -20,4 +20,18 @@ jobs:
           node-version: "20"
 
       - name: Validate markdown content
-        run: node tests/validate-markdown.mjs
+        id: validate_markdown
+        shell: bash
+        run: |
+          set +e
+          node tests/validate-markdown.mjs
+          VALIDATION_EXIT_CODE=$?
+          echo "exit_code=${VALIDATION_EXIT_CODE}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Fail job when markdown validation reports errors
+        if: steps.validate_markdown.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setFailed("Markdown validation failed. See file-level annotations above.")
