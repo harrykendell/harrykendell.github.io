@@ -11,6 +11,8 @@ const SCROLL_RETRY_DELAY_MS = 160;
 const SCROLL_BOTTOM_PADDING = 32;
 let activeTrackingObserver = null;
 let activeTrackingResizeHandler = null;
+let activeTrackingScrollHandler = null;
+let activeTrackingRafId = null;
 let sectionToggleBound = false;
 let sidebarLinksBound = false;
 let tocToggleBound = false;
@@ -868,6 +870,14 @@ function setupActiveTracking() {
     window.removeEventListener("resize", activeTrackingResizeHandler);
     activeTrackingResizeHandler = null;
   }
+  if (activeTrackingScrollHandler) {
+    window.removeEventListener("scroll", activeTrackingScrollHandler);
+    activeTrackingScrollHandler = null;
+  }
+  if (activeTrackingRafId !== null) {
+    window.cancelAnimationFrame(activeTrackingRafId);
+    activeTrackingRafId = null;
+  }
 
   const headings = Array.from(document.querySelectorAll(
     ".section[id], .section .section-content h2[id], .section .section-content h3[id], .section .section-content h4[id]",
@@ -939,11 +949,21 @@ function setupActiveTracking() {
     setActiveLink(resolveActiveElement());
   }
 
+  function scheduleActiveLinkUpdate() {
+    if (activeTrackingRafId !== null) {
+      return;
+    }
+    activeTrackingRafId = window.requestAnimationFrame(() => {
+      activeTrackingRafId = null;
+      updateActiveLink();
+    });
+  }
+
   window.updateActiveLink = updateActiveLink;
 
   activeTrackingObserver = new IntersectionObserver(
     () => {
-      updateActiveLink();
+      scheduleActiveLinkUpdate();
     },
     {
       root: null,
@@ -952,8 +972,10 @@ function setupActiveTracking() {
     },
   );
   headings.forEach((heading) => activeTrackingObserver.observe(heading));
-  activeTrackingResizeHandler = updateActiveLink;
+  activeTrackingResizeHandler = scheduleActiveLinkUpdate;
+  activeTrackingScrollHandler = scheduleActiveLinkUpdate;
   window.addEventListener("resize", activeTrackingResizeHandler, { passive: true });
+  window.addEventListener("scroll", activeTrackingScrollHandler, { passive: true });
 
   updateActiveLink();
 }
