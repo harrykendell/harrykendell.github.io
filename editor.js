@@ -25,6 +25,7 @@
   const MARKDOWN_DRAFTS_STORAGE_KEY = "editor-markdown-drafts-v1";
   const IMAGE_DRAFTS_STORAGE_KEY = "editor-image-drafts-v1";
   const EDITOR_MODAL_OPEN_CLASS = "editor-modal-open";
+  const PREVIEW_STACK_MEDIA_QUERY = "(max-width: 860px)";
   const DIFF_MATCH_PATCH_MODULE_URL = "https://esm.sh/diff-match-patch@1.0.5";
   const CODEMIRROR_STATE_MODULE_URL = "https://esm.sh/@codemirror/state";
   const CODEMIRROR_VIEW_MODULE_URL = "https://esm.sh/@codemirror/view";
@@ -92,6 +93,8 @@
     previewIgnoreNextPreviewScroll: 0,
     previewResizeObserver: null,
     previewEditorResizeObserver: null,
+    previewPaneSplitRatio: 0.5,
+    previewPaneResizePointerId: null,
     newSectionDraft: null,
     applyingNewSectionTemplate: false,
     dialogResolve: null,
@@ -129,6 +132,7 @@
     modalCompareSelect: null,
     modalDiffSummary: null,
     modalDiffEditor: null,
+    modalPaneSplitter: null,
     modalPreview: null,
     modalPreviewToggle: null,
   };
@@ -1168,10 +1172,153 @@
   }
 
   function shouldDefaultPreviewEnabled() {
+    return !isPreviewPaneStacked();
+  }
+
+  function isPreviewPaneStacked() {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia(PREVIEW_STACK_MEDIA_QUERY).matches;
+  }
+
+  function clampPreviewPaneSplitRatio(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return 0.5;
+    }
+    return Math.min(
+      0.75,
+      Math.max(0.25, numeric),
+    );
+  }
+
+  function updatePreviewPaneSplitterState() {
+    if (!elements.modalPaneSplitter) {
+      return;
+    }
+    const ratioPercent = Math.round(clampPreviewPaneSplitRatio(state.previewPaneSplitRatio) * 100);
+    const isActive = !!state.previewEnabled;
+    elements.modalPaneSplitter.tabIndex = isActive ? 0 : -1;
+    elements.modalPaneSplitter.setAttribute("aria-hidden", String(!isActive));
+    elements.modalPaneSplitter.setAttribute("aria-orientation", isPreviewPaneStacked() ? "horizontal" : "vertical");
+    elements.modalPaneSplitter.setAttribute("aria-valuemin", "25");
+    elements.modalPaneSplitter.setAttribute("aria-valuemax", "75");
+    elements.modalPaneSplitter.setAttribute("aria-valuenow", String(ratioPercent));
+    elements.modalPaneSplitter.setAttribute("aria-valuetext", `Editor pane ${ratioPercent}%`);
+  }
+
+  function applyPreviewPaneSplitRatio(nextRatio, options) {
+    const opts = options || {};
+    const ratio = clampPreviewPaneSplitRatio(nextRatio);
+    state.previewPaneSplitRatio = ratio;
+    if (elements.modalDiffEditor) {
+      elements.modalDiffEditor.style.setProperty("--editor-pane-split", `${(ratio * 100).toFixed(2)}%`);
+    }
+    updatePreviewPaneSplitterState();
+
+    if (opts.persist !== false) {
+      storeEditorState();
+    }
+    if (opts.resync === false || !state.previewEnabled) {
+      return;
+    }
+    schedulePreviewResyncAfterLayout({ preserveTargetScroll: true });
+  }
+
+  function applyPreviewPaneSplitRatioQuietly(nextRatio) {
+    applyPreviewPaneSplitRatio(nextRatio, { persist: false, resync: false });
+  }
+
+  function getPreviewPaneSplitMetrics() {
+    if (!elements.modalDiffEditor) {
+      return null;
+    }
+    const rect = elements.modalDiffEditor.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
+      return null;
+    }
+    const stacked = isPreviewPaneStacked();
+    const splitterRect = elements.modalPaneSplitter
+      ? elements.modalPaneSplitter.getBoundingClientRect()
+      : null;
+    const rawSplitterSize = stacked
+      ? Number(splitterRect && splitterRect.height) || 0
+      : Number(splitterRect && splitterRect.width) || 0;
+    const splitterSize = Math.max(1, rawSplitterSize || 10);
+    const span = stacked ? rect.height : rect.width;
+    const start = stacked ? rect.top : rect.left;
+    return { stacked, span, start, splitterSize };
+  }
+
+  function setPreviewPaneSplitRatioFromPointerEvent(event) {
+    const metrics = getPreviewPaneSplitMetrics();
+    if (!metrics) {
+      return;
+    }
+    const availableSize = Math.max(1, metrics.span - metrics.splitterSize);
+    const pointerPosition = metrics.stacked ? Number(event.clientY) : Number(event.clientX);
+    const pointerOffset = pointerPosition - metrics.start - metrics.splitterSize / 2;
+    const rawRatio = pointerOffset / availableSize;
+    applyPreviewPaneSplitRatio(rawRatio, { persist: false });
+  }
+
+  function isActivePreviewPaneResizePointer(event) {
+    if (state.previewPaneResizePointerId === null) {
+      return false;
+    }
+    if (!event || !Number.isFinite(event.pointerId)) {
       return true;
     }
-    return !window.matchMedia("(max-width: 860px)").matches;
+    return event.pointerId === state.previewPaneResizePointerId;
+  }
+
+  function endPreviewPaneResize(event) {
+    if (!isActivePreviewPaneResizePointer(event)) {
+      return;
+    }
+    const activePointerId = state.previewPaneResizePointerId;
+    state.previewPaneResizePointerId = null;
+
+    if (elements.modalDiffEditor) {
+      elements.modalDiffEditor.classList.remove("is-resizing");
+    }
+    document.body.classList.remove("editor-pane-resize-active");
+
+    if (
+      elements.modalPaneSplitter
+      && Number.isFinite(activePointerId)
+      && typeof elements.modalPaneSplitter.hasPointerCapture === "function"
+      && elements.modalPaneSplitter.hasPointerCapture(activePointerId)
+    ) {
+      elements.modalPaneSplitter.releasePointerCapture(activePointerId);
+    }
+
+    storeEditorState();
+  }
+
+  function beginPreviewPaneResize(event) {
+    if (!elements.modalPaneSplitter || !state.previewEnabled || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    state.previewPaneResizePointerId = event.pointerId;
+    if (elements.modalDiffEditor) {
+      elements.modalDiffEditor.classList.add("is-resizing");
+    }
+    document.body.classList.add("editor-pane-resize-active");
+    if (typeof elements.modalPaneSplitter.setPointerCapture === "function") {
+      elements.modalPaneSplitter.setPointerCapture(event.pointerId);
+    }
+    setPreviewPaneSplitRatioFromPointerEvent(event);
+  }
+
+  function handlePreviewPaneResizeMove(event) {
+    if (!isActivePreviewPaneResizePointer(event)) {
+      return;
+    }
+    event.preventDefault();
+    setPreviewPaneSplitRatioFromPointerEvent(event);
   }
 
   function updatePreviewResizeObservers() {
@@ -1660,6 +1807,9 @@
 
   function setPreviewEnabled(isEnabled) {
     state.previewEnabled = !!isEnabled;
+    if (!state.previewEnabled) {
+      endPreviewPaneResize();
+    }
     if (elements.modalPreviewToggle) {
       elements.modalPreviewToggle.classList.toggle("is-active", state.previewEnabled);
       elements.modalPreviewToggle.setAttribute("aria-pressed", String(state.previewEnabled));
@@ -1670,6 +1820,7 @@
     if (elements.modalDiffEditor) {
       elements.modalDiffEditor.classList.toggle("has-preview", state.previewEnabled);
     }
+    updatePreviewPaneSplitterState();
     if (!state.previewEnabled) {
       if (state.previewRenderTimeoutId) {
         window.clearTimeout(state.previewRenderTimeoutId);
@@ -2872,6 +3023,9 @@
       if (typeof parsed.editMode === "boolean") {
         nextState.editMode = parsed.editMode;
       }
+      if (Number.isFinite(parsed.previewPaneSplitRatio)) {
+        nextState.previewPaneSplitRatio = clampPreviewPaneSplitRatio(parsed.previewPaneSplitRatio);
+      }
       return nextState;
     } catch (error) {
       return null;
@@ -2885,6 +3039,7 @@
         JSON.stringify({
           toolbarVisible: elements.toolbar ? !elements.toolbar.hidden : false,
           editMode: !!state.editMode,
+          previewPaneSplitRatio: clampPreviewPaneSplitRatio(state.previewPaneSplitRatio),
         }),
       );
     } catch (error) {
@@ -2902,16 +3057,16 @@
   }
 
   function restoreEditorState() {
-    const storedState = readStoredEditorState();
-    if (!storedState) {
-      document.body.classList.toggle("edit-mode", state.editMode);
-      return;
-    }
+    const storedState = readStoredEditorState() || {};
+    const restoredSplitRatio = typeof storedState.previewPaneSplitRatio === "number"
+      ? storedState.previewPaneSplitRatio
+      : state.previewPaneSplitRatio;
+    applyPreviewPaneSplitRatioQuietly(restoredSplitRatio);
     if (typeof storedState.editMode === "boolean") {
       setEditMode(storedState.editMode);
-      return;
+    } else {
+      document.body.classList.toggle("edit-mode", state.editMode);
     }
-    document.body.classList.toggle("edit-mode", state.editMode);
   }
 
   async function authRequest(path, options) {
@@ -4355,6 +4510,7 @@
     if (!elements.modal) {
       return;
     }
+    endPreviewPaneResize();
     const closingPath = state.currentPath;
     const closingDraft = closingPath ? state.drafts.get(closingPath) : null;
     elements.modal.hidden = true;
@@ -5361,6 +5517,7 @@
         runHistoryAction("redo");
         break;
       case "preview-toggle":
+        applyPreviewPaneSplitRatio(0.5);
         setPreviewEnabled(!state.previewEnabled);
         break;
       case "comment-line":
@@ -5944,6 +6101,16 @@
           <div class="editor-pane editor-pane-editor">
             <div id="editor-codemirror" class="editor-codemirror"></div>
           </div>
+          <div
+            class="editor-pane-splitter"
+            role="separator"
+            aria-label="Resize editor and preview panes"
+            aria-orientation="vertical"
+            aria-valuemin="25"
+            aria-valuemax="75"
+            aria-valuenow="50"
+            tabindex="-1"
+          ></div>
           <div class="editor-pane editor-pane-preview">
             <div id="editor-markdown-preview" class="editor-markdown-preview" aria-label="Parsed markdown preview" hidden></div>
           </div>
@@ -6010,13 +6177,27 @@
     elements.modalCompareSelect = modal.querySelector("#editor-compare-commit");
     elements.modalDiffSummary = modal.querySelector("#editor-diff-summary");
     elements.modalDiffEditor = modal.querySelector(".editor-diff-editor");
+    elements.modalPaneSplitter = modal.querySelector(".editor-pane-splitter");
     elements.modalPreview = modal.querySelector("#editor-markdown-preview");
     elements.modalPreviewToggle = modal.querySelector("#editor-preview-toggle");
     elements.modalSave = modal.querySelector("#editor-save");
     elements.modalReset = modal.querySelector("#editor-reset");
+    applyPreviewPaneSplitRatioQuietly(state.previewPaneSplitRatio);
     setPreviewEnabled(shouldDefaultPreviewEnabled());
     updateVariantControlState();
     updateToolbarVisibilityButton();
+  }
+
+  function bindPreviewPaneSplitterEvents() {
+    if (!elements.modalPaneSplitter) {
+      return;
+    }
+    const splitter = elements.modalPaneSplitter;
+    splitter.addEventListener("pointerdown", beginPreviewPaneResize);
+    splitter.addEventListener("pointermove", handlePreviewPaneResizeMove);
+    splitter.addEventListener("pointerup", endPreviewPaneResize);
+    splitter.addEventListener("pointercancel", endPreviewPaneResize);
+    splitter.addEventListener("lostpointercapture", endPreviewPaneResize);
   }
 
   function setupEvents() {
@@ -6201,6 +6382,8 @@
       });
     }
 
+    bindPreviewPaneSplitterEvents();
+
     const backdrop = elements.modal.querySelector(".editor-backdrop");
     if (backdrop) {
       backdrop.addEventListener("click", closeModal);
@@ -6255,6 +6438,10 @@
     }
 
     window.addEventListener("resize", () => {
+      if (isPreviewPaneStacked()) {
+        endPreviewPaneResize();
+      }
+      updatePreviewPaneSplitterState();
       if (!elements.modal || elements.modal.hidden) {
         return;
       }

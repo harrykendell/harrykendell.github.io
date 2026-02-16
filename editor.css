@@ -968,6 +968,8 @@ body.editor-modal-open {
 }
 
 .editor-diff-editor {
+    --editor-pane-split: 50%;
+    --editor-pane-splitter-size: 12px;
     position: relative;
     min-height: 320px;
     height: 56vh;
@@ -979,7 +981,10 @@ body.editor-modal-open {
 }
 
 .editor-diff-editor.has-preview {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns:
+        minmax(0, var(--editor-pane-split))
+        var(--editor-pane-splitter-size)
+        minmax(0, calc(100% - var(--editor-pane-split) - var(--editor-pane-splitter-size)));
 }
 
 .editor-diff-editor > * {
@@ -998,6 +1003,58 @@ body.editor-modal-open {
 
 .editor-diff-editor.has-preview .editor-pane-preview {
     display: block;
+}
+
+.editor-pane-splitter {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    cursor: col-resize;
+    touch-action: none;
+    background: linear-gradient(
+        180deg,
+        rgba(226, 232, 240, 0.55) 0%,
+        rgba(241, 245, 249, 0.92) 18%,
+        rgba(241, 245, 249, 0.92) 82%,
+        rgba(226, 232, 240, 0.55) 100%
+    );
+    border-left: 1px solid rgba(148, 163, 184, 0.35);
+    border-right: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.editor-pane-splitter::before {
+    content: "";
+    width: 3px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(100, 116, 139, 0.65);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+.editor-diff-editor.has-preview .editor-pane-splitter {
+    display: flex;
+}
+
+.editor-pane-splitter:focus-visible {
+    outline: 2px solid #94a3b8;
+    outline-offset: -2px;
+}
+
+.editor-pane-splitter:hover::before,
+.editor-pane-splitter:focus-visible::before,
+.editor-diff-editor.is-resizing .editor-pane-splitter::before {
+    background: var(--info);
+}
+
+.editor-diff-editor.is-resizing,
+.editor-diff-editor.is-resizing * {
+    cursor: col-resize;
+}
+
+body.editor-pane-resize-active,
+body.editor-pane-resize-active * {
+    user-select: none;
 }
 
 .editor-codemirror {
@@ -1033,12 +1090,12 @@ body.editor-modal-open {
     overflow: auto;
     overscroll-behavior: contain;
     padding: 10px 14px 16px;
-    border-left: var(--border-subtle-line);
+    border-left: 0;
     background: var(--bg-elevated);
 }
 
 .editor-diff-editor.has-preview .editor-markdown-preview {
-    border-left: 2px solid rgba(15, 23, 42, 0.16);
+    border-left: 0;
     box-shadow:
         inset 1px 0 0 rgba(255, 255, 255, 0.8),
         -10px 0 16px -16px rgba(15, 23, 42, 0.5);
@@ -1175,7 +1232,29 @@ body.editor-modal-open {
 
     .editor-diff-editor.has-preview {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows:
+            minmax(0, var(--editor-pane-split))
+            var(--editor-pane-splitter-size)
+            minmax(0, calc(100% - var(--editor-pane-split) - var(--editor-pane-splitter-size)));
+    }
+
+    .editor-diff-editor.has-preview .editor-pane-splitter {
+        display: flex;
+        cursor: row-resize;
+        border-left: 0;
+        border-right: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.35);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .editor-diff-editor.has-preview .editor-pane-splitter::before {
+        width: 38px;
+        height: 3px;
+    }
+
+    .editor-diff-editor.is-resizing,
+    .editor-diff-editor.is-resizing * {
+        cursor: row-resize;
     }
 
     .editor-markdown-preview {
