@@ -79,12 +79,26 @@
     editorBaselineEffect: null,
     editorDiffField: null,
     editorDiffStats: null,
+    previewEnabled: false,
+    previewRenderTimeoutId: null,
+    previewLineAnchors: [],
+    previewScrollAnchors: [],
+    previewResyncPending: false,
+    previewScrollResyncTimeoutId: null,
+    previewSyncLock: "",
+    previewActiveScrollSource: "",
+    previewActiveScrollTimeoutId: null,
+    previewIgnoreNextEditorScroll: 0,
+    previewIgnoreNextPreviewScroll: 0,
+    previewResizeObserver: null,
+    previewEditorResizeObserver: null,
     newSectionDraft: null,
     applyingNewSectionTemplate: false,
     dialogResolve: null,
     currentTitle: "",
     currentTitleFallback: "",
     currentTitleTouched: false,
+    lastOpenedPath: "",
   };
 
   const elements = {
@@ -114,6 +128,9 @@
     modalCompareToolbar: null,
     modalCompareSelect: null,
     modalDiffSummary: null,
+    modalDiffEditor: null,
+    modalPreview: null,
+    modalPreviewToggle: null,
   };
   const AUTH_USER_ICON = `
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -132,6 +149,15 @@
       return null;
     }
     return String(path).replace(/^\/+/, "");
+  }
+
+  function extractMarkdownDefinitionSuffix(markdown) {
+    const source = String(markdown || "");
+    const definitionLines = source.match(/^\s{0,3}\[[^\]]+\]:\s*.+$/gm) || [];
+    return definitionLines
+      .map((line) => String(line || "").trimEnd())
+      .filter((line) => line.length > 0)
+      .join("\n");
   }
 
   function isMarkdownSourcePath(path) {
@@ -668,6 +694,20 @@
           }),
           parent: elements.modalEditorHost,
         });
+        bindManualScrollSourceListeners(view.scrollDOM, "editor");
+        bindManualScrollSourceListeners(view.dom, "editor");
+        view.scrollDOM.addEventListener("scroll", () => {
+          if (state.previewIgnoreNextEditorScroll > 0) {
+            state.previewIgnoreNextEditorScroll -= 1;
+            return;
+          }
+          if (state.previewSyncLock === "preview") {
+            return;
+          }
+          setActivePreviewScrollSource("editor");
+          syncPreviewScrollToSource();
+          schedulePreviewResyncAfterScrollSettles();
+        }, { passive: true });
 
         state.editorView = view;
         state.editorViewPromise = null;
@@ -784,13 +824,896 @@
 
     if (immediate) {
       updateDiffSummaryFromStats();
+      scheduleMarkdownPreviewRender(true);
       return;
     }
 
     state.diffRenderTimeoutId = window.setTimeout(() => {
       state.diffRenderTimeoutId = null;
       updateDiffSummaryFromStats();
+      scheduleMarkdownPreviewRender(true);
     }, 80);
+  }
+
+  function getEditorScrollOffset() {
+    if (!state.editorView) {
+      return 0;
+    }
+    return state.editorView.scrollDOM.scrollTop || 0;
+  }
+
+  function buildPreviewBlocksFromMarkdown(markdown) {
+    const source = String(markdown || "");
+    const fallbackEndOffset = Math.max(0, source.length);
+    const procedureStartPattern = /\[!PROCEDURE:[^\]]+\]\]?/gi;
+    const procedureEndPattern = /\[!\/PROCEDURE\]/gi;
+    const fallbackResult = {
+      blocks: [{
+        markdown: source,
+        sourceStart: 0,
+        sourceEnd: fallbackEndOffset,
+      }],
+      globalDefinitionSuffix: "",
+    };
+
+    if (typeof marked === "undefined" || typeof marked.lexer !== "function") {
+      return fallbackResult;
+    }
+
+    let tokens;
+    try {
+      tokens = marked.lexer(source);
+    } catch (error) {
+      console.error(error);
+      return fallbackResult;
+    }
+
+    const globalDefinitionSuffix = extractMarkdownDefinitionSuffix(source);
+
+    const blocks = [];
+    let charCursor = 0;
+    let pendingProcedureBlock = null;
+
+    const countProcedureMarkers = (raw, pattern) => {
+      if (!raw || !pattern) {
+        return 0;
+      }
+      let count = 0;
+      pattern.lastIndex = 0;
+      while (pattern.exec(raw)) {
+        count += 1;
+      }
+      pattern.lastIndex = 0;
+      return count;
+    };
+
+    const pushBlock = (raw, sourceStart, sourceEnd) => {
+      if (!raw.trim()) {
+        return;
+      }
+      blocks.push({
+        markdown: raw,
+        sourceStart,
+        sourceEnd,
+      });
+    };
+
+    tokens.forEach((token) => {
+      const raw = token && typeof token.raw === "string" ? token.raw : "";
+      const blockStartOffset = charCursor;
+      charCursor += raw.length;
+      const blockEndOffset = Math.max(blockStartOffset, charCursor);
+      const procedureStartCount = countProcedureMarkers(raw, procedureStartPattern);
+      const procedureEndCount = countProcedureMarkers(raw, procedureEndPattern);
+
+      if (pendingProcedureBlock) {
+        pendingProcedureBlock.raw += raw;
+        pendingProcedureBlock.sourceEnd = blockEndOffset;
+        pendingProcedureBlock.depth += procedureStartCount;
+        pendingProcedureBlock.depth -= procedureEndCount;
+        if (pendingProcedureBlock.depth <= 0) {
+          pushBlock(
+            pendingProcedureBlock.raw,
+            pendingProcedureBlock.sourceStart,
+            pendingProcedureBlock.sourceEnd,
+          );
+          pendingProcedureBlock = null;
+        }
+        return;
+      }
+
+      if (!raw.trim() || token.type === "space" || token.type === "def") {
+        return;
+      }
+
+      if (procedureStartCount > procedureEndCount) {
+        pendingProcedureBlock = {
+          raw,
+          sourceStart: blockStartOffset,
+          sourceEnd: blockEndOffset,
+          depth: procedureStartCount - procedureEndCount,
+        };
+        return;
+      }
+
+      pushBlock(raw, blockStartOffset, blockEndOffset);
+    });
+
+    if (pendingProcedureBlock) {
+      pushBlock(
+        pendingProcedureBlock.raw,
+        pendingProcedureBlock.sourceStart,
+        pendingProcedureBlock.sourceEnd,
+      );
+    }
+
+    if (!blocks.length) {
+      blocks.push({
+        markdown: source,
+        sourceStart: 0,
+        sourceEnd: fallbackEndOffset,
+      });
+    }
+
+    return {
+      blocks,
+      globalDefinitionSuffix,
+    };
+  }
+
+  function buildPreviewRenderMarkdown(markdown, globalDefinitionSuffix) {
+    const blockMarkdown = String(markdown || "");
+    const suffix = String(globalDefinitionSuffix || "").trim();
+    if (!suffix) {
+      return blockMarkdown;
+    }
+    if (!blockMarkdown.trim()) {
+      return suffix;
+    }
+    return `${blockMarkdown.trimEnd()}\n\n${suffix}`;
+  }
+
+  function renderPreviewBlock(target, markdown, globalDefinitionSuffix) {
+    const markdownToRender = buildPreviewRenderMarkdown(markdown, globalDefinitionSuffix);
+
+    if (typeof window.renderMarkdownContent === "function") {
+      window.renderMarkdownContent(target, markdownToRender, { downgradeHeadings: true });
+    } else if (typeof marked !== "undefined" && typeof marked.parse === "function") {
+      target.innerHTML = marked.parse(markdownToRender);
+    } else {
+      target.textContent = markdownToRender;
+    }
+  }
+
+  function getPreviewProcedureStateKey(procedure, index) {
+    if (!(procedure instanceof Element)) {
+      return `__index__:${index}`;
+    }
+    const skill = String(procedure.getAttribute("data-skill") || "").trim().toLowerCase();
+    const titleNode = procedure.querySelector(".procedure-title-text");
+    const title = String(titleNode && titleNode.textContent ? titleNode.textContent : "")
+      .trim()
+      .toLowerCase();
+    if (!skill && !title) {
+      return `__index__:${index}`;
+    }
+    return `${skill}|${title}`;
+  }
+
+  function capturePreviewProcedureStates() {
+    if (!elements.modalPreview) {
+      return {
+        byKey: new Map(),
+        byIndex: [],
+      };
+    }
+    const statesByKey = new Map();
+    const statesByIndex = [];
+    const procedures = Array.from(elements.modalPreview.querySelectorAll(".procedure"));
+    procedures.forEach((procedure, index) => {
+      const key = getPreviewProcedureStateKey(procedure, index);
+      const expanded = !procedure.classList.contains("collapsed");
+      statesByIndex[index] = expanded;
+      const entries = statesByKey.get(key) || [];
+      entries.push({ expanded });
+      statesByKey.set(key, entries);
+    });
+    return {
+      byKey: statesByKey,
+      byIndex: statesByIndex,
+    };
+  }
+
+  function setPreviewProcedureCollapsed(procedure, isCollapsed) {
+    if (!(procedure instanceof Element)) {
+      return;
+    }
+    const nextCollapsed = !!isCollapsed;
+    procedure.classList.toggle("collapsed", nextCollapsed);
+    const header = procedure.querySelector(".procedure-header");
+    if (header) {
+      header.setAttribute("aria-expanded", String(!nextCollapsed));
+    }
+  }
+
+  function restorePreviewProcedureStates(previousStates) {
+    if (!elements.modalPreview || !previousStates || typeof previousStates !== "object") {
+      return;
+    }
+    const byKey = previousStates.byKey instanceof Map ? previousStates.byKey : new Map();
+    const byIndex = Array.isArray(previousStates.byIndex) ? previousStates.byIndex : [];
+    if (byKey.size === 0 && byIndex.length === 0) {
+      return;
+    }
+    const restoreOffsets = new Map();
+    const procedures = Array.from(elements.modalPreview.querySelectorAll(".procedure"));
+    procedures.forEach((procedure, index) => {
+      let shouldExpand = false;
+      const key = getPreviewProcedureStateKey(procedure, index);
+      const entries = byKey.get(key);
+      if (Array.isArray(entries) && entries.length > 0) {
+        const offset = restoreOffsets.get(key) || 0;
+        if (offset < entries.length) {
+          restoreOffsets.set(key, offset + 1);
+          shouldExpand = !!(entries[offset] && entries[offset].expanded);
+        }
+      }
+      if (!shouldExpand && index < byIndex.length) {
+        shouldExpand = !!byIndex[index];
+      }
+      if (shouldExpand) {
+        setPreviewProcedureCollapsed(procedure, false);
+      }
+    });
+  }
+
+  function resetPreviewScroll() {
+    if (!elements.modalPreview) {
+      return;
+    }
+    elements.modalPreview.scrollTop = 0;
+    elements.modalPreview.scrollLeft = 0;
+  }
+
+  function resetPreviewSyncState() {
+    state.previewSyncLock = "";
+    state.previewActiveScrollSource = "";
+    state.previewIgnoreNextEditorScroll = 0;
+    state.previewIgnoreNextPreviewScroll = 0;
+  }
+
+  function resetEditorAndPreviewScroll() {
+    resetEditorScroll();
+    resetPreviewScroll();
+  }
+
+  function applyPreviewBlockMetadata(target, blockData, blockIndex) {
+    if (!(target instanceof Element)) {
+      return;
+    }
+    target.classList.add("editor-preview-block");
+    target.setAttribute("data-block-index", String(blockIndex));
+    target.setAttribute("data-source-start", String(blockData.sourceStart || 0));
+    target.setAttribute("data-source-end", String(blockData.sourceEnd || 0));
+  }
+
+  function updatePreviewLineAnchors() {
+    if (!elements.modalPreview) {
+      state.previewLineAnchors = [];
+      return;
+    }
+
+    state.previewLineAnchors = Array.from(
+      elements.modalPreview.querySelectorAll(".editor-preview-block"),
+    )
+      .map((block) => {
+        const indexRaw = Number.parseInt(block.getAttribute("data-block-index") || "-1", 10);
+        const sourceStartRaw = Number.parseInt(block.getAttribute("data-source-start") || "0", 10);
+        const sourceEndRaw = Number.parseInt(block.getAttribute("data-source-end") || String(sourceStartRaw), 10);
+        const sourceStart = Number.isFinite(sourceStartRaw) ? Math.max(0, sourceStartRaw) : 0;
+        const sourceEnd = Number.isFinite(sourceEndRaw) ? Math.max(sourceStart, sourceEndRaw) : sourceStart;
+        return {
+          block,
+          blockIndex: Number.isFinite(indexRaw) ? indexRaw : -1,
+          sourceStart,
+          sourceEnd,
+        };
+      });
+  }
+
+  function buildPreviewScrollAnchors() {
+    state.previewScrollAnchors = [];
+    if (!state.editorView || typeof state.editorView.lineBlockAt !== "function") {
+      return;
+    }
+    const view = state.editorView;
+    const doc = view.state.doc;
+    const maxDocPos = Math.max(0, doc.length);
+    const totalLines = Math.max(1, doc.lines || 1);
+
+    const mappedAnchors = state.previewLineAnchors
+      .map((anchor) => {
+        const startPos = Math.max(0, Math.min(maxDocPos, anchor.sourceStart));
+        const rawEndPos = Math.max(startPos, Math.min(maxDocPos, anchor.sourceEnd));
+        const endPos = Math.max(startPos, rawEndPos > startPos ? rawEndPos - 1 : rawEndPos);
+        const startLine = Math.min(totalLines, Math.max(1, doc.lineAt(startPos).number));
+        const endLine = Math.min(totalLines, Math.max(startLine, doc.lineAt(endPos).number));
+        const startBlock = view.lineBlockAt(doc.line(startLine).from);
+        const editorTop = Number(startBlock && startBlock.top) || 0;
+        let editorBottom = 0;
+        if (endLine < totalLines) {
+          const nextLineBlock = view.lineBlockAt(doc.line(endLine + 1).from);
+          editorBottom = Number(nextLineBlock && nextLineBlock.top) || 0;
+        } else {
+          editorBottom = view.scrollDOM.scrollHeight;
+        }
+        editorBottom = Math.max(editorTop + 1, editorBottom);
+        const previewTop = anchor.block.offsetTop;
+        const previewBottom = previewTop + Math.max(1, anchor.block.offsetHeight);
+        return {
+          blockIndex: anchor.blockIndex,
+          editorTop,
+          editorBottom,
+          previewTop,
+          previewBottom,
+        };
+      })
+      .sort((left, right) => left.editorTop - right.editorTop);
+
+    state.previewScrollAnchors = mappedAnchors.map((anchor) => ({
+      ...anchor,
+      editorBottom: Math.max(anchor.editorTop + 1, Number(anchor.editorBottom) || anchor.editorTop + 1),
+      previewBottom: Math.max(anchor.previewTop + 1, Number(anchor.previewBottom) || anchor.previewTop + 1),
+    }));
+  }
+
+  function shouldDefaultPreviewEnabled() {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return true;
+    }
+    return !window.matchMedia("(max-width: 860px)").matches;
+  }
+
+  function updatePreviewResizeObservers() {
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    if (!state.previewResizeObserver) {
+      state.previewResizeObserver = new ResizeObserver(() => {
+        schedulePreviewResyncAfterLayout();
+      });
+    }
+    state.previewResizeObserver.disconnect();
+    state.previewLineAnchors.forEach((anchor) => {
+      state.previewResizeObserver.observe(anchor.block);
+    });
+  }
+
+  function updatePreviewEditorResizeObserver() {
+    if (typeof ResizeObserver === "undefined" || !state.editorView) {
+      return;
+    }
+    if (!state.previewEditorResizeObserver) {
+      state.previewEditorResizeObserver = new ResizeObserver(() => {
+        schedulePreviewResyncAfterLayout();
+      });
+    }
+    state.previewEditorResizeObserver.disconnect();
+    state.previewEditorResizeObserver.observe(state.editorView.scrollDOM);
+    if (elements.modalDiffEditor) {
+      state.previewEditorResizeObserver.observe(elements.modalDiffEditor);
+    }
+  }
+
+  function syncPreviewOnMediaLoad() {
+    if (!elements.modalPreview) {
+      return;
+    }
+    const mediaNodes = elements.modalPreview.querySelectorAll("img, iframe, video");
+    mediaNodes.forEach((node) => {
+      if (!(node instanceof Element) || node.getAttribute("data-preview-sync-bound") === "true") {
+        return;
+      }
+      node.setAttribute("data-preview-sync-bound", "true");
+      node.addEventListener("load", () => {
+        schedulePreviewResyncAfterLayout();
+      }, { passive: true });
+      if (node.tagName === "VIDEO") {
+        node.addEventListener("loadedmetadata", () => {
+          schedulePreviewResyncAfterLayout();
+        }, { passive: true });
+      }
+    });
+  }
+
+  function clampToRange(value, minValue, maxValue) {
+    return Math.max(minValue, Math.min(maxValue, value));
+  }
+
+  function normalizePiecewisePoints(points, maxX, maxY) {
+    const sorted = points
+      .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+      .map((point) => ({
+        x: clampToRange(point.x, 0, maxX),
+        y: clampToRange(point.y, 0, maxY),
+      }))
+      .sort((left, right) => {
+        if (left.x !== right.x) {
+          return left.x - right.x;
+        }
+        return left.y - right.y;
+      });
+
+    if (!sorted.length) {
+      return [{ x: 0, y: 0 }, { x: maxX, y: maxY }];
+    }
+
+    const normalized = [];
+    let lastY = 0;
+
+    sorted.forEach((point) => {
+      const x = point.x;
+      const y = Math.max(lastY, point.y);
+      if (!normalized.length) {
+        normalized.push({ x, y });
+        lastY = y;
+        return;
+      }
+      const previous = normalized[normalized.length - 1];
+      if (Math.abs(x - previous.x) < 0.5) {
+        previous.y = Math.max(previous.y, y);
+        lastY = previous.y;
+        return;
+      }
+      normalized.push({ x, y });
+      lastY = y;
+    });
+
+    const first = normalized[0];
+    if (first.x > 0.5 || first.y > 0.5) {
+      normalized.unshift({ x: 0, y: 0 });
+    } else {
+      first.x = 0;
+      first.y = 0;
+    }
+
+    const last = normalized[normalized.length - 1];
+    if (Math.abs(last.x - maxX) < 0.5) {
+      last.x = maxX;
+      last.y = maxY;
+    } else {
+      normalized.push({ x: maxX, y: maxY });
+    }
+
+    for (let index = 1; index < normalized.length; index += 1) {
+      normalized[index].y = Math.max(normalized[index].y, normalized[index - 1].y);
+    }
+
+    return normalized;
+  }
+
+  function interpolatePiecewise(points, targetX) {
+    if (!points.length) {
+      return null;
+    }
+    if (points.length === 1) {
+      return points[0].y;
+    }
+
+    const clampedX = clampToRange(targetX, points[0].x, points[points.length - 1].x);
+    if (clampedX <= points[0].x) {
+      return points[0].y;
+    }
+
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const start = points[index];
+      const end = points[index + 1];
+      if (clampedX > end.x && index < points.length - 2) {
+        continue;
+      }
+      const span = Math.max(0.0001, end.x - start.x);
+      const ratio = clampToRange((clampedX - start.x) / span, 0, 1);
+      return start.y + ((end.y - start.y) * ratio);
+    }
+
+    return points[points.length - 1].y;
+  }
+
+  function buildScrollSyncPiecewiseMaps(
+    maxEditorScrollTop,
+    maxPreviewScrollTop,
+    editorViewportHeight,
+    previewViewportHeight,
+  ) {
+    const anchors = state.previewScrollAnchors;
+    const forwardRawPoints = [{ x: 0, y: 0 }];
+
+    anchors.forEach((anchor) => {
+      const editorTop = Number(anchor.editorTop) || 0;
+      const previewTop = Number(anchor.previewTop) || 0;
+      const editorBottomScroll = (Number(anchor.editorBottom) || 0) - editorViewportHeight;
+      const previewBottomScroll = (Number(anchor.previewBottom) || 0) - previewViewportHeight;
+
+      forwardRawPoints.push({
+        x: editorTop,
+        y: previewTop,
+      });
+
+      // Bottom anchors only make sense in scroll space when the block is tall
+      // enough to produce a distinct bottom-scroll position in both panes.
+      if (editorBottomScroll > editorTop + 0.5 && previewBottomScroll > previewTop + 0.5) {
+        forwardRawPoints.push({
+          x: editorBottomScroll,
+          y: previewBottomScroll,
+        });
+      }
+    });
+
+    forwardRawPoints.push({ x: maxEditorScrollTop, y: maxPreviewScrollTop });
+
+    const editorToPreview = normalizePiecewisePoints(
+      forwardRawPoints,
+      maxEditorScrollTop,
+      maxPreviewScrollTop,
+    );
+
+    const previewToEditor = normalizePiecewisePoints(
+      editorToPreview.map((point) => ({ x: point.y, y: point.x })),
+      maxPreviewScrollTop,
+      maxEditorScrollTop,
+    );
+
+    return {
+      editorToPreview,
+      previewToEditor,
+    };
+  }
+
+  function resolvePreviewOffsetForEditorOffset(targetEditorOffset, maxEditorScrollTop, maxPreviewScrollTop) {
+    const editorViewportHeight = state.editorView
+      ? Math.max(1, state.editorView.scrollDOM.clientHeight || 1)
+      : 1;
+    const previewViewportHeight = elements.modalPreview
+      ? Math.max(1, elements.modalPreview.clientHeight || 1)
+      : 1;
+    const maps = buildScrollSyncPiecewiseMaps(
+      maxEditorScrollTop,
+      maxPreviewScrollTop,
+      editorViewportHeight,
+      previewViewportHeight,
+    );
+    return interpolatePiecewise(maps.editorToPreview, targetEditorOffset);
+  }
+
+  function resolveEditorOffsetForPreviewOffset(targetPreviewOffset, maxEditorScrollTop, maxPreviewScrollTop) {
+    const editorViewportHeight = state.editorView
+      ? Math.max(1, state.editorView.scrollDOM.clientHeight || 1)
+      : 1;
+    const previewViewportHeight = elements.modalPreview
+      ? Math.max(1, elements.modalPreview.clientHeight || 1)
+      : 1;
+    const maps = buildScrollSyncPiecewiseMaps(
+      maxEditorScrollTop,
+      maxPreviewScrollTop,
+      editorViewportHeight,
+      previewViewportHeight,
+    );
+    return interpolatePiecewise(maps.previewToEditor, targetPreviewOffset);
+  }
+
+  function setPreviewSyncLock(source) {
+    state.previewSyncLock = source;
+    window.requestAnimationFrame(() => {
+      if (state.previewSyncLock === source) {
+        state.previewSyncLock = "";
+      }
+    });
+  }
+
+  function setActivePreviewScrollSource(source) {
+    state.previewActiveScrollSource = source;
+    if (state.previewActiveScrollTimeoutId) {
+      window.clearTimeout(state.previewActiveScrollTimeoutId);
+    }
+    state.previewActiveScrollTimeoutId = window.setTimeout(() => {
+      if (state.previewActiveScrollSource === source) {
+        state.previewActiveScrollSource = "";
+      }
+      state.previewActiveScrollTimeoutId = null;
+    }, 260);
+  }
+
+  function bindManualScrollSourceListeners(target, source) {
+    if (!target || typeof target.addEventListener !== "function") {
+      return;
+    }
+    if (target.getAttribute && target.getAttribute("data-scroll-source-bound") === "true") {
+      return;
+    }
+    if (target.setAttribute) {
+      target.setAttribute("data-scroll-source-bound", "true");
+    }
+
+    const markSource = () => {
+      setActivePreviewScrollSource(source);
+    };
+
+    target.addEventListener("wheel", markSource, { passive: true });
+    target.addEventListener("touchstart", markSource, { passive: true });
+    target.addEventListener("touchmove", markSource, { passive: true });
+    target.addEventListener("pointerdown", markSource, { passive: true });
+    target.addEventListener("keydown", (event) => {
+      const key = event && typeof event.key === "string" ? event.key : "";
+      if (!key) {
+        return;
+      }
+      if (
+        key === "ArrowUp"
+        || key === "ArrowDown"
+        || key === "PageUp"
+        || key === "PageDown"
+        || key === "Home"
+        || key === "End"
+        || key === " "
+      ) {
+        markSource();
+      }
+    });
+  }
+
+  function schedulePreviewResyncAfterScrollSettles() {
+    if (!state.previewEnabled) {
+      return;
+    }
+    if (state.previewScrollResyncTimeoutId) {
+      window.clearTimeout(state.previewScrollResyncTimeoutId);
+    }
+    state.previewScrollResyncTimeoutId = window.setTimeout(() => {
+      state.previewScrollResyncTimeoutId = null;
+      schedulePreviewResyncAfterLayout({ preserveTargetScroll: true });
+    }, 140);
+  }
+
+  function syncPreviewScrollToSource() {
+    if (!state.previewEnabled || !elements.modalPreview || elements.modalPreview.hidden) {
+      return;
+    }
+    if (state.previewSyncLock === "preview") {
+      return;
+    }
+    if (state.previewActiveScrollSource && state.previewActiveScrollSource !== "editor") {
+      return;
+    }
+    if (!state.previewScrollAnchors.length) {
+      schedulePreviewResyncAfterLayout();
+      return;
+    }
+    const maxPreviewScrollTop = Math.max(0, elements.modalPreview.scrollHeight - elements.modalPreview.clientHeight);
+    if (maxPreviewScrollTop <= 0) {
+      return;
+    }
+    const editorScroller = state.editorView ? state.editorView.scrollDOM : null;
+    const maxEditorScrollTop = editorScroller
+      ? Math.max(0, editorScroller.scrollHeight - editorScroller.clientHeight)
+      : 0;
+    const targetEditorOffset = getEditorScrollOffset();
+    const nextScrollTop = resolvePreviewOffsetForEditorOffset(
+      targetEditorOffset,
+      maxEditorScrollTop,
+      maxPreviewScrollTop,
+    );
+    if (!Number.isFinite(nextScrollTop)) {
+      return;
+    }
+    const clamped = Math.max(0, Math.min(maxPreviewScrollTop, nextScrollTop));
+    if (Math.abs((elements.modalPreview.scrollTop || 0) - clamped) > 0.5) {
+      setPreviewSyncLock("editor");
+      state.previewIgnoreNextPreviewScroll += 1;
+      elements.modalPreview.scrollTop = clamped;
+    }
+  }
+
+  function syncEditorScrollToPreview() {
+    if (!state.previewEnabled || !elements.modalPreview || elements.modalPreview.hidden || !state.editorView) {
+      return;
+    }
+    if (state.previewSyncLock === "editor") {
+      return;
+    }
+    if (state.previewActiveScrollSource && state.previewActiveScrollSource !== "preview") {
+      return;
+    }
+    if (!state.previewScrollAnchors.length) {
+      schedulePreviewResyncAfterLayout();
+      return;
+    }
+    const editorScroller = state.editorView.scrollDOM;
+    const maxEditorScrollTop = Math.max(0, editorScroller.scrollHeight - editorScroller.clientHeight);
+    if (maxEditorScrollTop <= 0) {
+      return;
+    }
+    const maxPreviewScrollTop = Math.max(
+      0,
+      elements.modalPreview.scrollHeight - elements.modalPreview.clientHeight,
+    );
+    const targetPreviewOffset = elements.modalPreview.scrollTop || 0;
+    const nextScrollTop = resolveEditorOffsetForPreviewOffset(
+      targetPreviewOffset,
+      maxEditorScrollTop,
+      maxPreviewScrollTop,
+    );
+    if (!Number.isFinite(nextScrollTop)) {
+      return;
+    }
+    const clamped = Math.max(0, Math.min(maxEditorScrollTop, nextScrollTop));
+    if (Math.abs((editorScroller.scrollTop || 0) - clamped) > 0.5) {
+      setPreviewSyncLock("preview");
+      state.previewIgnoreNextEditorScroll += 1;
+      editorScroller.scrollTop = clamped;
+    }
+  }
+
+  function schedulePreviewResyncAfterLayout(options) {
+    const preserveTargetScroll = !!(options && options.preserveTargetScroll);
+    if (state.previewResyncPending) {
+      return;
+    }
+    state.previewResyncPending = true;
+    const runResync = () => {
+      try {
+        buildPreviewScrollAnchors();
+        if (preserveTargetScroll) {
+          return;
+        }
+        if (state.previewActiveScrollSource === "preview") {
+          syncEditorScrollToPreview();
+        } else {
+          syncPreviewScrollToSource();
+        }
+      } finally {
+        state.previewResyncPending = false;
+      }
+    };
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        if (state.editorView && typeof state.editorView.requestMeasure === "function") {
+          state.editorView.requestMeasure({
+            read() {
+              return null;
+            },
+            write() {
+              runResync();
+            },
+          });
+          return;
+        }
+        runResync();
+      });
+    });
+  }
+
+  function renderMarkdownPreview() {
+    if (!state.previewEnabled || !elements.modalPreview) {
+      return;
+    }
+    const previousProcedureStates = capturePreviewProcedureStates();
+    const snapshot = getEditorSnapshot();
+    const markdown = snapshot ? snapshot.value : "";
+    const previewData = buildPreviewBlocksFromMarkdown(markdown);
+    const blocks = Array.isArray(previewData && previewData.blocks) ? previewData.blocks : [];
+    const globalDefinitionSuffix = previewData && previewData.globalDefinitionSuffix
+      ? String(previewData.globalDefinitionSuffix)
+      : "";
+    const fragment = document.createDocumentFragment();
+
+    blocks.forEach((blockData, blockIndex) => {
+      const blockHost = document.createElement("div");
+      renderPreviewBlock(blockHost, blockData.markdown, globalDefinitionSuffix);
+      const renderedElements = Array.from(blockHost.children);
+      const hasMeaningfulTextNode = Array.from(blockHost.childNodes).some((node) => (
+        node.nodeType === 3 && String(node.textContent || "").trim().length > 0
+      ));
+
+      if (renderedElements.length === 1 && !hasMeaningfulTextNode) {
+        const onlyElement = renderedElements[0];
+        applyPreviewBlockMetadata(onlyElement, blockData, blockIndex);
+        fragment.appendChild(onlyElement);
+        return;
+      }
+
+      // Fallback: keep a wrapper only when the rendered block has multiple roots.
+      const wrapper = document.createElement("div");
+      applyPreviewBlockMetadata(wrapper, blockData, blockIndex);
+      while (blockHost.firstChild) {
+        wrapper.appendChild(blockHost.firstChild);
+      }
+      fragment.appendChild(wrapper);
+    });
+
+    elements.modalPreview.replaceChildren(fragment);
+    restorePreviewProcedureStates(previousProcedureStates);
+    updatePreviewLineAnchors();
+    state.previewScrollAnchors = [];
+    updatePreviewResizeObservers();
+    updatePreviewEditorResizeObserver();
+    syncPreviewOnMediaLoad();
+    schedulePreviewResyncAfterLayout();
+  }
+
+  function scheduleMarkdownPreviewRender(immediate) {
+    if (!state.previewEnabled) {
+      return;
+    }
+    if (state.previewRenderTimeoutId) {
+      window.clearTimeout(state.previewRenderTimeoutId);
+      state.previewRenderTimeoutId = null;
+    }
+    if (immediate) {
+      renderMarkdownPreview();
+      return;
+    }
+    state.previewRenderTimeoutId = window.setTimeout(() => {
+      state.previewRenderTimeoutId = null;
+      renderMarkdownPreview();
+    }, 80);
+  }
+
+  function setPreviewEnabled(isEnabled) {
+    state.previewEnabled = !!isEnabled;
+    if (elements.modalPreviewToggle) {
+      elements.modalPreviewToggle.classList.toggle("is-active", state.previewEnabled);
+      elements.modalPreviewToggle.setAttribute("aria-pressed", String(state.previewEnabled));
+    }
+    if (elements.modalPreview) {
+      elements.modalPreview.hidden = !state.previewEnabled;
+    }
+    if (elements.modalDiffEditor) {
+      elements.modalDiffEditor.classList.toggle("has-preview", state.previewEnabled);
+    }
+    if (!state.previewEnabled) {
+      if (state.previewRenderTimeoutId) {
+        window.clearTimeout(state.previewRenderTimeoutId);
+        state.previewRenderTimeoutId = null;
+      }
+      if (state.previewScrollResyncTimeoutId) {
+        window.clearTimeout(state.previewScrollResyncTimeoutId);
+        state.previewScrollResyncTimeoutId = null;
+      }
+      if (state.previewActiveScrollTimeoutId) {
+        window.clearTimeout(state.previewActiveScrollTimeoutId);
+        state.previewActiveScrollTimeoutId = null;
+      }
+      state.previewResyncPending = false;
+      state.previewSyncLock = "";
+      state.previewActiveScrollSource = "";
+      state.previewIgnoreNextEditorScroll = 0;
+      state.previewIgnoreNextPreviewScroll = 0;
+      if (state.previewResizeObserver) {
+        state.previewResizeObserver.disconnect();
+      }
+      if (state.previewEditorResizeObserver) {
+        state.previewEditorResizeObserver.disconnect();
+      }
+      if (state.editorView && state.previewLineAnchors.length > 0) {
+        schedulePreviewResyncAfterLayout();
+      }
+      return;
+    }
+    if (state.previewScrollResyncTimeoutId) {
+      window.clearTimeout(state.previewScrollResyncTimeoutId);
+      state.previewScrollResyncTimeoutId = null;
+    }
+    if (state.previewActiveScrollTimeoutId) {
+      window.clearTimeout(state.previewActiveScrollTimeoutId);
+      state.previewActiveScrollTimeoutId = null;
+    }
+    state.previewSyncLock = "";
+    state.previewActiveScrollSource = "";
+    state.previewIgnoreNextEditorScroll = 0;
+    state.previewIgnoreNextPreviewScroll = 0;
+    state.previewResyncPending = false;
+    scheduleMarkdownPreviewRender(true);
+    schedulePreviewResyncAfterLayout();
   }
 
   function buildCommitOptionLabel(commit, fallbackLabel) {
@@ -3345,13 +4268,12 @@
 
   function setEditorModalOpen(isOpen) {
     const shouldOpen = !!isOpen;
-    const root = document.documentElement;
-    if (root) {
-      root.classList.toggle(EDITOR_MODAL_OPEN_CLASS, shouldOpen);
+    const body = document.body;
+    if (!body) {
+      return;
     }
-    if (document.body) {
-      document.body.classList.toggle(EDITOR_MODAL_OPEN_CLASS, shouldOpen);
-    }
+
+    body.classList.toggle(EDITOR_MODAL_OPEN_CLASS, shouldOpen);
   }
 
   async function openNewSectionModal() {
@@ -3418,6 +4340,7 @@
     } else {
       focusEditor();
     }
+    scheduleMarkdownPreviewRender(true);
   }
 
   function handleAddSection() {
@@ -3441,6 +4364,27 @@
     clearComparisonUi();
     setEditorContent("", 0, 0);
     resetEditorScroll();
+    if (state.previewResizeObserver) {
+      state.previewResizeObserver.disconnect();
+    }
+    if (state.previewEditorResizeObserver) {
+      state.previewEditorResizeObserver.disconnect();
+    }
+    if (state.previewScrollResyncTimeoutId) {
+      window.clearTimeout(state.previewScrollResyncTimeoutId);
+      state.previewScrollResyncTimeoutId = null;
+    }
+    if (state.previewActiveScrollTimeoutId) {
+      window.clearTimeout(state.previewActiveScrollTimeoutId);
+      state.previewActiveScrollTimeoutId = null;
+    }
+    state.previewResyncPending = false;
+    state.previewSyncLock = "";
+    state.previewActiveScrollSource = "";
+    state.previewIgnoreNextEditorScroll = 0;
+    state.previewIgnoreNextPreviewScroll = 0;
+    state.previewLineAnchors = [];
+    state.previewScrollAnchors = [];
     if (closingPath && typeof closingDraft === "string") {
       renderSectionFromDraft(closingPath, closingDraft);
     }
@@ -3451,6 +4395,8 @@
     if (!elements.modal || !elements.modalPathDisplay || !elements.modalEditorHost) {
       return;
     }
+    const wasPath = state.lastOpenedPath;
+    const isDifferentPath = wasPath !== path;
     setNewSectionMode(false);
     state.currentPath = path;
     elements.modalPathDisplay.textContent = path;
@@ -3473,8 +4419,12 @@
       setNewSectionMode(false);
       return;
     }
+    state.lastOpenedPath = path;
     setEditorContent(split.body, 0, 0);
-    resetEditorScroll();
+    if (isDifferentPath) {
+      resetPreviewSyncState();
+      resetEditorAndPreviewScroll();
+    }
     initializeEditorHistory();
     updateVariantControlState();
     elements.modal.hidden = false;
@@ -3488,7 +4438,10 @@
       updateFormatToolbarScrollState();
     });
     focusEditor();
-    resetEditorScroll();
+    if (isDifferentPath) {
+      resetEditorAndPreviewScroll();
+    }
+    scheduleMarkdownPreviewRender(true);
   }
 
   function nextValueInCycle(values, currentValue) {
@@ -4407,6 +5360,9 @@
       case "redo":
         runHistoryAction("redo");
         break;
+      case "preview-toggle":
+        setPreviewEnabled(!state.previewEnabled);
+        break;
       case "comment-line":
         toggleLineComment();
         break;
@@ -4575,9 +5531,25 @@
     const path = state.currentPath;
     try {
       const sourceMarkdown = await getSourceMarkdown(path);
+      const snapshot = getEditorSnapshot();
       const split = splitMarkdownTitle(sourceMarkdown);
       const sectionId = sectionIdFromPath(path);
       const fallbackTitle = getDefaultSectionTitle(sectionId);
+      const currentBody = snapshot ? snapshot.value : "";
+      const currentTitle = getTitleInputValue(fallbackTitle);
+      const currentMarkdown = composeMarkdownWithTitle(currentTitle, currentBody, fallbackTitle);
+      const hasChanges = currentMarkdown !== sourceMarkdown;
+      if (hasChanges) {
+        const confirmDialog = await openAppDialog({
+          title: "Reset draft",
+          message: `Discard unsaved changes for ${path}?`,
+          confirmText: "Reset",
+          cancelText: "Cancel",
+        });
+        if (!confirmDialog.confirmed) {
+          return;
+        }
+      }
       const titleValue = split.title || fallbackTitle;
       state.currentTitle = titleValue;
       state.currentTitleFallback = fallbackTitle;
@@ -4969,13 +5941,19 @@
           </div>
         </div>
         <div class="editor-diff-editor" role="region" aria-label="Live diff editor">
-          <div id="editor-codemirror" class="editor-codemirror"></div>
+          <div class="editor-pane editor-pane-editor">
+            <div id="editor-codemirror" class="editor-codemirror"></div>
+          </div>
+          <div class="editor-pane editor-pane-preview">
+            <div id="editor-markdown-preview" class="editor-markdown-preview" aria-label="Parsed markdown preview" hidden></div>
+          </div>
         </div>
         <input id="editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
         <div class="editor-actions">
-          <button type="button" id="editor-reset">Reset Section</button>
+          <button type="button" id="editor-reset">Reset</button>
           <p id="editor-diff-summary" class="editor-diff-summary">Live diff preview</p>
-          <button class="primary" type="button" id="editor-save">Save Draft</button>
+          <button type="button" id="editor-preview-toggle" data-format-action="preview-toggle" aria-pressed="false" title="Toggle parsed markdown preview">Preview</button>
+          <button class="primary" type="button" id="editor-save">Save</button>
         </div>
       </div>
     `;
@@ -5031,8 +6009,12 @@
     elements.modalCompareToolbar = modal.querySelector(".editor-compare-toolbar");
     elements.modalCompareSelect = modal.querySelector("#editor-compare-commit");
     elements.modalDiffSummary = modal.querySelector("#editor-diff-summary");
+    elements.modalDiffEditor = modal.querySelector(".editor-diff-editor");
+    elements.modalPreview = modal.querySelector("#editor-markdown-preview");
+    elements.modalPreviewToggle = modal.querySelector("#editor-preview-toggle");
     elements.modalSave = modal.querySelector("#editor-save");
     elements.modalReset = modal.querySelector("#editor-reset");
+    setPreviewEnabled(shouldDefaultPreviewEnabled());
     updateVariantControlState();
     updateToolbarVisibilityButton();
   }
@@ -5179,6 +6161,46 @@
       });
     }
 
+    if (elements.modalPreview) {
+      const resyncAfterPreviewToggle = () => {
+        schedulePreviewResyncAfterLayout();
+      };
+
+      bindManualScrollSourceListeners(elements.modalPreview, "preview");
+      elements.modalPreview.addEventListener("scroll", () => {
+        if (state.previewIgnoreNextPreviewScroll > 0) {
+          state.previewIgnoreNextPreviewScroll -= 1;
+          return;
+        }
+        if (state.previewSyncLock === "editor") {
+          return;
+        }
+        setActivePreviewScrollSource("preview");
+        syncEditorScrollToPreview();
+        schedulePreviewResyncAfterScrollSettles();
+      }, { passive: true });
+
+      elements.modalPreview.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        if (target.closest(".procedure-header")) {
+          resyncAfterPreviewToggle();
+        }
+      });
+
+      elements.modalPreview.addEventListener("keydown", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest(".procedure-header")) {
+          return;
+        }
+        if (event.key === "Enter" || event.key === " ") {
+          resyncAfterPreviewToggle();
+        }
+      });
+    }
+
     const backdrop = elements.modal.querySelector(".editor-backdrop");
     if (backdrop) {
       backdrop.addEventListener("click", closeModal);
@@ -5237,6 +6259,7 @@
         return;
       }
       updateFormatToolbarScrollState();
+      schedulePreviewResyncAfterLayout();
     });
 
     window.addEventListener("message", handleAuthPopupMessage);

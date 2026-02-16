@@ -590,12 +590,12 @@ body.editor-modal-open {
 .editor-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(17, 24, 39, 0.65);
+    background: rgba(17, 24, 39, 0.45);
 }
 
 .editor-dialog {
     position: relative;
-    width: min(900px, calc(100vw - 24px));
+    width: min(1190px, calc(100vw - 24px));
     max-height: calc(100vh - 24px);
     margin: 12px auto;
     background: #ffffff;
@@ -974,15 +974,40 @@ body.editor-modal-open {
     border-bottom: var(--border-subtle-line);
     background: #ffffff;
     overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.editor-diff-editor.has-preview {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.editor-diff-editor > * {
+    min-height: 0;
+}
+
+.editor-pane {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+}
+
+.editor-pane-preview {
+    display: none;
+}
+
+.editor-diff-editor.has-preview .editor-pane-preview {
+    display: block;
 }
 
 .editor-codemirror {
     height: 100%;
+    min-width: 0;
+    min-height: 0;
 }
 
 .editor-codemirror .cm-editor {
     height: 100%;
-    padding: 10px;
 }
 
 .editor-codemirror .cm-scroller {
@@ -999,6 +1024,36 @@ body.editor-modal-open {
         sans-serif;
     font-size: 1rem;
     line-height: 1.6;
+}
+
+.editor-markdown-preview {
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 10px 14px 16px;
+    border-left: var(--border-subtle-line);
+    background: var(--bg-elevated);
+}
+
+.editor-diff-editor.has-preview .editor-markdown-preview {
+    border-left: 2px solid rgba(15, 23, 42, 0.16);
+    box-shadow:
+        inset 1px 0 0 rgba(255, 255, 255, 0.8),
+        -10px 0 16px -16px rgba(15, 23, 42, 0.5);
+}
+
+.editor-preview-block {
+    position: relative;
+}
+
+.editor-markdown-preview > *:first-child {
+    margin-top: 0;
+}
+
+.editor-markdown-preview > *:last-child {
+    margin-bottom: 0;
 }
 
 .cm-diff-ins {
@@ -1018,12 +1073,12 @@ body.editor-modal-open {
 
 .cm-diff-del-block {
     display: block;
-    padding: 2px 0;
+    padding: 0 2px 0 6px;
 }
 
 .editor-actions {
     display: grid;
-    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
     justify-content: stretch;
     align-items: center;
     gap: 10px;
@@ -1047,6 +1102,12 @@ body.editor-modal-open {
     background: var(--info);
     color: #ffffff;
     border-color: var(--info);
+}
+
+.editor-actions #editor-preview-toggle.is-active {
+    border-color: var(--info);
+    color: var(--info-strong);
+    background: var(--info-soft);
 }
 
 @media (max-width: 860px) {
@@ -1110,6 +1171,23 @@ body.editor-modal-open {
 
     .editor-diff-editor {
         min-height: 240px;
+    }
+
+    .editor-diff-editor.has-preview {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .editor-markdown-preview {
+        border-left: 0;
+        border-top: var(--border-subtle-line);
+    }
+
+    .editor-diff-editor.has-preview .editor-markdown-preview {
+        border-top: 2px solid rgba(15, 23, 42, 0.16);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.8),
+            0 -10px 16px -16px rgba(15, 23, 42, 0.5);
     }
 
     .editor-format-toolbar {

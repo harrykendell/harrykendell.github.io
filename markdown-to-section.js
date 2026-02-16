@@ -24,53 +24,17 @@ const markdownEscapeHtml = window.AppUtils.escapeHtml;
 const markdownEscapeAttribute = window.AppUtils.escapeAttribute;
 const markdownGetGitHubEditUrl = window.AppUtils.getGitHubEditUrl;
 
-function renderProcedureNode(node) {
-    const skillRaw = (node.skillRaw || "").trim();
-    const title = (node.title || "Procedure").trim() || "Procedure";
+const PROCEDURE_MARKER_START_PREFIX = "PROCEDURE:START:";
+const PROCEDURE_MARKER_END = "PROCEDURE:END";
 
-    const blockContent = node.content
-        .map((part) => (typeof part === "string" ? part : part.html))
-        .join("\n")
-        .trim();
+function buildProcedureStartMarkerHtml(skillRaw, title) {
+    const encodedSkill = encodeURIComponent(skillRaw || "");
+    const encodedTitle = encodeURIComponent(title || "");
+    return `<!--${PROCEDURE_MARKER_START_PREFIX}${encodedSkill}:${encodedTitle}-->`;
+}
 
-    const chunks = blockContent
-        ? blockContent.split(/\n\s*\n/).filter(Boolean)
-        : [];
-    const descriptionChunk = (chunks.shift() || "").trim();
-    const restMarkdown = chunks.join("\n\n");
-
-    const descriptionHtml = descriptionChunk
-        ? marked.parseInline(descriptionChunk.replace(/\n+/g, " "))
-        : "";
-    const bodyHtml = restMarkdown ? marked.parse(restMarkdown) : "";
-
-    const skillValue = skillRaw.toLowerCase();
-    const skillLabel = skillRaw.replace(/[_-]+/g, " ");
-    const skillBadge = skillRaw
-        ? `<span class="procedure-skill-badge" data-skill="${skillValue}">${skillLabel}</span>`
-        : "";
-
-    const html = [
-        `<div class="procedure"${skillRaw ? ` data-skill="${skillValue}"` : ""}>`,
-        `  <div class="procedure-header" role="button" tabindex="0" aria-expanded="false">`,
-        `    <div class="procedure-title">`,
-        `      <span class="procedure-title-icon" aria-hidden="true">🛠</span>`,
-        `      <div class="procedure-title-content">`,
-        skillBadge ? `        ${skillBadge}` : "",
-        `        <span class="procedure-title-text">${title}</span>`,
-        `      </div>`,
-        `    </div>`,
-        `  </div>`,
-        `  <div class="procedure-content">`,
-        descriptionHtml
-            ? `    <div class="procedure-description">${descriptionHtml}</div>`
-            : "",
-        bodyHtml ? `    ${bodyHtml}` : "",
-        `  </div>`,
-        `</div>`,
-    ].filter(Boolean).join("\n");
-
-    return html;
+function buildProcedureEndMarkerHtml() {
+    return `<!--${PROCEDURE_MARKER_END}-->`;
 }
 
 function transformProcedureBlocks(markdown) {
@@ -90,14 +54,11 @@ function transformProcedureBlocks(markdown) {
 
             // Output any text before the tag
             if (prefix.trim()) {
-                if (stack.length) {
-                    stack[stack.length - 1].content.push(prefix.trimEnd());
-                } else {
-                    output.push(prefix.trimEnd());
-                }
+                output.push(prefix.trimEnd());
             }
 
-            stack.push({ skillRaw, title, content: [] });
+            output.push(buildProcedureStartMarkerHtml(skillRaw, title));
+            stack.push({ skillRaw, title, markerIndex: output.length - 1 });
             continue;
         }
 
@@ -112,49 +73,142 @@ function transformProcedureBlocks(markdown) {
                 continue;
             }
 
-            const completed = stack[stack.length - 1];
-
             // Add any text before the closing tag to the procedure content
             if (prefix.trim()) {
-                stack[stack.length - 1].content.push(prefix.trimEnd());
+                output.push(prefix.trimEnd());
             }
             stack.pop();
-            const rendered = { html: renderProcedureNode(completed) };
-
-            if (stack.length) {
-                stack[stack.length - 1].content.push(rendered);
-            } else {
-                output.push(rendered.html);
-            }
+            output.push(buildProcedureEndMarkerHtml());
 
             // Output any text after the closing tag
             if (suffix.trim()) {
-                if (stack.length) {
-                    stack[stack.length - 1].content.push(suffix.trimStart());
-                } else {
-                    output.push(suffix.trimStart());
-                }
+                output.push(suffix.trimStart());
             }
             continue;
         }
 
-        if (stack.length) {
-            stack[stack.length - 1].content.push(line);
-        } else {
-            output.push(line);
-        }
+        output.push(line);
     }
 
-    // If any unclosed procedures remain, emit them as raw text to avoid loss
+    // If any unclosed procedures remain, restore marker lines as plain text.
     while (stack.length) {
         const dangling = stack.shift();
         console.error(`❌ Unclosed procedure: "${dangling.title}"`);
-        output.push(
-            `[!PROCEDURE:${dangling.skillRaw}] ${dangling.title}`,
-            ...dangling.content.map((part) => typeof part === "string" ? part : part.html));
+        output[dangling.markerIndex] = `[!PROCEDURE:${dangling.skillRaw}] ${dangling.title}`;
     }
 
     return output.join("\n");
+}
+
+function renderProcedureBlockHtml(meta) {
+    const skillRaw = (meta.skillRaw || "").trim();
+    const title = (meta.title || "Procedure").trim() || "Procedure";
+    const skillValue = skillRaw.toLowerCase();
+    const skillLabel = skillRaw.replace(/[_-]+/g, " ");
+    const skillBadge = skillRaw
+        ? `<span class="procedure-skill-badge" data-skill="${markdownEscapeAttribute(skillValue)}">${markdownEscapeHtml(skillLabel)}</span>`
+        : "";
+
+    const rawContentHtml = String(meta.contentHtml || "");
+    const contentHtml = rawContentHtml.trim();
+    let descriptionHtml = "";
+    let bodyHtml = contentHtml;
+
+    const firstParagraphMatch = /^\s*<p>([\s\S]*?)<\/p>([\s\S]*)$/i.exec(contentHtml);
+    if (firstParagraphMatch && firstParagraphMatch[1].trim()) {
+        descriptionHtml = `<div class="procedure-description">${firstParagraphMatch[1].trim()}</div>`;
+        bodyHtml = firstParagraphMatch[2].trim();
+    }
+
+    return [
+        `<div class="procedure"${skillRaw ? ` data-skill="${markdownEscapeAttribute(skillValue)}"` : ""}>`,
+        `  <div class="procedure-header" role="button" tabindex="0" aria-expanded="false">`,
+        `    <div class="procedure-title">`,
+        `      <span class="procedure-title-icon" aria-hidden="true">🛠</span>`,
+        `      <div class="procedure-title-content">`,
+        skillBadge ? `        ${skillBadge}` : "",
+        `        <span class="procedure-title-text">${markdownEscapeHtml(title)}</span>`,
+        `      </div>`,
+        `    </div>`,
+        `  </div>`,
+        `  <div class="procedure-content">`,
+        descriptionHtml ? `    ${descriptionHtml}` : "",
+        bodyHtml ? `    ${bodyHtml}` : "",
+        `  </div>`,
+        `</div>`,
+    ].filter(Boolean).join("\n");
+}
+
+function transformRenderedProcedureBlocks(renderedHtml) {
+    const source = String(renderedHtml || "");
+    if (!source.includes("<!--PROCEDURE:")) {
+        return source;
+    }
+
+    const markerPattern = /<!--PROCEDURE:START:([^:]*):(.*?)-->|<!--PROCEDURE:END-->/g;
+    const output = [];
+    const stack = [];
+    let cursor = 0;
+
+    const append = (chunk) => {
+        if (!chunk) {
+            return;
+        }
+        if (stack.length) {
+            stack[stack.length - 1].contentHtml += chunk;
+            return;
+        }
+        output.push(chunk);
+    };
+
+    source.replace(markerPattern, (...args) => {
+        const fullMatch = args[0];
+        const encodedSkill = args[1];
+        const encodedTitle = args[2];
+        const offset = args[args.length - 2];
+
+        append(source.slice(cursor, offset));
+        cursor = offset + fullMatch.length;
+
+        if (fullMatch === `<!--${PROCEDURE_MARKER_END}-->`) {
+            if (!stack.length) {
+                console.error("⚠️ Unmatched [!/PROCEDURE] marker in rendered HTML.");
+                append("<p>[!/PROCEDURE]</p>");
+                return "";
+            }
+
+            const completed = stack.pop();
+            append(renderProcedureBlockHtml(completed));
+            return "";
+        }
+
+        let skillRaw = "";
+        let title = "Procedure";
+        try {
+            skillRaw = decodeURIComponent(encodedSkill || "");
+            title = decodeURIComponent(encodedTitle || "").trim() || "Procedure";
+        } catch (error) {
+            console.error("⚠️ Failed to decode procedure marker metadata.", error);
+        }
+
+        stack.push({
+            skillRaw: String(skillRaw || "").trim(),
+            title,
+            contentHtml: "",
+        });
+        return "";
+    });
+
+    append(source.slice(cursor));
+
+    while (stack.length) {
+        const dangling = stack.pop();
+        console.error(`❌ Unclosed procedure in rendered HTML: "${dangling.title}"`);
+        const fallbackOpen = `[!PROCEDURE:${dangling.skillRaw}] ${dangling.title}`;
+        append(`<p>${markdownEscapeHtml(fallbackOpen)}</p>${dangling.contentHtml}`);
+    }
+
+    return output.join("");
 }
 
 function initProcedures(rootEl) {
@@ -470,15 +524,15 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
     if (
         typeof marked === "undefined"
         || typeof marked.parse !== "function"
-        || typeof marked.parseInline !== "function"
     ) {
         throw new Error("marked is required to render markdown content.");
     }
 
     const transformedMarkdown = transformProcedureBlocks(sourceMarkdown);
     const renderedHtml = marked.parse(transformedMarkdown);
+    const procedureWrappedHtml = transformRenderedProcedureBlocks(renderedHtml);
     const template = document.createElement("template");
-    template.innerHTML = renderedHtml;
+    template.innerHTML = procedureWrappedHtml;
     const fragment = template.content;
 
     if (shouldDowngradeHeadings) {
