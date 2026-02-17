@@ -1,9 +1,9 @@
 # Coxbox Wiring
 
 <figure class="figure figure-float-right">
-  <img src="imgs/wiring/coxbox_plug_pinout.svg" alt="Diagram of a 5-pin coxbox plug showing keyway orientation and pins A-E." />
+  <img src="imgs/wiring/coxbox_plug.jpg" alt="Diagram of a 4-pin coxbox plug showing orientation and pin allocations." />
   <div class="figure-body">
-    <p class="figure-title">5‑pin plug reference (front view)</p>
+    <p class="figure-title">Cox box plug (front view)</p>
     <p class="figure-caption">
       Use the keyway to orient the connector. Do not assume pin functions: verify with a multimeter and a known‑good device.
     </p>
