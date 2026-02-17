@@ -70,6 +70,81 @@ body {
     position: relative;
 }
 
+body:not(.app-ready) {
+    overflow: hidden;
+}
+
+.app-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.22), transparent 45%),
+        radial-gradient(circle at 82% 70%, rgba(255, 255, 255, 0.14), transparent 42%),
+        linear-gradient(160deg, #003314 0%, #00491e 45%, #006028 100%);
+    color: #f8fafc;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 280ms ease, visibility 280ms ease;
+}
+
+body.app-ready .app-splash {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.app-splash-panel {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-splash-panel img {
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    animation: splash-float 1.4s ease-in-out infinite;
+}
+
+.app-splash-title {
+    margin: 0;
+    font-size: clamp(1.2rem, 3.4vw, 1.7rem);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.app-splash-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+@keyframes splash-float {
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-splash,
+    .app-splash-panel img {
+        animation: none;
+        transition: none;
+    }
+}
+
 .layout {
     display: flex;
     width: 100%;

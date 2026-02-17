@@ -6,16 +6,21 @@
   <title>Rowing Repairs Manual</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="github-auth-origin" content="https://github-auth.kendell.uk" />
+  <meta name="theme-color" content="#00491e" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
   <link rel="shortcut icon" href="/favicon/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="Boat Repairs" />
   <link rel="manifest" href="/favicon/site.webmanifest" />
-  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="styles.css?v=33" />
   <link rel="stylesheet" href="sidebar.css?v=2" />
   <script defer src="utils.js?v=4"></script>
-  <script defer src="script.js?v=42"></script>
+  <script defer src="pwa.js?v=1"></script>
+  <script defer src="script.js?v=43"></script>
   <script defer src="sidebar.js?v=2"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script defer src="markdown-to-section.js?v=32"></script>
@@ -26,6 +31,13 @@
 </head>
 
 <body id="top">
+  <div class="app-splash" id="app-splash" role="status" aria-live="polite">
+    <div class="app-splash-panel">
+      <img src="/favicon/web-app-manifest-192x192.png" alt="" width="80" height="80" />
+      <p class="app-splash-title">Rowing Repairs Manual</p>
+      <p class="app-splash-subtitle">Loading manual...</p>
+    </div>
+  </div>
   <button class="toc-toggle" id="toc-toggle" aria-controls="sidebar" aria-expanded="false" type="button">
     ≡
   </button>

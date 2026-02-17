@@ -804,12 +804,13 @@ async function initApp() {
   setupTocToggle();
   setupSearchBar();
 
-  loadPreface();
+  const prefacePromise = loadPreface();
 
   await resolveSectionFiles();
   renderInitialSidebar();
   setupSidebarLinks();
   await loadSections();
+  await prefacePromise;
   scheduleNonCriticalWork(() => {
     refreshSearchBarIndex();
   });
@@ -821,6 +822,12 @@ async function initApp() {
 document.addEventListener("DOMContentLoaded", () => {
   initApp().catch((error) => {
     console.error("App initialization failed", error);
+  }).finally(() => {
+    if (typeof window.markAppReady === "function") {
+      window.markAppReady();
+      return;
+    }
+    document.body.classList.add("app-ready");
   });
 });
 
