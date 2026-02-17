@@ -445,7 +445,7 @@ blockquote p {
 }
 
 .procedure-title {
-    align-items: flex-start;
+    align-items: center;
 }
 
 .procedure-title-icon {
