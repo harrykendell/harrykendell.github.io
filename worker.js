@@ -18,6 +18,7 @@ const REPO_ACCESS_CACHE_TTL_MS = 60 * 1000;
 const DEFAULT_ALLOWED_ORIGINS = [
     "https://kendell.uk",
     "https://www.kendell.uk",
+    "https://dev.kendell.uk",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ];
