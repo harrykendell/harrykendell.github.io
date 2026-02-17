@@ -24,11 +24,29 @@
 .toc-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
     margin: 0 0 12px;
     padding-bottom: 10px;
     border-bottom: var(--border-subtle-line);
+}
+
+.toc-logo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.toc-logo {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
 }
 
 .sidebar h2 {
