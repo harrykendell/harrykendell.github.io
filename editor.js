@@ -353,9 +353,13 @@
     const name = utilConfig && typeof utilConfig.name === "string"
       ? utilConfig.name
       : "";
-    const baseBranch = utilConfig && typeof utilConfig.baseBranch === "string"
+    const hostname = String(window.location.hostname || "").toLowerCase();
+    const configuredBaseBranch = utilConfig && typeof utilConfig.baseBranch === "string"
       ? utilConfig.baseBranch
-      : "unknown";
+      : "";
+    const baseBranch = hostname === "dev.kendell.uk"
+      ? "dev"
+      : (configuredBaseBranch || "main");
 
     if (!owner || !name) {
       return null;

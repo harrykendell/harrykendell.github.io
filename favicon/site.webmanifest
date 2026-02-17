@@ -1,21 +1,26 @@
 {
   "name": "Rowing Repairs Manual",
   "short_name": "Repairs",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "description": "Maintenance and repair reference for rowing boats, oars, and rigging.",
+  "theme_color": "#00491e",
+  "background_color": "#00491e",
   "icons": [
     {
       "src": "/favicon/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "/favicon/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

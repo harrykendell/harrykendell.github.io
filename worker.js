@@ -861,6 +861,12 @@ async function fetchRepoStatusFromGitHub(options) {
                 `${repoPrefix}/commits/${encodeURIComponent(activity.commitSha)}/check-runs?per_page=${REPO_STATUS_CHECK_RUNS_PER_PAGE}`,
                 { token, timeoutMs: REPO_STATUS_REQUEST_TIMEOUT_MS },
             );
+            const checkRuns = checkRunsPayload && Array.isArray(checkRunsPayload.check_runs)
+                ? checkRunsPayload.check_runs
+                : [];
+            if (!activity.deployRun) {
+                activity.deployRun = selectDeployCheckRun(checkRuns);
+            }
             const markdownValidation = await buildMarkdownValidationSummary({
                 token,
                 repoPrefix,
@@ -1078,6 +1084,34 @@ function selectDeployRun(runs) {
     return nonMarkdownRun ? summarizeDeployRun(nonMarkdownRun) : null;
 }
 
+function selectDeployCheckRun(checkRuns) {
+    if (!Array.isArray(checkRuns) || checkRuns.length === 0) {
+        return null;
+    }
+
+    const sortedRuns = checkRuns.slice().sort((left, right) => {
+        const leftTime = Date.parse(
+            left && (left.started_at || left.completed_at || left.created_at)
+                ? (left.started_at || left.completed_at || left.created_at)
+                : "",
+        ) || 0;
+        const rightTime = Date.parse(
+            right && (right.started_at || right.completed_at || right.created_at)
+                ? (right.started_at || right.completed_at || right.created_at)
+                : "",
+        ) || 0;
+        return rightTime - leftTime;
+    });
+
+    const cloudflareRun = sortedRuns.find((run) => isCloudflarePagesCheckRun(run)) || null;
+    if (cloudflareRun) {
+        return summarizeDeployCheckRun(cloudflareRun);
+    }
+
+    const genericPagesRun = sortedRuns.find((run) => isGenericPagesCheckRun(run)) || null;
+    return genericPagesRun ? summarizeDeployCheckRun(genericPagesRun) : null;
+}
+
 function summarizeDeployRun(run) {
     if (!run || typeof run !== "object") {
         return null;
@@ -1093,6 +1127,30 @@ function summarizeDeployRun(run) {
         event: typeof run.event === "string" ? run.event : "",
         created_at: typeof run.created_at === "string" ? run.created_at : "",
         updated_at: typeof run.updated_at === "string" ? run.updated_at : "",
+    };
+}
+
+function summarizeDeployCheckRun(checkRun) {
+    if (!checkRun || typeof checkRun !== "object") {
+        return null;
+    }
+
+    return {
+        id: Number.isFinite(Number(checkRun.id)) ? Number(checkRun.id) : 0,
+        name: typeof checkRun.name === "string" ? checkRun.name : "",
+        status: typeof checkRun.status === "string" ? checkRun.status : "",
+        conclusion: typeof checkRun.conclusion === "string" ? checkRun.conclusion : "",
+        html_url: typeof checkRun.details_url === "string" && checkRun.details_url
+            ? checkRun.details_url
+            : (typeof checkRun.html_url === "string" ? checkRun.html_url : ""),
+        run_number: 0,
+        event: "check_run",
+        created_at: typeof checkRun.started_at === "string"
+            ? checkRun.started_at
+            : (typeof checkRun.created_at === "string" ? checkRun.created_at : ""),
+        updated_at: typeof checkRun.completed_at === "string"
+            ? checkRun.completed_at
+            : (typeof checkRun.updated_at === "string" ? checkRun.updated_at : ""),
     };
 }
 
@@ -1137,6 +1195,39 @@ function isPagesDeployRun(run) {
         || text.includes("publish");
     const hasBuild = text.includes("build");
     return hasPages || (hasDeploy && hasBuild);
+}
+
+function isCloudflarePagesCheckRun(run) {
+    const name = String(run && run.name ? run.name : "").toLowerCase();
+    const app = String(
+        run
+        && run.app
+        && typeof run.app === "object"
+        && run.app.name
+            ? run.app.name
+            : "",
+    ).toLowerCase();
+    const text = `${name} ${app}`;
+    return text.includes("cloudflare") && text.includes("pages");
+}
+
+function isGenericPagesCheckRun(run) {
+    if (isMarkdownValidationRun(run)) {
+        return false;
+    }
+    const name = String(run && run.name ? run.name : "").toLowerCase();
+    const app = String(
+        run
+        && run.app
+        && typeof run.app === "object"
+        && run.app.name
+            ? run.app.name
+            : "",
+    ).toLowerCase();
+    const text = `${name} ${app}`;
+    const hasPages = text.includes("pages");
+    const hasDeploy = text.includes("deploy") || text.includes("deployment") || text.includes("build");
+    return hasPages && hasDeploy;
 }
 
 async function createPullRequestFromFork(options) {
