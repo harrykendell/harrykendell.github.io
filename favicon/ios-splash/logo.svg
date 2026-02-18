@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 55">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56">
   <defs>
     <path
       id="blade-shape"
@@ -21,15 +21,18 @@
   </g>
 
   <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+    <!-- <use href="#stripe-shape"/> -->
     <use href="#blade-shape" />
     <use href="#shaft-shape" />
     <use href="#handle-shape" />
-    <!-- <use href="#stripe-shape" fill="#ffffff" /> -->
   </g>
 
+
   <g>
+    <!-- <use href="#stripe-shape" fill="#ffffff" /> -->
     <use href="#blade-shape" fill="#00491e" />
     <use href="#shaft-shape" fill="#00491e" />
     <use href="#handle-shape" fill="#000000" />
+
   </g>
 </svg>
