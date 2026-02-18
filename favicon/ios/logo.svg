@@ -17,7 +17,7 @@
 
   <g id="splash-bg">
     <rect width="60" height="55" fill="#00491e" />
-    <rect x="0.55" y="0.55" width="58.9" height="53.9" fill="none" stroke="#ffffff" stroke-width="1.1" />
+    <rect id="splash-bg-border" x="0.55" y="0.55" width="58.9" height="53.9" fill="none" stroke="#ffffff" stroke-width="1.1" />
   </g>
 
   <g fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
