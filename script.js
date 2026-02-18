@@ -581,7 +581,7 @@ async function loadPreface() {
 
 function refreshSidebarLinksCache() {
   sidebarLinksCache = Array.from(
-    document.querySelectorAll(".sidebar a[href^='#']"));
+    document.querySelectorAll("#toc-list a[href^='#'], .toc-header h2 a[href^='#']"));
 }
 
 function setupTocToggle() {
@@ -941,7 +941,7 @@ function setupActiveTracking() {
       }
     } else {
       const contentsLink = document.querySelector(
-        '.sidebar a[href="#top"]',
+        '.toc-header h2 a[href="#top"]',
       );
       if (contentsLink) {
         contentsLink.classList.add("active");
