@@ -26,6 +26,8 @@ const SECTION_GROUPS = {
     other: "Other",
   },
 };
+let sectionGroupOrder = SECTION_GROUPS.order.slice();
+let sectionGroupOverrides = new Map();
 
 if (
   !window.AppUtils
@@ -93,24 +95,108 @@ function scheduleNonCriticalWork(task) {
   }, 0);
 }
 
+function normalizeGroupKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function resolveGroupKeyFromHeading(headingText) {
+  const normalized = normalizeGroupKey(headingText);
+  if (!normalized) {
+    return null;
+  }
+
+  if (SECTION_GROUPS.labels[normalized]) {
+    return normalized;
+  }
+
+  const match = Object.entries(SECTION_GROUPS.labels)
+    .find(([, label]) => normalizeGroupKey(label) === normalized);
+  return match ? match[0] : null;
+}
+
 function parseSectionOrderMarkdown(markdown) {
+  const parsed = {
+    ids: [],
+    groupMap: new Map(),
+    groupOrder: [],
+  };
+
   if (typeof markdown !== "string") {
-    return [];
+    return parsed;
   }
 
   const unique = new Set();
+  const seenGroups = new Set();
+  let currentGroup = null;
+
   markdown.split(/\r?\n/).forEach((line) => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) {
+    if (!trimmed) {
       return;
     }
+
+    const headingMatch = /^(#{2,6})\s+(.+?)\s*$/.exec(trimmed);
+    if (headingMatch) {
+      const groupKey = resolveGroupKeyFromHeading(headingMatch[2]);
+      if (groupKey) {
+        currentGroup = groupKey;
+        if (!seenGroups.has(groupKey)) {
+          seenGroups.add(groupKey);
+          parsed.groupOrder.push(groupKey);
+        }
+      } else {
+        currentGroup = null;
+      }
+      return;
+    }
+
+    if (trimmed.startsWith("#")) {
+      return;
+    }
+
     const sectionId = appNormalizeSectionId(trimmed);
-    if (sectionId) {
+    if (sectionId && !unique.has(sectionId)) {
       unique.add(sectionId);
+      parsed.ids.push(sectionId);
+      if (currentGroup) {
+        parsed.groupMap.set(sectionId, currentGroup);
+      }
     }
   });
-  return Array.from(unique);
+
+  return parsed;
 }
+
+function updateSectionGroupState(parsedManifest) {
+  sectionGroupOverrides = parsedManifest && parsedManifest.groupMap instanceof Map
+    ? new Map(parsedManifest.groupMap)
+    : new Map();
+  sectionGroupOrder = parsedManifest && Array.isArray(parsedManifest.groupOrder) && parsedManifest.groupOrder.length
+    ? parsedManifest.groupOrder.slice()
+    : SECTION_GROUPS.order.slice();
+}
+
+function setSectionGroupOverride(sectionId, groupKey) {
+  const normalizedId = appNormalizeSectionId(sectionId);
+  if (!normalizedId) {
+    return;
+  }
+  const normalizedGroup = normalizeGroupKey(groupKey);
+  if (!normalizedGroup) {
+    sectionGroupOverrides.delete(normalizedId);
+    return;
+  }
+  sectionGroupOverrides.set(normalizedId, normalizedGroup);
+  if (!sectionGroupOrder.includes(normalizedGroup)) {
+    sectionGroupOrder.push(normalizedGroup);
+  }
+}
+
+window.setSectionGroupOverride = setSectionGroupOverride;
 
 function getSectionPath(sectionId) {
   return `sections/${sectionId}.md`;
@@ -164,7 +250,7 @@ async function resolveSectionFiles() {
   }
   const markdown = await response.text();
   const parsed = parseSectionOrderMarkdown(markdown);
-  if (parsed.length === 0) {
+  if (parsed.ids.length === 0) {
     throw new Error("Section order manifest is empty.");
   }
 
@@ -172,8 +258,11 @@ async function resolveSectionFiles() {
   const draftManifest = getDraftMarkdown(SECTION_ORDER_PATH, draftMap);
   const parsedDraft = draftManifest
     ? parseSectionOrderMarkdown(draftManifest)
-    : [];
-  const nextIds = parsedDraft.length > 0 ? parsedDraft : parsed;
+    : null;
+  const nextManifest = parsedDraft && parsedDraft.ids.length > 0
+    ? parsedDraft
+    : parsed;
+  const nextIds = nextManifest.ids;
   const seenIds = new Set(nextIds);
   const draftOnlyIds = [];
   draftMap.forEach((draft, path) => {
@@ -192,6 +281,7 @@ async function resolveSectionFiles() {
   });
 
   sectionFiles = nextIds.concat(draftOnlyIds);
+  updateSectionGroupState(nextManifest);
   return sectionFiles;
 }
 
@@ -525,14 +615,13 @@ async function loadSections() {
     return;
   }
   let currentGroup = null;
-  const groupLabels = SECTION_GROUPS.labels;
   const fragment = document.createDocumentFragment();
 
   sectionFiles.forEach((sectionId) => {
     const groupKey = getSectionGroup(sectionId);
     if (groupKey !== currentGroup) {
       currentGroup = groupKey;
-      const groupLabel = groupLabels[groupKey];
+      const groupLabel = getSectionGroupLabel(groupKey);
       if (groupLabel) {
         fragment.appendChild(createSectionGroupElement(groupLabel));
       }
@@ -640,20 +729,32 @@ function setupTocToggle() {
 }
 
 function getSectionGroup(sectionId) {
-  if (sectionId.startsWith("maintenance/")) {
+  const normalized = appNormalizeSectionId(sectionId) || "";
+  const override = sectionGroupOverrides.get(normalized);
+  if (override) {
+    return override;
+  }
+  if (normalized.startsWith("maintenance/")) {
     return "maintenance";
   }
-  if (sectionId.startsWith("repairs/")) {
+  if (normalized.startsWith("repairs/")) {
     return "repairs";
   }
-  if (sectionId.startsWith("supplement/")) {
+  if (normalized.startsWith("supplement/")) {
     return "supplement";
   }
   return "other";
 }
 
+function getSectionGroupLabel(groupKey) {
+  return SECTION_GROUPS.labels[groupKey] || formatSectionTitleFromId(groupKey);
+}
+
 function groupItemsBySection(items, resolveSectionId) {
-  const grouped = SECTION_GROUPS.order.reduce((acc, groupKey) => {
+  const order = sectionGroupOrder.length
+    ? sectionGroupOrder.slice()
+    : SECTION_GROUPS.order.slice();
+  const grouped = order.reduce((acc, groupKey) => {
     acc[groupKey] = [];
     return acc;
   }, {});
@@ -666,15 +767,18 @@ function groupItemsBySection(items, resolveSectionId) {
     const groupKey = getSectionGroup(sectionId);
     if (!grouped[groupKey]) {
       grouped[groupKey] = [];
+      if (!order.includes(groupKey)) {
+        order.push(groupKey);
+      }
     }
     grouped[groupKey].push(item);
   });
 
-  return grouped;
+  return { grouped, order };
 }
 
 function buildTocGroupHtml(groupKey, itemsHtml) {
-  const groupLabel = SECTION_GROUPS.labels[groupKey];
+  const groupLabel = getSectionGroupLabel(groupKey);
   const safeGroupLabel = groupLabel ? escapeHtml(groupLabel) : "";
   const titleHtml = safeGroupLabel
     ? `<div class="toc-group-title">${safeGroupLabel}</div>`
@@ -690,8 +794,11 @@ function buildTocGroupHtml(groupKey, itemsHtml) {
     `;
 }
 
-function renderSidebarGroups(groupedSections, renderItem) {
-  return SECTION_GROUPS.order.map((groupKey) => {
+function renderSidebarGroups(groupedSections, renderItem, groupOrder) {
+  const order = Array.isArray(groupOrder) && groupOrder.length
+    ? groupOrder
+    : SECTION_GROUPS.order;
+  return order.map((groupKey) => {
     const groupItems = groupedSections[groupKey] || [];
     if (groupItems.length === 0) {
       return "";
@@ -809,7 +916,11 @@ function renderInitialSidebar() {
   }
 
   const groupedSections = groupItemsBySection(sectionFiles, (sectionId) => sectionId);
-  const sidebarHtml = renderSidebarGroups(groupedSections, renderInitialSectionNavItem);
+  const sidebarHtml = renderSidebarGroups(
+    groupedSections.grouped,
+    renderInitialSectionNavItem,
+    groupedSections.order,
+  );
   updateSidebarHtml(sidebarList, sidebarHtml);
 }
 
@@ -878,7 +989,11 @@ function generateSidebar() {
   }
 
   const groupedSections = groupItemsBySection(Array.from(sections), (section) => section.id);
-  const sidebarHtml = renderSidebarGroups(groupedSections, renderSectionNavItem);
+  const sidebarHtml = renderSidebarGroups(
+    groupedSections.grouped,
+    renderSectionNavItem,
+    groupedSections.order,
+  );
   updateSidebarHtml(sidebarList, sidebarHtml);
 }
 

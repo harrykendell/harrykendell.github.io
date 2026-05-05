@@ -14,6 +14,7 @@ const REPO_STATUS_MIN_ANNOTATIONS_PER_PAGE = 10;
 const REPO_STATUS_MAX_ISSUES = 12;
 const GITHUB_API_DEFAULT_TIMEOUT_MS = 12 * 1000;
 const REPO_ACCESS_CACHE_TTL_MS = 60 * 1000;
+const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif"]);
 
 const DEFAULT_ALLOWED_ORIGINS = [
     "https://kendell.uk",
@@ -57,6 +58,8 @@ export default {
                         "GET /api/repo-status",
                         "GET /api/file-history",
                         "GET /api/file-content",
+                        "GET /api/image-list",
+                        "GET /api/section-list",
                         "POST /api/logout",
                         "POST /api/submit",
                     ],
@@ -89,6 +92,14 @@ export default {
 
             if (url.pathname === "/api/file-content" && request.method === "GET") {
                 return handleApiFileContent(request, env, corsHeaders);
+            }
+
+            if (url.pathname === "/api/image-list" && request.method === "GET") {
+                return handleApiImageList(request, env, corsHeaders);
+            }
+
+            if (url.pathname === "/api/section-list" && request.method === "GET") {
+                return handleApiSectionList(request, env, corsHeaders);
             }
 
             if (url.pathname === "/api/logout" && request.method === "POST") {
@@ -612,6 +623,80 @@ async function handleApiFileContent(request, env, corsHeaders) {
         sha,
         markdown,
     }, 200, corsHeaders);
+}
+
+async function handleApiImageList(request, env, corsHeaders) {
+    const token = mustGetEnv(env, "GITHUB_STATUS_TOKEN");
+    const url = new URL(request.url);
+    const owner = normalizeRepoOwner(url.searchParams.get("owner"));
+    const repo = normalizeRepoName(url.searchParams.get("repo"));
+    const branch = normalizeBranchName(url.searchParams.get("branch")) || "main";
+
+    if (!owner || !repo) {
+        return jsonResponse({ error: "owner and repo are required." }, 400, corsHeaders);
+    }
+
+    const repoPrefix = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const branchRef = encodeURIComponent(branch);
+    const headCommit = await githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token });
+    const treeSha = headCommit && headCommit.commit && headCommit.commit.tree
+        ? headCommit.commit.tree.sha
+        : (headCommit && headCommit.tree ? headCommit.tree.sha : null);
+
+    if (!treeSha) {
+        return jsonResponse({ error: "Could not resolve repository tree." }, 502, corsHeaders);
+    }
+
+    const tree = await githubApiRequest(
+        `${repoPrefix}/git/trees/${encodeURIComponent(treeSha)}?recursive=1`,
+        { token },
+    );
+    const entries = Array.isArray(tree && tree.tree) ? tree.tree : [];
+    const images = entries
+        .filter((entry) => entry && entry.type === "blob" && typeof entry.path === "string")
+        .map((entry) => entry.path)
+        .filter((path) => path.startsWith("imgs/"))
+        .filter((path) => isImagePath(path))
+        .sort((left, right) => left.localeCompare(right));
+
+    return jsonResponse({ images }, 200, corsHeaders);
+}
+
+async function handleApiSectionList(request, env, corsHeaders) {
+    const token = mustGetEnv(env, "GITHUB_STATUS_TOKEN");
+    const url = new URL(request.url);
+    const owner = normalizeRepoOwner(url.searchParams.get("owner"));
+    const repo = normalizeRepoName(url.searchParams.get("repo"));
+    const branch = normalizeBranchName(url.searchParams.get("branch")) || "main";
+
+    if (!owner || !repo) {
+        return jsonResponse({ error: "owner and repo are required." }, 400, corsHeaders);
+    }
+
+    const repoPrefix = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const branchRef = encodeURIComponent(branch);
+    const headCommit = await githubApiRequest(`${repoPrefix}/commits/${branchRef}`, { token });
+    const treeSha = headCommit && headCommit.commit && headCommit.commit.tree
+        ? headCommit.commit.tree.sha
+        : (headCommit && headCommit.tree ? headCommit.tree.sha : null);
+
+    if (!treeSha) {
+        return jsonResponse({ error: "Could not resolve repository tree." }, 502, corsHeaders);
+    }
+
+    const tree = await githubApiRequest(
+        `${repoPrefix}/git/trees/${encodeURIComponent(treeSha)}?recursive=1`,
+        { token },
+    );
+    const entries = Array.isArray(tree && tree.tree) ? tree.tree : [];
+    const sections = entries
+        .filter((entry) => entry && entry.type === "blob" && typeof entry.path === "string")
+        .map((entry) => entry.path)
+        .map((path) => toSectionIdFromPath(path))
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right));
+
+    return jsonResponse({ sections }, 200, corsHeaders);
 }
 
 async function handleApiLogout(request, env, corsHeaders) {
@@ -1804,6 +1889,39 @@ function normalizeImageRepoPath(value) {
     }
 
     return path;
+}
+
+function isImagePath(value) {
+    if (!value || typeof value !== "string") {
+        return false;
+    }
+
+    const dotIndex = value.lastIndexOf(".");
+    if (dotIndex === -1) {
+        return false;
+    }
+
+    const ext = value.slice(dotIndex).toLowerCase();
+    return IMAGE_EXTENSIONS.has(ext);
+}
+
+function toSectionIdFromPath(value) {
+    if (!value || typeof value !== "string") {
+        return null;
+    }
+
+    if (!value.startsWith("sections/") || !value.endsWith(".md")) {
+        return null;
+    }
+
+    const sectionId = value.slice("sections/".length, -".md".length);
+    if (!sectionId || sectionId === "section-order" || sectionId === "supplement/introduction") {
+        return null;
+    }
+
+    return /^[A-Za-z0-9._-]+(?:\/[A-Za-z0-9._-]+)+$/.test(sectionId)
+        ? sectionId
+        : null;
 }
 
 function normalizeBase64Payload(value) {

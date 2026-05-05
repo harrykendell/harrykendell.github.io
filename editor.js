@@ -334,21 +334,12 @@
       return state.imageManifestPromise;
     }
 
-    state.imageManifestPromise = fetch("imgs/image-manifest.json", { cache: "no-store" })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load image manifest (${response.status}).`);
-        }
-        return response.json();
-      })
-      .then((payload) => {
-        const rawImages = Array.isArray(payload && payload.images) ? payload.images : [];
-        const images = rawImages
-          .map((path) => normalizeImageRepoPath(path))
-          .filter(Boolean)
-          .sort((left, right) => left.localeCompare(right));
-        return images;
-      })
+    state.imageManifestPromise = fetchRepoList(
+      "/api/image-list",
+      "images",
+      normalizeImageRepoPath,
+    )
+      .then((images) => images.sort((left, right) => left.localeCompare(right)))
       .catch((error) => {
         console.error(error);
         return [];
@@ -401,16 +392,6 @@
       return buildPreviewImageDataUrl(choice.draft, choice.path);
     }
     return choice.path;
-  }
-
-  function buildImageManifestContent(paths) {
-    const images = Array.from(new Set(
-      (Array.isArray(paths) ? paths : [])
-        .map((path) => normalizeImageRepoPath(path))
-        .filter(Boolean),
-    )).sort((left, right) => left.localeCompare(right));
-
-    return `${JSON.stringify({ images }, null, 2)}\n`;
   }
 
   function applyStagedImagePreviews(root) {
@@ -472,6 +453,41 @@
       return null;
     }
     return { owner, name, baseBranch };
+  }
+
+  function buildRepoQueryParams(repo) {
+    if (!repo) {
+      return null;
+    }
+
+    const owner = typeof repo.owner === "string" ? repo.owner : "";
+    const name = typeof repo.name === "string" ? repo.name : "";
+    const branch = typeof repo.baseBranch === "string" ? repo.baseBranch : "";
+    if (!owner || !name) {
+      return null;
+    }
+
+    const params = new URLSearchParams({ owner, repo: name });
+    if (branch) {
+      params.set("branch", branch);
+    }
+    return params;
+  }
+
+  async function fetchRepoList(path, payloadKey, normalizeItem) {
+    const repo = resolveRepoConfig();
+    const params = buildRepoQueryParams(repo);
+    if (!params) {
+      return [];
+    }
+
+    const payload = await authRequest(`${path}?${params.toString()}`, {
+      includeSessionHeader: false,
+    });
+    const rawItems = Array.isArray(payload && payload[payloadKey]) ? payload[payloadKey] : [];
+    return rawItems
+      .map((item) => normalizeItem(item))
+      .filter(Boolean);
   }
 
   function formatCompactCommitAge(isoString) {
@@ -4153,23 +4169,80 @@
     return appUtils.normalizeSectionId(sectionId);
   }
 
+  const SECTION_GROUPS = {
+    order: ["maintenance", "repairs", "supplement", "other"],
+    labels: {
+      maintenance: "Maintenance",
+      repairs: "Repairs",
+      supplement: "Supplement",
+      other: "Other",
+    },
+  };
+  let sectionGroupOverrides = new Map();
+  let sectionGroupOrder = SECTION_GROUPS.order.slice();
+
+  function normalizeGroupKey(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function resolveGroupKeyFromHeading(headingText) {
+    const normalized = normalizeGroupKey(headingText);
+    if (!normalized) {
+      return null;
+    }
+
+    if (SECTION_GROUPS.labels[normalized]) {
+      return normalized;
+    }
+
+    const match = Object.entries(SECTION_GROUPS.labels)
+      .find(([, label]) => normalizeGroupKey(label) === normalized);
+    return match ? match[0] : null;
+  }
+
+  function updateSectionGroupState(parsedManifest) {
+    sectionGroupOverrides = parsedManifest && parsedManifest.groupMap instanceof Map
+      ? new Map(parsedManifest.groupMap)
+      : new Map();
+    sectionGroupOrder = parsedManifest && Array.isArray(parsedManifest.groupOrder) && parsedManifest.groupOrder.length
+      ? parsedManifest.groupOrder.slice()
+      : SECTION_GROUPS.order.slice();
+  }
+
   function getSectionGroupKey(sectionId) {
     const normalized = normalizeSectionId(sectionId) || "";
+    if (typeof window.getSectionGroup === "function") {
+      const externalGroup = window.getSectionGroup(normalized);
+      if (externalGroup) {
+        return externalGroup;
+      }
+    }
+    const override = sectionGroupOverrides.get(normalized);
+    if (override) {
+      return override;
+    }
     const groupKey = normalized.split("/")[0] || "other";
-    return groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+    return groupKey.toLowerCase();
   }
 
   function getSectionGroupLabel(groupKey) {
-    if (groupKey === "maintenance") {
-      return "Maintenance";
-    }
-    if (groupKey === "repairs") {
-      return "Repairs";
-    }
-    if (groupKey === "supplement") {
-      return "Supplement";
-    }
-    return "Other";
+    return SECTION_GROUPS.labels[groupKey] || "Other";
+  }
+
+  function getOrderedGroupKeys(groupKeys) {
+    const order = sectionGroupOrder.length
+      ? sectionGroupOrder.slice()
+      : SECTION_GROUPS.order.slice();
+    groupKeys.forEach((groupKey) => {
+      if (!order.includes(groupKey)) {
+        order.push(groupKey);
+      }
+    });
+    return order.filter((groupKey) => groupKeys.includes(groupKey));
   }
 
   function getSectionContainer() {
@@ -4225,9 +4298,45 @@
       .filter(Boolean);
   }
 
-  function serializeSectionOrderDraft(sectionIds) {
-    const lines = sectionIds.map((sectionId) => `- ${sectionId}`);
-    return `# Section Order\n\n${lines.join("\n")}\n`;
+  function serializeSectionOrderDraft(sectionIds, options = {}) {
+    const groupMap = options.groupMap instanceof Map ? options.groupMap : null;
+    const groupOrderOverride = Array.isArray(options.groupOrder) ? options.groupOrder : null;
+    const grouped = sectionIds.reduce((acc, sectionId) => {
+      const groupKey = groupMap && groupMap.has(sectionId)
+        ? groupMap.get(sectionId)
+        : getSectionGroupKey(sectionId);
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
+      }
+      acc[groupKey].push(sectionId);
+      return acc;
+    }, {});
+
+    const lines = ["# Section Order", ""];
+    const orderedGroups = (groupOrderOverride && groupOrderOverride.length)
+      ? groupOrderOverride.slice()
+      : (sectionGroupOrder.length
+        ? sectionGroupOrder.slice()
+        : SECTION_GROUPS.order.slice());
+    Object.keys(grouped).forEach((groupKey) => {
+      if (!orderedGroups.includes(groupKey)) {
+        orderedGroups.push(groupKey);
+      }
+    });
+
+    orderedGroups.forEach((groupKey) => {
+      const items = grouped[groupKey] || [];
+      if (!items.length) {
+        return;
+      }
+      lines.push(`## ${getSectionGroupLabel(groupKey)}`, "");
+      items.forEach((sectionId) => {
+        lines.push(`- ${sectionId}`);
+      });
+      lines.push("");
+    });
+
+    return `${lines.join("\n").trimEnd()}\n`;
   }
 
   async function stageSectionOrderDraftFromDom() {
@@ -4248,11 +4357,14 @@
       }
     }
 
-    const sourceSectionIds = parseSectionOrderMarkdownValue(sourceMarkdown);
-    const matchesSourceOrder = sourceSectionIds.length === sectionIds.length
-      && sourceSectionIds.every((sectionId, index) => sectionId === sectionIds[index]);
+    const parsedSource = parseSectionOrderMarkdownWithGroups(sourceMarkdown);
+    const sourceSectionIds = parsedSource.sectionIds;
+    const sourceNormalized = serializeSectionOrderDraft(sourceSectionIds, {
+      groupMap: parsedSource.groupMap,
+      groupOrder: parsedSource.groupOrder,
+    });
 
-    if (matchesSourceOrder) {
+    if (sourceNormalized.trim() === nextMarkdown.trim()) {
       state.drafts.delete(path);
     } else {
       state.drafts.set(path, nextMarkdown);
@@ -4262,10 +4374,56 @@
   }
 
   function parseSectionOrderMarkdownValue(markdown) {
-    return String(markdown || "")
-      .split(/\r?\n/)
-      .map((line) => normalizeSectionId(line))
-      .filter(Boolean);
+    const parsed = parseSectionOrderMarkdownWithGroups(markdown);
+    updateSectionGroupState(parsed);
+    return parsed.sectionIds;
+  }
+
+  function parseSectionOrderMarkdownWithGroups(markdown) {
+    const sectionIds = [];
+    const groupMap = new Map();
+    const groupOrder = [];
+    const seenIds = new Set();
+    const seenGroups = new Set();
+    let currentGroup = null;
+
+    String(markdown || "").split(/\r?\n/).forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      const headingMatch = /^(#{2,6})\s+(.+?)\s*$/.exec(trimmed);
+      if (headingMatch) {
+        const groupKey = resolveGroupKeyFromHeading(headingMatch[2]);
+        if (groupKey) {
+          currentGroup = groupKey;
+          if (!seenGroups.has(groupKey)) {
+            seenGroups.add(groupKey);
+            groupOrder.push(groupKey);
+          }
+        } else {
+          currentGroup = null;
+        }
+        return;
+      }
+
+      if (trimmed.startsWith("#")) {
+        return;
+      }
+
+      const sectionId = normalizeSectionId(trimmed);
+      if (!sectionId || seenIds.has(sectionId)) {
+        return;
+      }
+      seenIds.add(sectionId);
+      sectionIds.push(sectionId);
+      if (currentGroup) {
+        groupMap.set(sectionId, currentGroup);
+      }
+    });
+
+    return { sectionIds, groupMap, groupOrder };
   }
 
   function getSectionTitleFromMarkdown(sectionId, markdown) {
@@ -4406,16 +4564,30 @@
     if (targetIndex < 0 || targetIndex >= sections.length) {
       return;
     }
+
     const currentGroup = getSectionGroupKey(normalizedSectionId);
     const targetGroup = getSectionGroupKey(sections[targetIndex].id);
+    const targetSectionId = sections[targetIndex].id;
+    let insertBeforeTarget = direction < 0;
     if (currentGroup !== targetGroup) {
-      setStatus("Sections can be reordered within their group only.", true);
-      return;
+      insertBeforeTarget = direction > 0;
+      sectionGroupOverrides.set(normalizedSectionId, targetGroup);
+      if (!sectionGroupOrder.includes(targetGroup)) {
+        sectionGroupOrder.push(targetGroup);
+      }
+      if (typeof window.setSectionGroupOverride === "function") {
+        window.setSectionGroupOverride(normalizedSectionId, targetGroup);
+      }
     }
-
     const reordered = sections.slice();
     const [moved] = reordered.splice(index, 1);
-    reordered.splice(targetIndex, 0, moved);
+    const targetAfterRemoval = reordered.findIndex((section) => section.id === targetSectionId);
+    if (targetAfterRemoval === -1) {
+      return;
+    }
+    const insertionIndex = insertBeforeTarget ? targetAfterRemoval : targetAfterRemoval + 1;
+    const clampedIndex = Math.max(0, Math.min(reordered.length, insertionIndex));
+    reordered.splice(clampedIndex, 0, moved);
     reordered.forEach((section) => {
       container.appendChild(section);
     });
@@ -4477,15 +4649,12 @@
 
   async function fetchSectionManifestIds() {
     try {
-      const response = await fetch("sections/section-manifest.json", { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error(`Could not load section manifest (${response.status}).`);
-      }
-      const payload = await response.json();
-      const rawSections = Array.isArray(payload && payload.sections) ? payload.sections : [];
-      return rawSections
-        .map((sectionId) => normalizeSectionId(sectionId))
-        .filter(Boolean);
+      const sections = await fetchRepoList(
+        "/api/section-list",
+        "sections",
+        normalizeSectionId,
+      );
+      return sections.sort((left, right) => left.localeCompare(right));
     } catch (error) {
       console.error(error);
       return [];
@@ -4495,17 +4664,76 @@
   function buildManageSectionRow(sectionId, options = {}) {
     const safeId = escapeDialogHtml(sectionId);
     const missing = !!options.missing;
+    const disableUp = !!options.disableUp;
+    const disableDown = !!options.disableDown;
     return `
       <li class="section-manager-row${missing ? " is-missing" : ""}">
         <span class="section-manager-id">${safeId}</span>
         <span class="section-manager-actions">
           ${missing ? `<button type="button" data-section-manager-action="add-existing" data-section-id="${safeId}">Add</button>` : ""}
-          ${missing ? "" : `<button type="button" data-section-manager-action="up" data-section-id="${safeId}">Up</button>`}
-          ${missing ? "" : `<button type="button" data-section-manager-action="down" data-section-id="${safeId}">Down</button>`}
+          ${missing ? "" : `<button type="button" data-section-manager-action="up" data-section-id="${safeId}"${disableUp ? " disabled" : ""}>Up</button>`}
+          ${missing ? "" : `<button type="button" data-section-manager-action="down" data-section-id="${safeId}"${disableDown ? " disabled" : ""}>Down</button>`}
           ${missing ? "" : `<button type="button" class="is-danger" data-section-manager-action="remove" data-section-id="${safeId}">Remove</button>`}
         </span>
       </li>
     `;
+  }
+
+  let manageSectionsHandler = null;
+
+  function buildManageSectionsDialogHtml(manifestIds) {
+    const currentIds = getSectionOrderIdsFromDom();
+    const currentSet = new Set(currentIds);
+    const missingIds = (manifestIds || []).filter((sectionId) => !currentSet.has(sectionId));
+    const grouped = currentIds.reduce((acc, sectionId) => {
+      const group = getSectionGroupKey(sectionId).toLowerCase();
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push(sectionId);
+      return acc;
+    }, {});
+
+    const orderedGroups = getOrderedGroupKeys(Object.keys(grouped));
+    const flatIds = orderedGroups.flatMap((group) => grouped[group] || []);
+    const firstId = flatIds[0] || "";
+    const lastId = flatIds[flatIds.length - 1] || "";
+
+    const groupsHtml = orderedGroups.map((group) => {
+      const groupIds = grouped[group] || [];
+      return `
+      <section class="section-manager-group">
+        <h4>${escapeDialogHtml(getSectionGroupLabel(group))}</h4>
+        <ol>${groupIds.map((sectionId) => buildManageSectionRow(sectionId, {
+          disableUp: sectionId === firstId,
+          disableDown: sectionId === lastId,
+        })).join("")}</ol>
+      </section>
+    `;
+    }).join("");
+    const missingHtml = missingIds.length
+      ? `
+        <section class="section-manager-group section-manager-missing">
+          <h4>Missing / unlisted</h4>
+          <ol>${missingIds.map((sectionId) => buildManageSectionRow(sectionId, { missing: true })).join("")}</ol>
+        </section>
+      `
+      : "";
+
+    return `
+        <div class="section-manager">
+          <button type="button" class="section-manager-add" data-section-manager-action="add-new">Add section</button>
+          ${groupsHtml}
+          ${missingHtml}
+        </div>
+      `;
+  }
+
+  function refreshManageSectionsDialog(manifestIds) {
+    if (!elements.appDialogMessage) {
+      return;
+    }
+    elements.appDialogMessage.innerHTML = buildManageSectionsDialogHtml(manifestIds);
   }
 
   async function addExistingSectionToManual(sectionId) {
@@ -4532,61 +4760,34 @@
     if (!state.editMode || state.busy || state.authBusy) {
       return;
     }
-
-    const currentIds = getSectionOrderIdsFromDom();
     const manifestIds = await fetchSectionManifestIds();
-    const currentSet = new Set(currentIds);
-    const missingIds = manifestIds.filter((sectionId) => !currentSet.has(sectionId));
-    const grouped = currentIds.reduce((acc, sectionId) => {
-      const group = getSectionGroupKey(sectionId).toLowerCase();
-      if (!acc[group]) {
-        acc[group] = [];
-      }
-      acc[group].push(sectionId);
-      return acc;
-    }, {});
-
-    const groupsHtml = Object.keys(grouped).sort().map((group) => `
-      <section class="section-manager-group">
-        <h4>${escapeDialogHtml(getSectionGroupLabel(group))}</h4>
-        <ol>${grouped[group].map((sectionId) => buildManageSectionRow(sectionId)).join("")}</ol>
-      </section>
-    `).join("");
-    const missingHtml = missingIds.length
-      ? `
-        <section class="section-manager-group section-manager-missing">
-          <h4>Missing / unlisted</h4>
-          <ol>${missingIds.map((sectionId) => buildManageSectionRow(sectionId, { missing: true })).join("")}</ol>
-        </section>
-      `
-      : "";
-
     const dialogPromise = openAppDialog({
       title: "Manage sections",
-      messageHtml: `
-        <div class="section-manager">
-          <button type="button" class="section-manager-add" data-section-manager-action="add-new">Add section</button>
-          ${groupsHtml}
-          ${missingHtml}
-        </div>
-      `,
+      messageHtml: buildManageSectionsDialogHtml(manifestIds),
       confirmText: "Close",
       showCancel: false,
       panelClassName: "section-manager-dialog-panel",
       messageClassName: "section-manager-dialog",
     });
 
-    const buttons = elements.appDialogMessage
-      ? Array.from(elements.appDialogMessage.querySelectorAll("[data-section-manager-action]"))
-      : [];
-    buttons.forEach((button) => {
-      button.addEventListener("click", async () => {
-        const action = button.getAttribute("data-section-manager-action");
-        const sectionId = button.getAttribute("data-section-id") || "";
-        closeAppDialog(true);
+    refreshManageSectionsDialog(manifestIds);
+    if (elements.appDialogMessage) {
+      if (manageSectionsHandler) {
+        elements.appDialogMessage.removeEventListener("click", manageSectionsHandler);
+      }
+      manageSectionsHandler = async (event) => {
+        const target = event.target instanceof Element
+          ? event.target.closest("[data-section-manager-action]")
+          : null;
+        if (!target) {
+          return;
+        }
+
+        const action = target.getAttribute("data-section-manager-action");
+        const sectionId = target.getAttribute("data-section-id") || "";
         try {
           if (action === "add-new") {
-            openNewSectionModal();
+            await openNewSectionModal();
           } else if (action === "add-existing") {
             await addExistingSectionToManual(sectionId);
           } else if (action === "up") {
@@ -4596,14 +4797,20 @@
           } else if (action === "remove") {
             await removeSectionFromManual(sectionId);
           }
+          refreshManageSectionsDialog(manifestIds);
         } catch (error) {
           console.error(error);
           await reportError("Manage sections failed", error.message || "Could not update sections.");
         }
-      });
-    });
+      };
+      elements.appDialogMessage.addEventListener("click", manageSectionsHandler);
+    }
 
     await dialogPromise;
+    if (elements.appDialogMessage && manageSectionsHandler) {
+      elements.appDialogMessage.removeEventListener("click", manageSectionsHandler);
+      manageSectionsHandler = null;
+    }
   }
 
   function buildSectionShell(sectionId, title) {
@@ -5593,7 +5800,7 @@
   async function openImagePickerDialog() {
     const choices = await getAvailableImageChoices();
     if (choices.length === 0) {
-      setStatus("No images found. Upload an image first, or add entries to the image manifest.", true);
+      setStatus("No images found. Upload an image first to get started.", true);
       return "";
     }
 

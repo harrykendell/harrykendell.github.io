@@ -33,7 +33,7 @@
     --section-h4-size: var(--section-h4-size-base);
     --section-h2-weight: 700;
     --section-h3-accent: var(--info);
-    --inline-image-float-gap: 6px;
+    --inline-image-float-gap: 10px;
 }
 
 .section-edit-link {
@@ -341,6 +341,12 @@ ol {
 
 li {
     margin-bottom: 4px;
+}
+
+li::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 
 /* Callouts & Procedures - Shared Styles */
@@ -690,10 +696,12 @@ img.inline-image-align-center {
 
 .inline-image-float-left {
     float: left;
+    margin: 4px var(--inline-image-float-gap) 14px 0;
 }
 
 .inline-image-float-right {
     float: right;
+    margin: 4px 0 14px var(--inline-image-float-gap);
 }
 
 .centered {

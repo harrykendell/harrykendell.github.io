@@ -24,28 +24,10 @@ Dont let users change the filetype in the upload
 
 auto caption for an image should be "Insert Title" not the files name
 
-add an auto generation of the image manifest on pushes
-
-Implementation: Existing section Markdown image refs were migrated to unprefixed image paths. The renderer, preview, staged-image lookup, and validator resolve unprefixed image refs under `imgs/`. The picker no longer has search, shows directory/name separately, and uses source icons. Upload paths preserve the selected file extension and default inserted alt text to `Insert Title`. Browser publish no longer writes the image manifest.
+Implementation: Existing section Markdown image refs were migrated to unprefixed image paths. The renderer, preview, staged-image lookup, and validator resolve unprefixed image refs under `imgs/`. The picker no longer has search, shows directory/name separately, and uses source icons. Upload paths preserve the selected file extension and default inserted alt text to `Insert Title`.
 
 ## Sections
 
-auto generate a section manifest on pushes
+Replace tiny per-section arrows with a “Manage sections” dialog in the toc via some sort of reorder button: grouped lists, drag/drop or keyboard move, add section, remove from manual
 
-Replace tiny per-section arrows with a “Manage sections” dialog in the toc via some sort of reorder button: grouped lists, drag/drop or keyboard move, add section, remove from manual, and a visible “missing/unlisted” warning
-
-Implementation: Header-level section arrows were removed. Edit mode now adds a TOC Manage button that opens a grouped section-management dialog with add, add missing, move up/down, and remove controls. Missing/unlisted sections come from the generated section manifest.
-
-## Deploy
-
-Replace ad hoc manifest updates with CI-generated image and section manifests.
-
-Add Cloudflare Pages deploy via GitHub Actions and Wrangler.
-
-Cancel older deploy jobs for the same branch before deploying a newer generated commit.
-
-Keep browser editing/uploading source-only; generated artifacts are CI-owned.
-
-Optionally generate deploy-time search/pre-render artifacts later, without changing editor drafts.
-
-Implementation: Added `scripts/generate-manifests.mjs` for image and section manifests, replaced the validation workflow with a generate/validate/deploy workflow, and configured branch-level concurrency so stale deploy runs are cancelled. Pushes commit regenerated manifests when needed, then validation and Cloudflare deploy check out that generated commit. PRs fail when manifests are stale.
+Implementation: Header-level section arrows were removed. Edit mode now adds a TOC Manage button that opens a grouped section-management dialog with add, move up/down, and remove controls.

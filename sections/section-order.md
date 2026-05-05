@@ -5,6 +5,8 @@ This list controls the rendered section order in the manual.
 One section ID per list item, without the `sections/` prefix and without `.md`.
 -->
 
+## Maintenance
+
 - maintenance/rigging
 - maintenance/boats
 - maintenance/oars
@@ -13,8 +15,14 @@ One section ID per list item, without the `sections/` prefix and without `.md`.
 - maintenance/seats
 - maintenance/coxbox-wiring
 - maintenance/hardware
+
+## Repairs
+
 - repairs/boat-composites
 - repairs/oars
 - repairs/coxbox-wiring
+
+## Supplement
+
 - supplement/quick-reference-checklists
 - supplement/tools-and-consumables
