@@ -1,12 +1,12 @@
-const CACHE_NAME = "rowing-manual-cache-v2";
+const CACHE_NAME = "rowing-manual-cache-v3";
 const APP_SHELL_URLS = [
   "/",
   "/index.html",
   "/styles.css?v=35",
-  "/sidebar.css?v=3",
-  "/utils.js?v=4",
+  "/sidebar.css?v=4",
+  "/utils.js?v=5",
   "/pwa.js?v=3",
-  "/script.js?v=43",
+  "/script.js?v=44",
   "/sidebar.js?v=2",
   "/markdown-to-section.js?v=32",
   "/editor.css?v=9",
