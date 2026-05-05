@@ -42,6 +42,7 @@
     editorAuthorized: false,
     drafts: new Map(),
     imageDrafts: new Map(),
+    imageManifestPromise: null,
     sourceMarkdown: new Map(),
     currentPath: null,
     statusTimeoutId: null,
@@ -244,7 +245,7 @@
   function inferAltTextFromFileName(fileName) {
     const stem = sanitizeFileStem(fileName).replace(/[._-]+/g, " ").trim();
     if (!stem) {
-      return "Image description";
+      return "Image caption";
     }
     return stem.charAt(0).toUpperCase() + stem.slice(1);
   }
@@ -307,6 +308,90 @@
     const type = imageDraft.contentType
       || (path && path.toLowerCase().endsWith(".svg") ? "image/svg+xml" : "application/octet-stream");
     return `data:${type};base64,${imageDraft.contentBase64}`;
+  }
+
+  async function fetchImageManifest() {
+    if (state.imageManifestPromise) {
+      return state.imageManifestPromise;
+    }
+
+    state.imageManifestPromise = fetch("imgs/image-manifest.json", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load image manifest (${response.status}).`);
+        }
+        return response.json();
+      })
+      .then((payload) => {
+        const rawImages = Array.isArray(payload && payload.images) ? payload.images : [];
+        const images = rawImages
+          .map((path) => normalizeImageRepoPath(path))
+          .filter(Boolean)
+          .sort((left, right) => left.localeCompare(right));
+        return images;
+      })
+      .catch((error) => {
+        console.error(error);
+        return [];
+      });
+
+    return state.imageManifestPromise;
+  }
+
+  async function getAvailableImageChoices() {
+    const existingImages = await fetchImageManifest();
+    const choicesByPath = new Map();
+
+    existingImages.forEach((path) => {
+      choicesByPath.set(path, {
+        path,
+        source: "repo",
+        label: path.replace(/^imgs\//, ""),
+      });
+    });
+
+    state.imageDrafts.forEach((draft, path) => {
+      const normalizedPath = normalizeImageRepoPath(path);
+      if (!normalizedPath) {
+        return;
+      }
+      choicesByPath.set(normalizedPath, {
+        path: normalizedPath,
+        source: choicesByPath.has(normalizedPath) ? "staged replacement" : "staged",
+        label: normalizedPath.replace(/^imgs\//, ""),
+        draft,
+      });
+    });
+
+    return Array.from(choicesByPath.values())
+      .sort((left, right) => {
+        const leftStaged = left.source.startsWith("staged") ? 0 : 1;
+        const rightStaged = right.source.startsWith("staged") ? 0 : 1;
+        if (leftStaged !== rightStaged) {
+          return leftStaged - rightStaged;
+        }
+        return left.path.localeCompare(right.path);
+      });
+  }
+
+  function getImageChoicePreviewSrc(choice) {
+    if (!choice || !choice.path) {
+      return "";
+    }
+    if (choice.draft) {
+      return buildPreviewImageDataUrl(choice.draft, choice.path);
+    }
+    return choice.path;
+  }
+
+  function buildImageManifestContent(paths) {
+    const images = Array.from(new Set(
+      (Array.isArray(paths) ? paths : [])
+        .map((path) => normalizeImageRepoPath(path))
+        .filter(Boolean),
+    )).sort((left, right) => left.localeCompare(right));
+
+    return `${JSON.stringify({ images }, null, 2)}\n`;
   }
 
   function applyStagedImagePreviews(root) {
@@ -1823,6 +1908,7 @@
       fragment.appendChild(wrapper);
     });
 
+    applyStagedImagePreviews(fragment);
     elements.modalPreview.replaceChildren(fragment);
     restorePreviewProcedureStates(previousProcedureStates);
     updatePreviewLineAnchors();
@@ -5257,20 +5343,155 @@
     replaceEditorRange(lineStart, lineEnd, adjustedBlock, lineStart, lineStart + adjustedBlock.length);
   }
 
-  function insertInlineImageTemplate() {
+  function formatInlineImageOptions(options) {
+    const config = options || {};
+    const parts = [];
+    if (config.size) {
+      parts.push(`size=${config.size}`);
+    }
+    if (config.float) {
+      parts.push(`float=${config.float}`);
+    }
+    return parts.length ? `{${parts.join(" ")}}` : "";
+  }
+
+  function insertMarkdownImageAtSelection(imagePath, options) {
     const snapshot = getEditorSnapshot();
     if (!snapshot) {
       return;
     }
 
+    const normalizedPath = normalizeImageRepoPath(imagePath);
+    if (!normalizedPath) {
+      setStatus("Invalid image path. Use imgs/... with a valid image extension.", true);
+      return;
+    }
+
     const start = snapshot.selectionStart;
     const end = snapshot.selectionEnd;
-    const selectedAlt = snapshot.value.slice(start, end).trim() || "Image description";
-    const pathPlaceholder = "imgs/your-image.jpg";
-    const markdown = `![${selectedAlt}](${pathPlaceholder})`;
-    const pathStartOffset = markdown.indexOf(pathPlaceholder);
-    const pathEndOffset = pathStartOffset + pathPlaceholder.length;
+    const selectedAlt = snapshot.value.slice(start, end).trim() || "Image caption";
+    const markdown = `![${selectedAlt}](${normalizedPath})${formatInlineImageOptions(options || { size: "-1" })}`;
+    const pathStartOffset = markdown.indexOf(normalizedPath);
+    const pathEndOffset = pathStartOffset + normalizedPath.length;
     replaceEditorRange(start, end, markdown, start + pathStartOffset, start + pathEndOffset);
+  }
+
+  async function openImagePickerDialog() {
+    const choices = await getAvailableImageChoices();
+    if (choices.length === 0) {
+      setStatus("No images found. Upload an image first, or add entries to imgs/image-manifest.json.", true);
+      return "";
+    }
+
+    const choiceHtml = choices.map((choice, index) => {
+      const previewSrc = getImageChoicePreviewSrc(choice);
+      const sourceLabel = choice.source === "repo" ? "GitHub" : choice.source;
+      return `
+        <button
+          type="button"
+          class="image-picker-item${index === 0 ? " is-selected" : ""}"
+          data-image-path="${escapeDialogHtml(choice.path)}"
+          data-image-search="${escapeDialogHtml(`${choice.path} ${sourceLabel}`)}"
+          aria-pressed="${index === 0 ? "true" : "false"}"
+        >
+          <span class="image-picker-thumb">
+            <img src="${escapeDialogHtml(previewSrc)}" alt="" loading="lazy" decoding="async" />
+          </span>
+          <span class="image-picker-meta">
+            <span class="image-picker-path">${escapeDialogHtml(choice.label)}</span>
+            <span class="image-picker-source">${escapeDialogHtml(sourceLabel)}</span>
+          </span>
+        </button>
+      `;
+    }).join("");
+
+    const dialogPromise = openAppDialog({
+      title: "Insert image",
+      messageHtml: `
+        <div class="image-picker">
+          <input
+            class="image-picker-search"
+            type="search"
+            placeholder="Search images"
+            aria-label="Search images"
+            autocomplete="off"
+          />
+          <div class="image-picker-grid">${choiceHtml}</div>
+          <p class="image-picker-empty" hidden>No matching images.</p>
+        </div>
+      `,
+      input: true,
+      inputValue: choices[0].path,
+      inputPlaceholder: "imgs/your-image.jpg",
+      inputLabel: "Selected image path",
+      confirmText: "Insert image",
+      cancelText: "Cancel",
+      panelClassName: "image-picker-dialog-panel",
+      messageClassName: "image-picker-dialog",
+    });
+
+    const dialogRoot = elements.appDialogMessage;
+    const selectedPathInput = elements.appDialogInput;
+    const searchInput = dialogRoot ? dialogRoot.querySelector(".image-picker-search") : null;
+    const items = dialogRoot ? Array.from(dialogRoot.querySelectorAll(".image-picker-item")) : [];
+    const emptyMessage = dialogRoot ? dialogRoot.querySelector(".image-picker-empty") : null;
+
+    const selectItem = (item) => {
+      if (!item || !selectedPathInput) {
+        return;
+      }
+      items.forEach((candidate) => {
+        const isSelected = candidate === item;
+        candidate.classList.toggle("is-selected", isSelected);
+        candidate.setAttribute("aria-pressed", String(isSelected));
+      });
+      selectedPathInput.value = item.getAttribute("data-image-path") || "";
+    };
+
+    const filterItems = () => {
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+      let visibleCount = 0;
+      items.forEach((item) => {
+        const haystack = String(item.getAttribute("data-image-search") || "").toLowerCase();
+        const isVisible = !query || haystack.includes(query);
+        item.hidden = !isVisible;
+        if (isVisible) {
+          visibleCount += 1;
+        }
+      });
+      if (emptyMessage) {
+        emptyMessage.hidden = visibleCount > 0;
+      }
+    };
+
+    items.forEach((item) => {
+      item.addEventListener("click", () => selectItem(item));
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener("input", filterItems);
+      window.setTimeout(() => {
+        if (!elements.appDialog || elements.appDialog.hidden) {
+          return;
+        }
+        searchInput.focus();
+      }, 0);
+    }
+
+    const result = await dialogPromise;
+    if (!result.confirmed) {
+      return "";
+    }
+
+    return normalizeImageRepoPath(result.value) || "";
+  }
+
+  async function insertInlineImageTemplate(options) {
+    const selectedPath = await openImagePickerDialog();
+    if (!selectedPath) {
+      return;
+    }
+    insertMarkdownImageAtSelection(selectedPath, options || { size: "-1" });
   }
 
   async function stageImageUploadIntoDraft() {
@@ -5348,7 +5569,7 @@
       const end = snapshot.selectionEnd;
       const selected = snapshot.value.slice(start, end).trim();
       const alt = selected || inferAltTextFromFileName(imageFile.name);
-      const markdown = `![${alt}](${normalizedPath})`;
+      const markdown = `![${alt}](${normalizedPath}){size=-1}`;
       const pathStartOffset = markdown.indexOf(normalizedPath);
       const pathEndOffset = pathStartOffset + normalizedPath.length;
       replaceEditorRange(start, end, markdown, start + pathStartOffset, start + pathEndOffset);
@@ -5369,29 +5590,6 @@
     const idStartOffset = embed.indexOf(videoId);
     const idEndOffset = idStartOffset + videoId.length;
     insertBlockAtSelection(embed, idStartOffset, idEndOffset);
-  }
-
-  function insertFigureTemplate(variant) {
-    const figureClassMap = {
-      left: "figure figure-float-left",
-      right: "figure figure-float-right",
-      wide: "figure",
-    };
-    const figureClass = figureClassMap[variant] || "figure";
-    const srcPath = "imgs/your-image.jpg";
-    const figureTemplate = [
-      `<figure class="${figureClass}">`,
-      `  <img src="${srcPath}" alt="Describe image" />`,
-      "  <div class=\"figure-body\">",
-      "    <p class=\"figure-title\">Figure title</p>",
-      "    <!-- <p class=\"figure-caption\">Caption text</p> -->",
-      "  </div>",
-      "</figure>",
-    ].join("\n");
-
-    const srcStartOffset = figureTemplate.indexOf(srcPath);
-    const srcEndOffset = srcStartOffset + srcPath.length;
-    insertBlockAtSelection(figureTemplate, srcStartOffset, srcEndOffset);
   }
 
   function getEditorHistoryEntry() {
@@ -5545,13 +5743,10 @@
         stageImageUploadIntoDraft();
         break;
       case "image-left":
-        insertFigureTemplate("left");
+        insertInlineImageTemplate({ size: "0.5", float: "left" });
         break;
       case "image-right":
-        insertFigureTemplate("right");
-        break;
-      case "image-wide":
-        insertFigureTemplate("wide");
+        insertInlineImageTemplate({ size: "0.5", float: "right" });
         break;
       case "video":
         insertVideoTemplate();
@@ -5664,8 +5859,6 @@
       action = "image-left";
     } else if (event.altKey && !event.shiftKey && key === "r") {
       action = "image-right";
-    } else if (event.altKey && !event.shiftKey && key === "w") {
-      action = "image-wide";
     } else if (event.altKey && !event.shiftKey && key === "v") {
       action = "video";
     }
@@ -5861,6 +6054,19 @@
       changedMarkdownPaths.forEach((path) => {
         files[path] = state.drafts.get(path);
       });
+
+      let nextImageManifest = null;
+      if (changedImagePaths.length > 0) {
+        const currentManifestImages = await fetchImageManifest();
+        const mergedImagePaths = Array.from(new Set(currentManifestImages.concat(changedImagePaths)))
+          .sort((left, right) => left.localeCompare(right));
+        const hasNewManifestPath = changedImagePaths.some((path) => !currentManifestImages.includes(path));
+        if (hasNewManifestPath) {
+          files["imgs/image-manifest.json"] = buildImageManifestContent(mergedImagePaths);
+          nextImageManifest = mergedImagePaths;
+        }
+      }
+
       const binaryFiles = {};
       changedImagePaths.forEach((path) => {
         const imageDraft = state.imageDrafts.get(path);
@@ -5911,6 +6117,9 @@
       storeMarkdownDrafts();
       state.imageDrafts.clear();
       storeImageDrafts();
+      if (nextImageManifest) {
+        state.imageManifestPromise = Promise.resolve(nextImageManifest);
+      }
       updateToolbar();
       refreshRepoActivity(true);
       window.setTimeout(() => {
@@ -6103,7 +6312,7 @@
               </span>
               <span class="editor-tool-label">Inline</span>
             </button>
-            <button type="button" data-format-action="image-left" title="Left-aligned figure (Cmd/Ctrl+Alt+L)" aria-label="Insert left-aligned figure">
+            <button type="button" data-format-action="image-left" title="Left floated image (Cmd/Ctrl+Alt+L)" aria-label="Insert left floated image">
               <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M3.5 4V16"></path>
@@ -6113,7 +6322,7 @@
               </span>
               <span class="editor-tool-label">Left</span>
             </button>
-            <button type="button" data-format-action="image-right" title="Right-aligned figure (Cmd/Ctrl+Alt+R)" aria-label="Insert right-aligned figure">
+            <button type="button" data-format-action="image-right" title="Right floated image (Cmd/Ctrl+Alt+R)" aria-label="Insert right floated image">
               <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M16.5 4V16"></path>
@@ -6122,15 +6331,6 @@
                 </svg>
               </span>
               <span class="editor-tool-label">Right</span>
-            </button>
-            <button type="button" data-format-action="image-wide" title="Wide figure (Cmd/Ctrl+Alt+W)" aria-label="Insert wide figure">
-              <span class="editor-tool-icon" aria-hidden="true">
-                <svg viewBox="0 0 20 20" focusable="false">
-                  <rect x="2.5" y="6" width="15" height="8" rx="1.8"></rect>
-                  <path d="M5 12L8 9L10 11L12.5 8.5L15 12"></path>
-                </svg>
-              </span>
-              <span class="editor-tool-label">Wide</span>
             </button>
             <button type="button" data-format-action="video" title="Insert video (Cmd/Ctrl+Alt+V)">
               <span class="editor-tool-icon" aria-hidden="true">

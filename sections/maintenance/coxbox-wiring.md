@@ -1,14 +1,6 @@
 # Coxbox Wiring
 
-<figure class="figure figure-float-right">
-  <img src="imgs/wiring/coxbox_plug.jpg" alt="Diagram of a 4-pin coxbox plug showing orientation and pin allocations." />
-  <div class="figure-body">
-    <p class="figure-title">Cox box plug (front view)</p>
-    <p class="figure-caption">
-      Use the keyway to orient the connector. Do not assume pin functions: verify with a multimeter and a known‑good device.
-    </p>
-  </div>
-</figure>
+![Cox box plug front view. Use the keyway to orient the connector. Do not assume pin functions: verify with a multimeter and a known-good device.](imgs/wiring/coxbox_plug.jpg){size=0.5 float=right}
 
 The wiring harness is relatively simple, with 5 pins on the main plug. These are typically split into speakers, rate, and charging pins. Not all pins are used in every connector, so wiring can break out to 2‑pin or 4‑pin plugs where needed.
 

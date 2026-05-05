@@ -1,15 +1,6 @@
 # Oar repairs
 
-<figure class="figure figure-float-right">
-  <img src="imgs/repairs/oar_sleeve_pitch_alignment.svg" alt="Diagram showing sleeve pitch alignment relative to the blade back face and P/S marks." />
-  <div class="figure-body">
-    <p class="figure-title">Sleeve pitch alignment matters</p>
-    <p class="figure-caption">
-      A sleeve bonded a few degrees off makes the boat feel wrong and is hard to diagnose later.
-      Dry-fit, mark, bond, and hold alignment until full cure.
-    </p>
-  </div>
-</figure>
+![Sleeve pitch alignment matters. A sleeve bonded a few degrees off makes the boat feel wrong and is hard to diagnose later. Dry-fit, mark, bond, and hold alignment until full cure.](imgs/repairs/oar_sleeve_pitch_alignment.svg){size=0.5 float=right}
 
 ## Scope and escalation
 

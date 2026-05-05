@@ -1,15 +1,6 @@
 # Seats
 
-<figure class="figure">
-  <img src="imgs/overviews/seats_tracks.svg" alt="Diagram of seat on tracks showing wheels, tracks, end stops, and grit hotspots." />
-  <div class="figure-body">
-    <p class="figure-title">Seats fail from grit and looseness</p>
-    <p class="figure-caption">
-      The two common causes of rough seats are (1) grit embedded in wheels/tracks and (2) track fasteners loosening until inserts strip.
-      Clean often; fix looseness immediately.
-    </p>
-  </div>
-</figure>
+![Seats fail from grit and looseness. The two common causes of rough seats are grit embedded in wheels/tracks and track fasteners loosening until inserts strip. Clean often; fix looseness immediately.](imgs/overviews/seats_tracks.svg){size=1}
 
 ## Routine cleaning
 

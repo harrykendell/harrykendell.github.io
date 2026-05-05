@@ -204,14 +204,14 @@ function loadEditorAssets() {
     const link = document.createElement("link");
     link.id = "editor-css";
     link.rel = "stylesheet";
-    link.href = "editor.css?v=9";
+    link.href = "editor.css?v=12";
     document.head.appendChild(link);
   }
 
   if (!document.getElementById("editor-script")) {
     const script = document.createElement("script");
     script.id = "editor-script";
-    script.src = "editor.js?v=27";
+    script.src = "editor.js?v=31";
     script.async = true;
     document.head.appendChild(script);
   }

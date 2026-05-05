@@ -392,6 +392,194 @@ function optimizeSectionMedia(rootEl) {
     });
 }
 
+function parseImageTextWidthFraction(value) {
+    const normalized = String(value || "").trim().replace(/^['"]|['"]$/g, "");
+    if (normalized === "-1") {
+        return null;
+    }
+
+    let fraction = NaN;
+    const ratioMatch = /^(\d+)\/(\d+)$/.exec(normalized);
+    if (ratioMatch) {
+        const numerator = Number(ratioMatch[1]);
+        const denominator = Number(ratioMatch[2]);
+        if (denominator > 0) {
+            fraction = numerator / denominator;
+        }
+    } else if (/^(?:0?\.\d+|1(?:\.0+)?)$/.test(normalized)) {
+        fraction = Number(normalized);
+    }
+
+    if (!Number.isFinite(fraction) || fraction <= 0 || fraction > 1) {
+        return false;
+    }
+
+    return {
+        css: `${Number((fraction * 100).toFixed(4))}%`,
+        fraction,
+    };
+}
+
+function parseImageFloat(value) {
+    const normalized = String(value || "").trim().replace(/^['"]|['"]$/g, "").toLowerCase();
+    if (normalized === "-1") {
+        return null;
+    }
+    if (normalized === "left" || normalized === "right") {
+        return normalized;
+    }
+    return false;
+}
+
+function applyImageFloat(target, floatValue) {
+    if (!(target instanceof Element)) {
+        return;
+    }
+    target.classList.remove("inline-image-float-left", "inline-image-float-right", "inline-image-align-center");
+    if (floatValue) {
+        target.classList.add(`inline-image-float-${floatValue}`);
+        return;
+    }
+    target.classList.add("inline-image-align-center");
+}
+
+function getImageWidthCss(dimension, floatValue) {
+    if (!dimension || !dimension.css) {
+        return "";
+    }
+    if (floatValue) {
+        return `calc(${dimension.css} - var(--inline-image-float-gap))`;
+    }
+    return dimension.css;
+}
+
+function applyImageSizing(image, frame, options) {
+    const target = frame || image;
+    if (!(image instanceof Element) || !(target instanceof Element)) {
+        return;
+    }
+
+    if (options.size) {
+        const widthCss = getImageWidthCss(options.size, options.float);
+        target.style.width = widthCss;
+        image.style.width = frame ? "100%" : widthCss;
+        image.style.height = "auto";
+        return;
+    }
+
+    if (options.width) {
+        const widthCss = getImageWidthCss(options.width, options.float);
+        target.style.width = widthCss;
+        image.style.width = frame ? "100%" : widthCss;
+    }
+
+    if (options.width && options.height) {
+        image.style.aspectRatio = `${options.width.fraction} / ${options.height.fraction}`;
+        image.style.height = "auto";
+        return;
+    }
+
+    if (options.height && !options.width) {
+        target.style.width = options.height.css;
+        image.style.width = frame ? "100%" : options.height.css;
+        image.style.height = "auto";
+        return;
+    }
+
+    if (frame) {
+        image.style.height = "auto";
+    }
+}
+
+function renderImageCaption(image, options) {
+    const captionText = String(image.getAttribute("alt") || "").trim();
+    if (!captionText) {
+        return null;
+    }
+
+    const frame = document.createElement("span");
+    frame.className = "inline-image-frame";
+    image.replaceWith(frame);
+    frame.appendChild(image);
+
+    const caption = document.createElement("span");
+    caption.className = "inline-image-caption";
+    caption.textContent = captionText;
+    frame.appendChild(caption);
+
+    applyImageSizing(image, frame, options);
+    applyImageFloat(frame, options.float);
+    return frame;
+}
+
+function applyImageAttributeLists(rootEl) {
+    const images = Array.from(rootEl.querySelectorAll("img"));
+    images.forEach((image) => {
+        if (image.closest(".youtube-embed, .video-wrapper")) {
+            return;
+        }
+
+        const nextNode = image.nextSibling;
+        const hasAttributeListNode = nextNode && nextNode.nodeType === Node.TEXT_NODE;
+        if (!hasAttributeListNode && !String(image.getAttribute("alt") || "").trim()) {
+            return;
+        }
+
+        const text = hasAttributeListNode ? nextNode.textContent || "" : "";
+        const match = hasAttributeListNode ? /^\s*\{([^{}]*)\}/.exec(text) : null;
+        const options = {
+            width: "",
+            height: "",
+            size: "",
+            float: "",
+        };
+
+        let recognized = false;
+        if (match) {
+            const attrText = match[1];
+            attrText.replace(/\b(width|height|size|float)=(?:"([^"]*)"|'([^']*)'|([^\s}]+))/g, (fullMatch, name, doubleQuoted, singleQuoted, bare) => {
+                const value = doubleQuoted || singleQuoted || bare;
+
+                if (name === "float") {
+                    const floatValue = parseImageFloat(value);
+                    if (floatValue === false) {
+                        return fullMatch;
+                    }
+                    recognized = true;
+                    options.float = floatValue || "";
+                    return fullMatch;
+                }
+
+                const textWidthFraction = parseImageTextWidthFraction(value);
+                if (textWidthFraction === false) {
+                    return fullMatch;
+                }
+
+                recognized = true;
+                if (textWidthFraction) {
+                    options[name] = textWidthFraction;
+                }
+                return fullMatch;
+            });
+        }
+
+        const frame = renderImageCaption(image, options);
+        if (!frame) {
+            applyImageSizing(image, null, options);
+            applyImageFloat(image, options.float);
+        }
+
+        if (!recognized || !match) {
+            return;
+        }
+
+        nextNode.textContent = text.slice(match[0].length);
+        if (!nextNode.textContent) {
+            nextNode.remove();
+        }
+    });
+}
+
 function extractYouTubeId(src) {
     const url = new URL(src);
     if (!/youtube(-nocookie)?\.com$/.test(url.hostname)) {
@@ -447,6 +635,7 @@ function buildYouTubeEmbed(iframe, videoId) {
     thumbnail.decoding = "async";
     thumbnail.alt = title;
     thumbnail.src = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+    thumbnail.style.height = "auto";
 
     button.appendChild(icon);
     button.appendChild(thumbnail);
@@ -469,6 +658,23 @@ function buildYouTubeEmbed(iframe, videoId) {
     return wrapper;
 }
 
+function getReplaceableVideoWrapper(iframe) {
+    const parent = iframe && iframe.parentElement;
+    if (!parent || !parent.classList.contains("video-wrapper")) {
+        return null;
+    }
+
+    const meaningfulNodes = Array.from(parent.childNodes).filter((node) => {
+        return node.nodeType !== Node.TEXT_NODE || String(node.textContent || "").trim();
+    });
+
+    if (meaningfulNodes.length === 1 && meaningfulNodes[0] === iframe) {
+        return parent;
+    }
+
+    return null;
+}
+
 function transformYouTubeEmbeds(rootEl) {
     const iframes = Array.from(rootEl.querySelectorAll("iframe"));
 
@@ -482,7 +688,12 @@ function transformYouTubeEmbeds(rootEl) {
         }
 
         const wrapper = buildYouTubeEmbed(iframe, videoId);
-        iframe.replaceWith(wrapper);
+        const existingVideoWrapper = getReplaceableVideoWrapper(iframe);
+        if (existingVideoWrapper) {
+            existingVideoWrapper.replaceWith(wrapper);
+        } else {
+            iframe.replaceWith(wrapper);
+        }
     });
 }
 
@@ -544,6 +755,7 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
     transformYouTubeEmbeds(fragment);
     initYouTubeEmbeds(fragment);
     wrapTables(fragment);
+    applyImageAttributeLists(fragment);
     optimizeSectionMedia(fragment);
 
     if (headingScopeId) {

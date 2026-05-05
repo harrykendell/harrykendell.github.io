@@ -439,6 +439,112 @@ body.editor-modal-open {
     padding-right: 3px;
 }
 
+.app-dialog-panel.image-picker-dialog-panel {
+    width: min(760px, calc(100vw - 24px));
+}
+
+.app-dialog-message.image-picker-dialog {
+    white-space: normal;
+    color: var(--text-main);
+}
+
+.image-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-picker-search {
+    width: 100%;
+    min-height: 36px;
+    border: var(--border-subtle-line);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font: inherit;
+    color: var(--text-main);
+    background: #fff;
+}
+
+.image-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    max-height: min(48vh, 420px);
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.image-picker-item {
+    display: grid;
+    grid-template-rows: 94px auto;
+    gap: 7px;
+    min-width: 0;
+    padding: 7px;
+    border: var(--border-subtle-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.image-picker-item:hover,
+.image-picker-item:focus-visible {
+    border-color: #7c9ac7;
+    outline: none;
+}
+
+.image-picker-item.is-selected {
+    border-color: var(--info);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.16);
+}
+
+.image-picker-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 6px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.image-picker-thumb img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.image-picker-meta {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.image-picker-path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.image-picker-source {
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    text-transform: capitalize;
+}
+
+.image-picker-empty {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+}
+
 .markdown-validation-summary {
     display: flex;
     align-items: center;
@@ -1089,7 +1195,7 @@ body.editor-pane-resize-active * {
     min-height: 0;
     overflow: auto;
     overscroll-behavior: contain;
-    padding: 10px 14px 16px;
+    padding: var(--gap);
     border-left: 0;
     background: var(--bg-elevated);
 }

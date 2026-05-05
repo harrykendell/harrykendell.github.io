@@ -1,15 +1,6 @@
 # Boats
 
-<figure class="figure">
-  <img src="imgs/overviews/boat_inspection_zones.svg" alt="Diagram highlighting common rowing shell inspection zones: hatches, rigger/seat area, fin box and rudder." />
-  <div class="figure-body">
-    <p class="figure-title">Where damage hides (and where leaks start)</p>
-    <p class="figure-caption">
-      Most “mystery” problems come from three zones: (1) buoyancy covers and seals, (2) rigger/seat track attachments, and (3) fin box/rudder.
-      Inspect these first, especially after transport or any impact.
-    </p>
-  </div>
-</figure>
+![Where damage hides and where leaks start. Most mystery problems come from three zones: buoyancy covers and seals, rigger/seat track attachments, and fin box/rudder. Inspect these first, especially after transport or any impact.](imgs/overviews/boat_inspection_zones.svg){size=1}
 
 ## Routine care & cleaning
 

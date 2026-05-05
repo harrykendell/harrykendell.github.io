@@ -1,14 +1,6 @@
 # Gates
 
-<figure class="figure figure-float-right">
-  <img src="imgs/overviews/pin_overview.svg" alt="Exploded diagram of a rowing pin and gate stack with pitch bushings and washers." />
-  <div class="figure-body">
-    <p class="figure-title">Pin, bushings, washers, and top nut</p>
-    <p class="figure-caption">
-      Keep washer stacks in order. Losing washers or swapping bushings changes pitch/height and causes rattle.
-    </p>
-  </div>
-</figure>
+![Pin, bushings, washers, and top nut. Keep washer stacks in order. Losing washers or swapping bushings changes pitch/height and causes rattle.](imgs/overviews/pin_overview.svg){size=0.5 float=right}
 
 Gates (oarlocks) are safety‑critical: if a gate unlatches or a pin assembly loosens, the crew can lose an oar under load.
 

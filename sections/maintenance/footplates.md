@@ -1,14 +1,6 @@
 # Footplates
 
-<figure class="figure figure-float-right">
-  <img src="imgs/overviews/footplate_heel_restraint.svg" alt="Diagram of footplate with shoes and heel restraints, including 7 cm maximum heel lift." />
-  <div class="figure-body">
-    <p class="figure-title">Heel restraints are safety‑critical</p>
-    <p class="figure-caption">
-      In any boat with fitted shoes, each shoe must be independently restrained and the heel must not rise more than 7 cm.
-    </p>
-  </div>
-</figure>
+![Heel restraints are safety-critical. In any boat with fitted shoes, each shoe must be independently restrained and the heel must not rise more than 7 cm.](imgs/overviews/footplate_heel_restraint.svg){size=0.5 float=right}
 
 Different boats use different stretcher and steering systems (wing‑nut tracks, quick‑release clamps, wire rope, Dyneema, rigid pushrods). Always confirm the exact routing and parts on that boat’s rigging sheet.
 

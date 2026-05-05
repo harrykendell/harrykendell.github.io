@@ -1,14 +1,6 @@
 # Hardware
 
-<figure class="figure figure-float-right">
-  <img src="imgs/overviews/hardware_washer_stack.svg" alt="Diagram showing safe washer stack: bolt head, flat washer, hull/rigger, flat washer, optional lock washer, nyloc nut." />
-  <div class="figure-body">
-    <p class="figure-title">Washer rule against composite</p>
-    <p class="figure-caption">
-      Split/spring washers can crush paint and bruise laminate. Always use a flat washer against the hull.
-    </p>
-  </div>
-</figure>
+![Washer rule against composite. Split/spring washers can crush paint and bruise laminate. Always use a flat washer against the hull.](imgs/overviews/hardware_washer_stack.svg){size=0.5 float=right}
 
 We buy generic hardware from [Westfield Fasteners](https://www.westfieldfasteners.co.uk/). Rowing-specific parts are typically from:
 
