@@ -1,9 +1,9 @@
-const CACHE_NAME = "rowing-manual-cache-v1";
+const CACHE_NAME = "rowing-manual-cache-v2";
 const APP_SHELL_URLS = [
   "/",
   "/index.html",
   "/styles.css?v=35",
-  "/sidebar.css?v=2",
+  "/sidebar.css?v=3",
   "/utils.js?v=4",
   "/pwa.js?v=3",
   "/script.js?v=43",
@@ -18,7 +18,7 @@ const APP_SHELL_URLS = [
   "/favicon/favicon.ico",
   "/favicon/favicon-96x96.png",
   "/favicon/apple-touch-icon.png",
-  "/favicon/web-app-manifest-192x192.png",
+  "/favicon/web-app-manifest-192x192.png?v=2",
   "/favicon/web-app-manifest-512x512.png",
   "https://cdn.jsdelivr.net/npm/marked/marked.min.js",
 ];
