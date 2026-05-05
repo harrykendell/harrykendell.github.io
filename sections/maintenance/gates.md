@@ -1,6 +1,6 @@
 # Gates
 
-![Pin, bushings, washers, and top nut. Keep washer stacks in order. Losing washers or swapping bushings changes pitch/height and causes rattle.](imgs/overviews/pin_overview.svg){size=0.5 float=right}
+![Pin, bushings, washers, and top nut. Keep washer stacks in order. Losing washers or swapping bushings changes pitch/height and causes rattle.](overviews/pin_overview.svg){size=0.5 float=right}
 
 Gates (oarlocks) are safety‑critical: if a gate unlatches or a pin assembly loosens, the crew can lose an oar under load.
 

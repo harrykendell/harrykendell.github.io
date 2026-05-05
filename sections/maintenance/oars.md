@@ -1,6 +1,6 @@
 # Oars
 
-![Oar terminology: handle, sleeve, collar, spoon. Most mistakes in oar care are simple: scraping tips, using the spoon to push off, and storing them insecurely. Most mistakes in oar rigging are geometric: collar/inboard mismatches and sleeve pitch errors.](imgs/overviews/oar_parts.svg){size=1}
+![Oar terminology: handle, sleeve, collar, spoon. Most mistakes in oar care are simple: scraping tips, using the spoon to push off, and storing them insecurely. Most mistakes in oar rigging are geometric: collar/inboard mismatches and sleeve pitch errors.](overviews/oar_parts.svg){size=1}
 
 Nearly all new blades are Skinny, with older ones generally being Ultralight or Low I, and a range of blade shapes. Standardising over time improves mix‑and‑match and reduces spares complexity.
 
@@ -79,11 +79,11 @@ Concept2 offers several blade shapes, many of which are difficult to distinguish
 
 | Blade type | Image | Description | Identification |
 |---|---|---|---|
-| **Big Blade** | ![Big Blade](imgs/blades/BigBlade.jpg) | Original hatchet shape with a front ridge (no longer produced) | Front rib and mostly straight bottom edge |
-| **Smoothie2** | ![Smoothie2](imgs/blades/Smoothie2.jpg) | Successor to Big Blade with softer catch | No front rib, bottom edge mostly straight |
-| **Smoothie2 Vortex** | ![Smoothie2 Vortex](imgs/blades/Smoothie2Vortex.jpg) | Smoothie2 with Vortex Edge | Like Smoothie2, but rounded tip |
-| **Fat2** | ![Fat2](imgs/blades/Fat2.jpg) | Between Smoothie and Comp; often rigged with shorter outboard | Rounder “belly” profile |
-| **Comp** | ![Comp](imgs/blades/Comp.jpg) | Newer shorter design with aggressive catch | Much shorter and rounder than others |
+| **Big Blade** | ![Big Blade](blades/BigBlade.jpg) | Original hatchet shape with a front ridge (no longer produced) | Front rib and mostly straight bottom edge |
+| **Smoothie2** | ![Smoothie2](blades/Smoothie2.jpg) | Successor to Big Blade with softer catch | No front rib, bottom edge mostly straight |
+| **Smoothie2 Vortex** | ![Smoothie2 Vortex](blades/Smoothie2Vortex.jpg) | Smoothie2 with Vortex Edge | Like Smoothie2, but rounded tip |
+| **Fat2** | ![Fat2](blades/Fat2.jpg) | Between Smoothie and Comp; often rigged with shorter outboard | Rounder “belly” profile |
+| **Comp** | ![Comp](blades/Comp.jpg) | Newer shorter design with aggressive catch | Much shorter and rounder than others |
 
 The standard for sculls is to get 284–289 cm (278–283 cm for Fat2) total length with 79–91 cm inboard. This is paired with skinny shafts with a medium flex, and 0 degrees of blade pitch. We then rig around a fixed point of 88 cm inboard with a 160 cm span for sculls.
 

@@ -1,6 +1,6 @@
 # Rigging
 
-![What rigging means and what you measure. Rigging spans multiple components. This page is the hub: it defines capability tiers, stop-use criteria, and the audit workflow, then points you to the section that contains the detailed adjustment procedure.](imgs/overviews/rigging_overview.svg){size=1}
+![What rigging means and what you measure. Rigging spans multiple components. This page is the hub: it defines capability tiers, stop-use criteria, and the audit workflow, then points you to the section that contains the detailed adjustment procedure.](overviews/rigging_overview.svg){size=1}
 
 Rigging is spread across several components (riggers, pins, gates, oars, footplates). This page is the **hub**: it defines what “rigging” means, what you’re allowed to change, and where the detailed adjustment procedures live.
 

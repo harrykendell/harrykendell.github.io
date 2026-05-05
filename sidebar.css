@@ -396,27 +396,25 @@
 @media (max-width: 860px) {
     .sidebar {
         position: fixed;
-        top: calc(0.7 * var(--gap));
-        left: calc(-1 * var(--radius));
-        right: auto;
+        inset: 0;
+        width: 100vw;
+        max-height: 100dvh;
+        border-radius: 0;
+        border: 0;
         opacity: 0;
         pointer-events: none;
         transform: translateX(-110%);
         transition:
             opacity 0.2s ease,
             transform 0.2s ease;
-        padding-left: 36px;
+        padding: calc(var(--gap) + 42px) var(--gap) var(--gap);
+        z-index: 35;
     }
 
     .sidebar.is-open {
         opacity: 1;
         pointer-events: auto;
         transform: translateX(0);
-    }
-
-    main.toc-dim {
-        opacity: 0.2;
-        pointer-events: none;
     }
 
     .toc-toggle {
@@ -426,7 +424,7 @@
         position: fixed;
         top: calc(0.7 * var(--gap));
         right: calc(0.7 * var(--gap));
-        z-index: 40;
+        z-index: 45;
         padding: 10px 14px;
         border-radius: var(--radius);
         border: var(--border-subtle-line);

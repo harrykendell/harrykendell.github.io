@@ -17,12 +17,14 @@ if (
     || typeof window.AppUtils.escapeHtml !== "function"
     || typeof window.AppUtils.escapeAttribute !== "function"
     || typeof window.AppUtils.getGitHubEditUrl !== "function"
+    || typeof window.AppUtils.normalizeImagePath !== "function"
 ) {
     throw new Error("AppUtils is required before markdown-to-section.js.");
 }
 const markdownEscapeHtml = window.AppUtils.escapeHtml;
 const markdownEscapeAttribute = window.AppUtils.escapeAttribute;
 const markdownGetGitHubEditUrl = window.AppUtils.getGitHubEditUrl;
+const markdownNormalizeImagePath = window.AppUtils.normalizeImagePath;
 
 const PROCEDURE_MARKER_START_PREFIX = "PROCEDURE:START:";
 const PROCEDURE_MARKER_END = "PROCEDURE:END";
@@ -392,6 +394,20 @@ function optimizeSectionMedia(rootEl) {
     });
 }
 
+function resolveImageSources(rootEl) {
+    const images = Array.from(rootEl.querySelectorAll("img[src]"));
+    images.forEach((image) => {
+        const src = String(image.getAttribute("src") || "").trim();
+        if (!src || /^(?:https?:)?\/\//i.test(src) || /^(?:data|blob):/i.test(src) || src.startsWith("#")) {
+            return;
+        }
+        const normalized = markdownNormalizeImagePath(src);
+        if (normalized) {
+            image.setAttribute("src", normalized);
+        }
+    });
+}
+
 function parseImageTextWidthFraction(value) {
     const normalized = String(value || "").trim().replace(/^['"]|['"]$/g, "");
     if (normalized === "-1") {
@@ -755,6 +771,7 @@ function renderMarkdownContent(rootEl, markdownContent, options) {
     transformYouTubeEmbeds(fragment);
     initYouTubeEmbeds(fragment);
     wrapTables(fragment);
+    resolveImageSources(fragment);
     applyImageAttributeLists(fragment);
     optimizeSectionMedia(fragment);
 

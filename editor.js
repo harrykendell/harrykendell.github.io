@@ -111,6 +111,7 @@
     authButton: null,
     repoCommit: null,
     addSectionButton: null,
+    manageSectionsButton: null,
     submitButton: null,
     clearButton: null,
     status: null,
@@ -156,6 +157,28 @@
     return String(path).replace(/^\/+/, "");
   }
 
+  function getSectionPath(sectionId) {
+    if (appUtils && typeof appUtils.getSectionPath === "function") {
+      return appUtils.getSectionPath(sectionId);
+    }
+    const normalized = normalizeSectionId(sectionId);
+    return normalized ? `sections/${normalized}.md` : null;
+  }
+
+  function displaySourcePath(path) {
+    const normalizedPath = normalizeSourcePath(path);
+    const sectionId = sectionIdFromPath(normalizedPath);
+    return sectionId || normalizedPath || "";
+  }
+
+  function displayImagePath(path) {
+    const normalizedPath = normalizeImageRepoPath(path);
+    if (appUtils && typeof appUtils.imageRefFromPath === "function") {
+      return appUtils.imageRefFromPath(normalizedPath || path);
+    }
+    return normalizedPath ? normalizedPath.replace(/^imgs\//, "") : "";
+  }
+
   function extractMarkdownDefinitionSuffix(markdown) {
     const source = String(markdown || "");
     const definitionLines = source.match(/^\s{0,3}\[[^\]]+\]:\s*.+$/gm) || [];
@@ -181,24 +204,20 @@
   }
 
   function normalizeImageRepoPath(value) {
+    if (appUtils && typeof appUtils.normalizeImagePath === "function") {
+      return appUtils.normalizeImagePath(value);
+    }
     if (!value) {
       return null;
     }
-
-    const normalized = String(value)
-      .replace(/\\/g, "/")
-      .replace(/^\/+/, "")
-      .trim();
-
-    if (!normalized.startsWith("imgs/")) {
-      return null;
-    }
+    const raw = String(value).replace(/\\/g, "/").replace(/^\/+/, "").trim();
+    const normalized = raw.startsWith("imgs/") ? raw : `imgs/${raw}`;
     if (normalized.includes("..") || normalized.endsWith("/") || normalized.includes("//")) {
       return null;
     }
-
-    const valid = /^imgs\/[A-Za-z0-9._/-]+\.(png|jpe?g|gif|webp|svg|avif)$/i.test(normalized);
-    return valid ? normalized : null;
+    return /^imgs\/[A-Za-z0-9._/-]+\.(png|jpe?g|gif|webp|svg|avif)$/i.test(normalized)
+      ? normalized
+      : null;
   }
 
   function normalizeImageReferencePath(value) {
@@ -212,6 +231,10 @@
     }
 
     if (raw.startsWith("imgs/")) {
+      return normalizeImageRepoPath(raw);
+    }
+
+    if (/^[A-Za-z0-9._/-]+\.(png|jpe?g|gif|webp|svg|avif)$/i.test(raw)) {
       return normalizeImageRepoPath(raw);
     }
 
@@ -239,15 +262,11 @@
       String(now.getUTCMonth() + 1).padStart(2, "0"),
       String(now.getUTCDate()).padStart(2, "0"),
     ].join("");
-    return `imgs/uploads/${stamp}-${sanitizeFileStem(fileName)}.${extension}`;
+    return `uploads/${stamp}-${sanitizeFileStem(fileName)}.${extension}`;
   }
 
   function inferAltTextFromFileName(fileName) {
-    const stem = sanitizeFileStem(fileName).replace(/[._-]+/g, " ").trim();
-    if (!stem) {
-      return "Image caption";
-    }
-    return stem.charAt(0).toUpperCase() + stem.slice(1);
+    return "Insert Title";
   }
 
   function formatFileSize(bytes) {
@@ -346,7 +365,7 @@
       choicesByPath.set(path, {
         path,
         source: "repo",
-        label: path.replace(/^imgs\//, ""),
+        label: displayImagePath(path),
       });
     });
 
@@ -358,7 +377,7 @@
       choicesByPath.set(normalizedPath, {
         path: normalizedPath,
         source: choicesByPath.has(normalizedPath) ? "staged replacement" : "staged",
-        label: normalizedPath.replace(/^imgs\//, ""),
+        label: displayImagePath(normalizedPath),
         draft,
       });
     });
@@ -422,6 +441,9 @@
   }
 
   function sectionIdFromPath(path) {
+    if (appUtils && typeof appUtils.sectionIdFromPath === "function") {
+      return appUtils.sectionIdFromPath(path);
+    }
     if (!path || !path.startsWith("sections/") || !path.endsWith(".md")) {
       return null;
     }
@@ -2208,6 +2230,57 @@
     }
   }
 
+  async function openCompareCommitDialog() {
+    if (!elements.modalCompareSelect || !state.currentPath || state.newSectionDraft) {
+      return;
+    }
+
+    const options = Array.from(elements.modalCompareSelect.options || []);
+    if (!options.length) {
+      setCompareStatus("Commit history is still loading.");
+      return;
+    }
+
+    const rows = options.map((option, index) => {
+      const selected = option.value === elements.modalCompareSelect.value;
+      const title = option.title || option.textContent || "Commit";
+      return `
+        <button
+          type="button"
+          class="compare-picker-option${selected ? " is-selected" : ""}"
+          data-compare-value="${escapeDialogHtml(option.value)}"
+          aria-pressed="${selected ? "true" : "false"}"
+        >
+          <span class="compare-picker-label">${escapeDialogHtml(option.textContent || `Commit ${index + 1}`)}</span>
+          <span class="compare-picker-title">${escapeDialogHtml(title)}</span>
+        </button>
+      `;
+    }).join("");
+
+    const dialogPromise = openAppDialog({
+      title: "Compare with",
+      messageHtml: `<div class="compare-picker">${rows}</div>`,
+      confirmText: "Close",
+      showCancel: false,
+      panelClassName: "compare-picker-dialog-panel",
+      messageClassName: "compare-picker-dialog",
+    });
+
+    const optionButtons = elements.appDialogMessage
+      ? Array.from(elements.appDialogMessage.querySelectorAll(".compare-picker-option"))
+      : [];
+    optionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.getAttribute("data-compare-value") || "current";
+        elements.modalCompareSelect.value = value;
+        closeAppDialog(true);
+        applyCompareSelection(state.currentPath);
+      });
+    });
+
+    await dialogPromise;
+  }
+
   async function loadComparisonContext(path, initialMarkdown, forceRefresh) {
     if (!path || !elements.modalCompareSelect) {
       return;
@@ -3714,6 +3787,20 @@
     }, timeoutMs);
   }
 
+  async function reportError(title, message) {
+    const text = String(message || "Something went wrong.").trim();
+    setStatus(text, true);
+    if (!elements.appDialog) {
+      return;
+    }
+    await openAppDialog({
+      title: title || "Action failed",
+      message: text,
+      confirmText: "OK",
+      showCancel: false,
+    });
+  }
+
   function isAppDialogOpen() {
     return !!(elements.appDialog && !elements.appDialog.hidden);
   }
@@ -3870,11 +3957,19 @@
     if (elements.addSectionButton) {
       elements.addSectionButton.disabled = disableToolbarActions;
     }
+    if (elements.manageSectionsButton) {
+      elements.manageSectionsButton.disabled = disableToolbarActions || !state.editMode;
+    }
     if (elements.modalSave) {
       elements.modalSave.disabled = disableToolbarActions;
     }
     if (elements.modalCompareSelect) {
       elements.modalCompareSelect.disabled = disableToolbarActions;
+    }
+    if (elements.modal) {
+      elements.modal.querySelectorAll("button[data-format-action], button[data-format-cycle]").forEach((button) => {
+        button.disabled = disableToolbarActions || !state.editorView;
+      });
     }
   }
 
@@ -3934,6 +4029,9 @@
     elements.clearButton.disabled = state.busy || state.authBusy || !hasDrafts;
     if (elements.addSectionButton) {
       elements.addSectionButton.disabled = state.busy || state.authBusy || !state.editMode;
+    }
+    if (elements.manageSectionsButton) {
+      elements.manageSectionsButton.disabled = state.busy || state.authBusy || !state.editMode;
     }
     updateRepoActivityUi();
   }
@@ -4281,37 +4379,7 @@
     if (!(section instanceof Element)) {
       return;
     }
-    if (!section.classList.contains("section")) {
-      return;
-    }
-    const header = section.querySelector(".section-header");
-    if (!header) {
-      return;
-    }
-
-    let headerActions = header.querySelector(".section-header-actions");
-    if (!(headerActions instanceof Element)) {
-      headerActions = document.createElement("div");
-      headerActions.className = "section-header-actions";
-      const existingEditLink = header.querySelector(".section-edit-link");
-      if (existingEditLink) {
-        headerActions.appendChild(existingEditLink);
-      }
-      header.appendChild(headerActions);
-    }
-
-    if (headerActions.querySelector(".section-order-actions")) {
-      return;
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "section-order-actions";
-    actions.innerHTML = `
-      <button type="button" class="section-order-action" data-section-order-action="move-up" title="Move section up" aria-label="Move section up">↑</button>
-      <button type="button" class="section-order-action" data-section-order-action="move-down" title="Move section down" aria-label="Move section down">↓</button>
-      <button type="button" class="section-order-action is-danger" data-section-order-action="remove" title="Remove section from manual" aria-label="Remove section from manual">×</button>
-    `;
-    headerActions.appendChild(actions);
+    section.querySelectorAll(".section-order-actions").forEach((node) => node.remove());
   }
 
   function ensureAllSectionOrderActions() {
@@ -4394,6 +4462,148 @@
     syncSectionStructureDrafts();
     updateToolbar();
     setStatus(`Removed ${normalizedSectionId} from section order.`);
+  }
+
+  function buildManageSectionsButton() {
+    const button = document.createElement("button");
+    button.id = "toc-manage-sections";
+    button.type = "button";
+    button.className = "toc-manage-sections";
+    button.textContent = "Manage";
+    button.title = "Manage sections";
+    button.disabled = !state.editMode;
+    return button;
+  }
+
+  async function fetchSectionManifestIds() {
+    try {
+      const response = await fetch("sections/section-manifest.json", { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Could not load section manifest (${response.status}).`);
+      }
+      const payload = await response.json();
+      const rawSections = Array.isArray(payload && payload.sections) ? payload.sections : [];
+      return rawSections
+        .map((sectionId) => normalizeSectionId(sectionId))
+        .filter(Boolean);
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  function buildManageSectionRow(sectionId, options = {}) {
+    const safeId = escapeDialogHtml(sectionId);
+    const missing = !!options.missing;
+    return `
+      <li class="section-manager-row${missing ? " is-missing" : ""}">
+        <span class="section-manager-id">${safeId}</span>
+        <span class="section-manager-actions">
+          ${missing ? `<button type="button" data-section-manager-action="add-existing" data-section-id="${safeId}">Add</button>` : ""}
+          ${missing ? "" : `<button type="button" data-section-manager-action="up" data-section-id="${safeId}">Up</button>`}
+          ${missing ? "" : `<button type="button" data-section-manager-action="down" data-section-id="${safeId}">Down</button>`}
+          ${missing ? "" : `<button type="button" class="is-danger" data-section-manager-action="remove" data-section-id="${safeId}">Remove</button>`}
+        </span>
+      </li>
+    `;
+  }
+
+  async function addExistingSectionToManual(sectionId) {
+    const normalizedSectionId = normalizeSectionId(sectionId);
+    if (!normalizedSectionId || document.getElementById(normalizedSectionId)) {
+      return;
+    }
+    const path = getSectionPath(normalizedSectionId);
+    if (!path) {
+      return;
+    }
+    const markdown = await fetchMarkdownFromSource(path);
+    state.sourceMarkdown.set(path, markdown);
+    const title = getSectionTitleFromMarkdown(normalizedSectionId, markdown);
+    const shell = buildSectionShell(normalizedSectionId, title);
+    insertSectionByGroup(shell);
+    renderSectionFromDraft(path, markdown);
+    syncSectionStructureDrafts();
+    updateToolbar();
+    setStatus(`Added section ${normalizedSectionId}.`);
+  }
+
+  async function openManageSectionsDialog() {
+    if (!state.editMode || state.busy || state.authBusy) {
+      return;
+    }
+
+    const currentIds = getSectionOrderIdsFromDom();
+    const manifestIds = await fetchSectionManifestIds();
+    const currentSet = new Set(currentIds);
+    const missingIds = manifestIds.filter((sectionId) => !currentSet.has(sectionId));
+    const grouped = currentIds.reduce((acc, sectionId) => {
+      const group = getSectionGroupKey(sectionId).toLowerCase();
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push(sectionId);
+      return acc;
+    }, {});
+
+    const groupsHtml = Object.keys(grouped).sort().map((group) => `
+      <section class="section-manager-group">
+        <h4>${escapeDialogHtml(getSectionGroupLabel(group))}</h4>
+        <ol>${grouped[group].map((sectionId) => buildManageSectionRow(sectionId)).join("")}</ol>
+      </section>
+    `).join("");
+    const missingHtml = missingIds.length
+      ? `
+        <section class="section-manager-group section-manager-missing">
+          <h4>Missing / unlisted</h4>
+          <ol>${missingIds.map((sectionId) => buildManageSectionRow(sectionId, { missing: true })).join("")}</ol>
+        </section>
+      `
+      : "";
+
+    const dialogPromise = openAppDialog({
+      title: "Manage sections",
+      messageHtml: `
+        <div class="section-manager">
+          <button type="button" class="section-manager-add" data-section-manager-action="add-new">Add section</button>
+          ${groupsHtml}
+          ${missingHtml}
+        </div>
+      `,
+      confirmText: "Close",
+      showCancel: false,
+      panelClassName: "section-manager-dialog-panel",
+      messageClassName: "section-manager-dialog",
+    });
+
+    const buttons = elements.appDialogMessage
+      ? Array.from(elements.appDialogMessage.querySelectorAll("[data-section-manager-action]"))
+      : [];
+    buttons.forEach((button) => {
+      button.addEventListener("click", async () => {
+        const action = button.getAttribute("data-section-manager-action");
+        const sectionId = button.getAttribute("data-section-id") || "";
+        closeAppDialog(true);
+        try {
+          if (action === "add-new") {
+            openNewSectionModal();
+          } else if (action === "add-existing") {
+            await addExistingSectionToManual(sectionId);
+          } else if (action === "up") {
+            reorderSectionByOffset(sectionId, -1);
+          } else if (action === "down") {
+            reorderSectionByOffset(sectionId, 1);
+          } else if (action === "remove") {
+            await removeSectionFromManual(sectionId);
+          }
+        } catch (error) {
+          console.error(error);
+          await reportError("Manage sections failed", error.message || "Could not update sections.");
+        }
+      });
+    });
+
+    await dialogPromise;
   }
 
   function buildSectionShell(sectionId, title) {
@@ -4537,6 +4747,9 @@
     }
     if (elements.modalCompareToolbar) {
       elements.modalCompareToolbar.hidden = !!isNew;
+    }
+    if (elements.modalDiffSummary) {
+      elements.modalDiffSummary.disabled = !!isNew;
     }
     if (!isNew) {
       state.newSectionDraft = null;
@@ -4687,7 +4900,7 @@
     const isDifferentPath = wasPath !== path;
     setNewSectionMode(false);
     state.currentPath = path;
-    elements.modalPathDisplay.textContent = path;
+    elements.modalPathDisplay.textContent = displaySourcePath(path);
     const sectionId = sectionIdFromPath(path);
     const fallbackTitle = getDefaultSectionTitle(sectionId);
     const split = splitMarkdownTitle(markdown);
@@ -4890,7 +5103,7 @@
 
       const response = await fetch(normalizedPath, { cache: "no-store" });
       if (!response.ok) {
-        throw new Error(`Unable to load ${normalizedPath} (${response.status})`);
+        throw new Error(`Unable to load ${displaySourcePath(normalizedPath)} (${response.status})`);
       }
       const markdown = await response.text();
       state.sourceMarkdown.set(normalizedPath, markdown);
@@ -4904,7 +5117,7 @@
   async function fetchMarkdownFromSource(path) {
     const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) {
-      const error = new Error(`Unable to reload ${path} (${response.status})`);
+      const error = new Error(`Unable to reload ${displaySourcePath(path)} (${response.status})`);
       error.status = response.status;
       throw error;
     }
@@ -4976,7 +5189,7 @@
         shell.remove();
         state.drafts.delete(path);
         storeMarkdownDrafts();
-        setStatus(`Could not add ${normalizedSectionId}.`, true);
+        await reportError("Add section failed", `Could not add ${normalizedSectionId}.`);
         return;
       }
 
@@ -5004,7 +5217,7 @@
         storeMarkdownDrafts();
         renderSectionFromDraft(path, sourceMarkdown);
         updateToolbar();
-        setStatus(`No changes in ${path}; draft discarded.`);
+        setStatus(`No changes in ${displaySourcePath(path)}; draft discarded.`);
         closeModal();
         return;
       }
@@ -5013,11 +5226,11 @@
       storeMarkdownDrafts();
       renderSectionFromDraft(path, markdown);
       updateToolbar();
-      setStatus(`Draft saved for ${path}`);
+      setStatus(`Draft saved for ${displaySourcePath(path)}`);
       closeModal();
     } catch (error) {
       console.error(error);
-      setStatus(error.message || "Could not save draft.", true);
+      await reportError("Save failed", error.message || "Could not save draft.");
     }
   }
 
@@ -5363,43 +5576,51 @@
 
     const normalizedPath = normalizeImageRepoPath(imagePath);
     if (!normalizedPath) {
-      setStatus("Invalid image path. Use imgs/... with a valid image extension.", true);
+      setStatus("Invalid image path. Choose an image under the image library with a valid extension.", true);
       return;
     }
 
     const start = snapshot.selectionStart;
     const end = snapshot.selectionEnd;
-    const selectedAlt = snapshot.value.slice(start, end).trim() || "Image caption";
-    const markdown = `![${selectedAlt}](${normalizedPath})${formatInlineImageOptions(options || { size: "-1" })}`;
-    const pathStartOffset = markdown.indexOf(normalizedPath);
-    const pathEndOffset = pathStartOffset + normalizedPath.length;
+    const imageRef = displayImagePath(normalizedPath);
+    const selectedAlt = snapshot.value.slice(start, end).trim() || "Insert Title";
+    const markdown = `![${selectedAlt}](${imageRef})${formatInlineImageOptions(options || { size: "-1" })}`;
+    const pathStartOffset = markdown.indexOf(imageRef);
+    const pathEndOffset = pathStartOffset + imageRef.length;
     replaceEditorRange(start, end, markdown, start + pathStartOffset, start + pathEndOffset);
   }
 
   async function openImagePickerDialog() {
     const choices = await getAvailableImageChoices();
     if (choices.length === 0) {
-      setStatus("No images found. Upload an image first, or add entries to imgs/image-manifest.json.", true);
+      setStatus("No images found. Upload an image first, or add entries to the image manifest.", true);
       return "";
     }
 
     const choiceHtml = choices.map((choice, index) => {
       const previewSrc = getImageChoicePreviewSrc(choice);
       const sourceLabel = choice.source === "repo" ? "GitHub" : choice.source;
+      const displayPath = displayImagePath(choice.path);
+      const slashIndex = displayPath.lastIndexOf("/");
+      const imageDir = slashIndex >= 0 ? displayPath.slice(0, slashIndex) : "";
+      const imageName = slashIndex >= 0 ? displayPath.slice(slashIndex + 1) : displayPath;
+      const sourceIcon = choice.source === "repo"
+        ? AUTH_GITHUB_ICON
+        : `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M10 13V4"></path><path d="M6.5 7.5L10 4L13.5 7.5"></path><path d="M4 12.5V15.5H16V12.5"></path></svg>`;
       return `
         <button
           type="button"
           class="image-picker-item${index === 0 ? " is-selected" : ""}"
-          data-image-path="${escapeDialogHtml(choice.path)}"
-          data-image-search="${escapeDialogHtml(`${choice.path} ${sourceLabel}`)}"
+          data-image-path="${escapeDialogHtml(displayPath)}"
           aria-pressed="${index === 0 ? "true" : "false"}"
         >
           <span class="image-picker-thumb">
             <img src="${escapeDialogHtml(previewSrc)}" alt="" loading="lazy" decoding="async" />
+            <span class="image-picker-source-icon" title="${escapeDialogHtml(sourceLabel)}" aria-label="${escapeDialogHtml(sourceLabel)}">${sourceIcon}</span>
           </span>
           <span class="image-picker-meta">
-            <span class="image-picker-path">${escapeDialogHtml(choice.label)}</span>
-            <span class="image-picker-source">${escapeDialogHtml(sourceLabel)}</span>
+            <span class="image-picker-dir">${escapeDialogHtml(imageDir || "root")}</span>
+            <span class="image-picker-name">${escapeDialogHtml(imageName)}</span>
           </span>
         </button>
       `;
@@ -5409,20 +5630,12 @@
       title: "Insert image",
       messageHtml: `
         <div class="image-picker">
-          <input
-            class="image-picker-search"
-            type="search"
-            placeholder="Search images"
-            aria-label="Search images"
-            autocomplete="off"
-          />
           <div class="image-picker-grid">${choiceHtml}</div>
-          <p class="image-picker-empty" hidden>No matching images.</p>
         </div>
       `,
       input: true,
-      inputValue: choices[0].path,
-      inputPlaceholder: "imgs/your-image.jpg",
+      inputValue: displayImagePath(choices[0].path),
+      inputPlaceholder: "your-folder/your-image.jpg",
       inputLabel: "Selected image path",
       confirmText: "Insert image",
       cancelText: "Cancel",
@@ -5432,9 +5645,7 @@
 
     const dialogRoot = elements.appDialogMessage;
     const selectedPathInput = elements.appDialogInput;
-    const searchInput = dialogRoot ? dialogRoot.querySelector(".image-picker-search") : null;
     const items = dialogRoot ? Array.from(dialogRoot.querySelectorAll(".image-picker-item")) : [];
-    const emptyMessage = dialogRoot ? dialogRoot.querySelector(".image-picker-empty") : null;
 
     const selectItem = (item) => {
       if (!item || !selectedPathInput) {
@@ -5448,35 +5659,9 @@
       selectedPathInput.value = item.getAttribute("data-image-path") || "";
     };
 
-    const filterItems = () => {
-      const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
-      let visibleCount = 0;
-      items.forEach((item) => {
-        const haystack = String(item.getAttribute("data-image-search") || "").toLowerCase();
-        const isVisible = !query || haystack.includes(query);
-        item.hidden = !isVisible;
-        if (isVisible) {
-          visibleCount += 1;
-        }
-      });
-      if (emptyMessage) {
-        emptyMessage.hidden = visibleCount > 0;
-      }
-    };
-
     items.forEach((item) => {
       item.addEventListener("click", () => selectItem(item));
     });
-
-    if (searchInput) {
-      searchInput.addEventListener("input", filterItems);
-      window.setTimeout(() => {
-        if (!elements.appDialog || elements.appDialog.hidden) {
-          return;
-        }
-        searchInput.focus();
-      }, 0);
-    }
 
     const result = await dialogPromise;
     if (!result.confirmed) {
@@ -5513,13 +5698,16 @@
     }
 
     const suggestedPath = buildSuggestedImagePath(imageFile.name);
+    const extensionMatch = suggestedPath.match(/(\.[A-Za-z0-9]+)$/);
+    const lockedExtension = extensionMatch ? extensionMatch[1] : ".png";
+    const suggestedStem = suggestedPath.slice(0, -lockedExtension.length);
     const pathDialog = await openAppDialog({
       title: "Image path",
-      message: "Image path in repo (must start with imgs/):",
+      message: `Image path under the image library. File type is fixed as ${lockedExtension}.`,
       input: true,
-      inputValue: suggestedPath,
-      inputPlaceholder: "imgs/your-image.png",
-      inputLabel: "Image path in repo",
+      inputValue: suggestedStem,
+      inputPlaceholder: "uploads/your-image",
+      inputLabel: "Image path without file extension",
       confirmText: "Use path",
       cancelText: "Cancel",
     });
@@ -5527,14 +5715,15 @@
       return;
     }
 
-    const chosenPath = String(pathDialog.value || "").trim();
+    const chosenStem = String(pathDialog.value || "").trim().replace(/\.[A-Za-z0-9]+$/i, "");
+    const chosenPath = `${chosenStem}${lockedExtension}`;
     if (!chosenPath) {
       return;
     }
 
     const normalizedPath = normalizeImageRepoPath(chosenPath);
     if (!normalizedPath) {
-      setStatus("Invalid image path. Use imgs/... with a valid image extension.", true);
+      setStatus("Invalid image path. Use a path under the image library.", true);
       return;
     }
 
@@ -5542,7 +5731,7 @@
     if (replacingExisting) {
       const replaceDialog = await openAppDialog({
         title: "Replace staged image",
-        message: `Replace staged image at ${normalizedPath}?`,
+        message: `Replace staged image at ${displayImagePath(normalizedPath)}?`,
         confirmText: "Replace",
         cancelText: "Cancel",
       });
@@ -5569,16 +5758,17 @@
       const end = snapshot.selectionEnd;
       const selected = snapshot.value.slice(start, end).trim();
       const alt = selected || inferAltTextFromFileName(imageFile.name);
-      const markdown = `![${alt}](${normalizedPath}){size=-1}`;
-      const pathStartOffset = markdown.indexOf(normalizedPath);
-      const pathEndOffset = pathStartOffset + normalizedPath.length;
+      const imageRef = displayImagePath(normalizedPath);
+      const markdown = `![${alt}](${imageRef}){size=-1}`;
+      const pathStartOffset = markdown.indexOf(imageRef);
+      const pathEndOffset = pathStartOffset + imageRef.length;
       replaceEditorRange(start, end, markdown, start + pathStartOffset, start + pathEndOffset);
 
-      setStatus(`Staged ${normalizedPath} (${formatFileSize(imageFile.size)}).`);
+      setStatus(`Staged ${displayImagePath(normalizedPath)} (${formatFileSize(imageFile.size)}).`);
       updateToolbar();
     } catch (error) {
       console.error(error);
-      setStatus(error && error.message ? error.message : "Could not stage image upload.", true);
+      await reportError("Image upload failed", error && error.message ? error.message : "Could not stage image upload.");
     }
   }
 
@@ -5913,7 +6103,7 @@
       setStatus(`Discarded ${totalStaged} staged file${totalStaged === 1 ? "" : "s"}.`);
     } catch (error) {
       console.error(error);
-      setStatus(error.message || "Could not discard drafts.", true);
+      await reportError("Reset failed", error.message || "Could not discard drafts.");
     } finally {
       setBusy(false);
     }
@@ -5938,7 +6128,7 @@
       if (hasChanges) {
         const confirmDialog = await openAppDialog({
           title: "Reset draft",
-          message: `Discard unsaved changes for ${path}?`,
+          message: `Discard unsaved changes for ${displaySourcePath(path)}?`,
           confirmText: "Reset",
           cancelText: "Cancel",
         });
@@ -5961,10 +6151,10 @@
       initializeEditorHistory();
       updateToolbar();
       refreshEditorBaseline();
-      setStatus(`Reset draft for ${path}.`);
+      setStatus(`Reset draft for ${displaySourcePath(path)}.`);
     } catch (error) {
       console.error(error);
-      setStatus(error.message || "Could not reset section draft.", true);
+      await reportError("Reset failed", error.message || "Could not reset section draft.");
     }
   }
 
@@ -6022,10 +6212,10 @@
       defaultCommitMessage = `docs: update ${counts.markdown} markdown file${counts.markdown === 1 ? "" : "s"}`;
     }
     const markdownSummary = changedMarkdownPaths.length
-      ? `Markdown (${changedMarkdownPaths.length}):\n${changedMarkdownPaths.map((path) => `- ${path}`).join("\n")}`
+      ? `Markdown (${changedMarkdownPaths.length}):\n${changedMarkdownPaths.map((path) => `- ${displaySourcePath(path)}`).join("\n")}`
       : "Markdown: none";
     const imageSummary = changedImagePaths.length
-      ? `Images (${changedImagePaths.length}):\n${changedImagePaths.map((path) => `- ${path}`).join("\n")}`
+      ? `Images (${changedImagePaths.length}):\n${changedImagePaths.map((path) => `- ${displayImagePath(path)}`).join("\n")}`
       : "Images: none";
     const commitDialog = await openAppDialog({
       title: "Commit message",
@@ -6054,18 +6244,6 @@
       changedMarkdownPaths.forEach((path) => {
         files[path] = state.drafts.get(path);
       });
-
-      let nextImageManifest = null;
-      if (changedImagePaths.length > 0) {
-        const currentManifestImages = await fetchImageManifest();
-        const mergedImagePaths = Array.from(new Set(currentManifestImages.concat(changedImagePaths)))
-          .sort((left, right) => left.localeCompare(right));
-        const hasNewManifestPath = changedImagePaths.some((path) => !currentManifestImages.includes(path));
-        if (hasNewManifestPath) {
-          files["imgs/image-manifest.json"] = buildImageManifestContent(mergedImagePaths);
-          nextImageManifest = mergedImagePaths;
-        }
-      }
 
       const binaryFiles = {};
       changedImagePaths.forEach((path) => {
@@ -6117,9 +6295,7 @@
       storeMarkdownDrafts();
       state.imageDrafts.clear();
       storeImageDrafts();
-      if (nextImageManifest) {
-        state.imageManifestPromise = Promise.resolve(nextImageManifest);
-      }
+      state.imageManifestPromise = null;
       updateToolbar();
       refreshRepoActivity(true);
       window.setTimeout(() => {
@@ -6194,7 +6370,7 @@
                 id="editor-path-input"
                 class="editor-path-input"
                 type="text"
-                placeholder="category/filename.md"
+                placeholder="category/filename"
                 spellcheck="false"
                 autocomplete="off"
                 autocapitalize="off"
@@ -6292,7 +6468,7 @@
             </div>
           </div>
           <div class="editor-format-group editor-format-group-media" role="group" aria-label="Media tools">
-            <button type="button" data-format-action="image-upload" title="Upload image to imgs/ (Cmd/Ctrl+Alt+U)" aria-label="Upload image">
+            <button type="button" data-format-action="image-upload" title="Upload image (Cmd/Ctrl+Alt+U)" aria-label="Upload image">
               <span class="editor-tool-icon" aria-hidden="true">
                 <svg viewBox="0 0 20 20" focusable="false">
                   <path d="M10 13V4"></path>
@@ -6364,7 +6540,7 @@
         <input id="editor-image-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,image/avif" hidden />
         <div class="editor-actions">
           <button type="button" id="editor-reset">Reset</button>
-          <p id="editor-diff-summary" class="editor-diff-summary">Live diff preview</p>
+          <button type="button" id="editor-diff-summary" class="editor-diff-summary">Live diff preview</button>
           <button type="button" id="editor-preview-toggle" data-format-action="preview-toggle" aria-pressed="false" title="Toggle parsed markdown preview">Preview</button>
           <button class="primary" type="button" id="editor-save">Save</button>
         </div>
@@ -6428,6 +6604,11 @@
     elements.modalPreviewToggle = modal.querySelector("#editor-preview-toggle");
     elements.modalSave = modal.querySelector("#editor-save");
     elements.modalReset = modal.querySelector("#editor-reset");
+    elements.manageSectionsButton = buildManageSectionsButton();
+    const tocHeader = document.querySelector(".toc-header");
+    if (tocHeader && elements.manageSectionsButton) {
+      tocHeader.appendChild(elements.manageSectionsButton);
+    }
     applyPreviewPaneSplitRatioQuietly(state.previewPaneSplitRatio);
     setPreviewEnabled(shouldDefaultPreviewEnabled());
     updateVariantControlState();
@@ -6523,6 +6704,12 @@
       });
     }
 
+    if (elements.manageSectionsButton) {
+      elements.manageSectionsButton.addEventListener("click", () => {
+        openManageSectionsDialog();
+      });
+    }
+
     if (elements.modalReset) {
       elements.modalReset.addEventListener("click", () => {
         resetCurrentSectionDraft();
@@ -6585,6 +6772,12 @@
           return;
         }
         applyCompareSelection(state.currentPath);
+      });
+    }
+
+    if (elements.modalDiffSummary) {
+      elements.modalDiffSummary.addEventListener("click", () => {
+        openCompareCommitDialog();
       });
     }
 
@@ -6737,25 +6930,6 @@
     document.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof Element)) {
-        return;
-      }
-
-      const sectionAction = target.closest(".section-order-action");
-      if (sectionAction && state.editMode) {
-        const action = sectionAction.getAttribute("data-section-order-action");
-        const section = sectionAction.closest(".section");
-        const sectionId = section && section.id ? section.id : "";
-        if (action && sectionId) {
-          event.preventDefault();
-          event.stopPropagation();
-          if (action === "move-up") {
-            reorderSectionByOffset(sectionId, -1);
-          } else if (action === "move-down") {
-            reorderSectionByOffset(sectionId, 1);
-          } else if (action === "remove") {
-            removeSectionFromManual(sectionId);
-          }
-        }
         return;
       }
 

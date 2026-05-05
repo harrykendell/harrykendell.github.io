@@ -835,7 +835,7 @@ function validateOccurrence(occurrence, context) {
   }
 
   if (classified.type === "internal") {
-    const repoPath = classifyInternalRepoPath(classified.path);
+    const repoPath = classifyInternalRepoPath(classified.path, occurrence.kind);
     if (!repoPath.ok) {
       addIssue({
         level: "error",
@@ -944,7 +944,7 @@ function classifyDestination(destination) {
   };
 }
 
-function classifyInternalRepoPath(rawPath) {
+function classifyInternalRepoPath(rawPath, kind = "link") {
   const source = String(rawPath || "").trim();
   if (!source || source === "/") {
     return { ok: true, path: "index.html" };
@@ -959,7 +959,10 @@ function classifyInternalRepoPath(rawPath) {
     return { ok: true, path: "index.html" };
   }
 
-  const normalized = path.posix.normalize(normalizedInput);
+  const imagePath = kind === "image" && !normalizedInput.startsWith("imgs/")
+    ? `imgs/${normalizedInput}`
+    : normalizedInput;
+  const normalized = path.posix.normalize(imagePath);
   if (normalized.startsWith("../") || normalized === ".." || normalized.includes("/../")) {
     return { ok: false, message: `Invalid relative path traversal: ${rawPath}` };
   }

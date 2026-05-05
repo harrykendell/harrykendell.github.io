@@ -16,7 +16,7 @@ Use this page like a checklist:
 
 ## Composite construction primer
 
-![Rowing shells are typically sandwich panels. The core carries shear and keeps skins separated. The skins carry bending loads. Even tiny skin cracks can allow water into the core: seal early.](imgs/repairs/sandwich_structure.svg){size=1}
+![Rowing shells are typically sandwich panels. The core carries shear and keeps skins separated. The skins carry bending loads. Even tiny skin cracks can allow water into the core: seal early.](repairs/sandwich_structure.svg){size=1}
 
 Most modern shells are a **sandwich**: thin composite skins (carbon/glass/aramid) over a lightweight core (honeycomb or foam). The most common failure escalation is:
 
@@ -74,7 +74,7 @@ Practical rules that prevent common failures:
 
 ## Vacuum bagging and cure controls (adapted from layup/curing references)
 
-![Vacuum bag stack outside-in. Vacuum bagging improves consolidation and reduces voids. Use peel ply so the surface is bondable after cure.](imgs/repairs/vacuum_bag_stack.svg){size=1}
+![Vacuum bag stack outside-in. Vacuum bagging improves consolidation and reduces voids. Use peel ply so the surface is bondable after cure.](repairs/vacuum_bag_stack.svg){size=1}
 
 Vacuum bagging is optional for small repairs but highly recommended for structural patches when you can access both geometry and sealing.
 
@@ -123,7 +123,7 @@ Seal a small skin break where fibres are visible but core is not crushed, to sto
 
 This is the common case: a **tiny crescent crack** from handling (e.g., bolt/riggers striking the hull) opens a path into honeycomb. Even if it’s not massively structural, it can spiral into a major repair if water gets in.
 
-![Inject + clamp for small pockets. Goal: wet-out the pocket, restore contour, avoid denting from over-clamping.](imgs/repairs/injection_clamp.svg){size=1}
+![Inject + clamp for small pockets. Goal: wet-out the pocket, restore contour, avoid denting from over-clamping.](repairs/injection_clamp.svg){size=1}
 
 [!PROCEDURE:Intermediate] Micro crack into core (resin injection + seal)
 Treat a small (~1–20 mm) crack that opens into honeycomb/foam core. This is a “seal now” procedure.
@@ -168,7 +168,7 @@ Stabilise a small delamination where skin has separated locally (often identifie
 
 ### Structural patch repairs (scarf/taper)
 
-![Shallow taper avoids a stress riser. Too-steep patch edges crack. Use a shallow taper and stepped ply schedule to rebuild thickness.](imgs/repairs/scarf_taper.svg){size=1}
+![Shallow taper avoids a stress riser. Too-steep patch edges crack. Use a shallow taper and stepped ply schedule to rebuild thickness.](repairs/scarf_taper.svg){size=1}
 
 [!PROCEDURE:Advanced] Scarf patch repair (skin + core involvement)
 Structural repair for crushed core, significant delamination, or holes where the core must be replaced and skins rebuilt.

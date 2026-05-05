@@ -1,6 +1,6 @@
 # Seats
 
-![Seats fail from grit and looseness. The two common causes of rough seats are grit embedded in wheels/tracks and track fasteners loosening until inserts strip. Clean often; fix looseness immediately.](imgs/overviews/seats_tracks.svg){size=1}
+![Seats fail from grit and looseness. The two common causes of rough seats are grit embedded in wheels/tracks and track fasteners loosening until inserts strip. Clean often; fix looseness immediately.](overviews/seats_tracks.svg){size=1}
 
 ## Routine cleaning
 

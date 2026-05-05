@@ -607,7 +607,6 @@ function setupTocToggle() {
   }
   const toggleButton = document.getElementById("toc-toggle");
   const sidebar = document.getElementById("sidebar");
-  const mainContent = document.querySelector("main");
 
   if (!toggleButton || !sidebar) {
     return;
@@ -616,9 +615,6 @@ function setupTocToggle() {
   const setExpanded = (expanded) => {
     sidebar.classList.toggle("is-open", expanded);
     toggleButton.setAttribute("aria-expanded", String(expanded));
-    if (mainContent) {
-      mainContent.classList.toggle("toc-dim", expanded);
-    }
   };
 
   window.setTocOpen = setExpanded;

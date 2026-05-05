@@ -1,6 +1,6 @@
 # Harness build and repair
 
-![Seal + strain relief prevents repeat failures. Most harness failures are not electrical - they are mechanical: water ingress at the connector and broken conductors at the strain point.](imgs/wiring/harness_build.svg){size=0.5 float=right}
+![Seal + strain relief prevents repeat failures. Most harness failures are not electrical - they are mechanical: water ingress at the connector and broken conductors at the strain point.](wiring/harness_build.svg){size=0.5 float=right}
 
 This page covers the practical build/repair of rowing electronics harnesses (coxbox, speakers, rate switches, charging).
 

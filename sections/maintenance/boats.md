@@ -1,6 +1,6 @@
 # Boats
 
-![Where damage hides and where leaks start. Most mystery problems come from three zones: buoyancy covers and seals, rigger/seat track attachments, and fin box/rudder. Inspect these first, especially after transport or any impact.](imgs/overviews/boat_inspection_zones.svg){size=1}
+![Where damage hides and where leaks start. Most mystery problems come from three zones: buoyancy covers and seals, rigger/seat track attachments, and fin box/rudder. Inspect these first, especially after transport or any impact.](overviews/boat_inspection_zones.svg){size=1}
 
 ## Routine care & cleaning
 

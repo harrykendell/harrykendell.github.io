@@ -1,6 +1,6 @@
 # Oar repairs
 
-![Sleeve pitch alignment matters. A sleeve bonded a few degrees off makes the boat feel wrong and is hard to diagnose later. Dry-fit, mark, bond, and hold alignment until full cure.](imgs/repairs/oar_sleeve_pitch_alignment.svg){size=0.5 float=right}
+![Sleeve pitch alignment matters. A sleeve bonded a few degrees off makes the boat feel wrong and is hard to diagnose later. Dry-fit, mark, bond, and hold alignment until full cure.](repairs/oar_sleeve_pitch_alignment.svg){size=0.5 float=right}
 
 ## Scope and escalation
 

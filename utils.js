@@ -76,6 +76,47 @@
       : null;
   }
 
+  function getSectionPath(sectionId) {
+    const normalized = normalizeSectionId(sectionId);
+    return normalized ? `sections/${normalized}.md` : null;
+  }
+
+  function sectionIdFromPath(value) {
+    return normalizeSectionId(value);
+  }
+
+  function normalizeImagePath(value) {
+    if (!value) {
+      return null;
+    }
+
+    const normalized = String(value)
+      .replace(/\\/g, "/")
+      .replace(/^\/+/, "")
+      .trim();
+
+    const withPrefix = normalized.startsWith("imgs/")
+      ? normalized
+      : `imgs/${normalized}`;
+
+    if (
+      withPrefix.includes("..")
+      || withPrefix.includes("//")
+      || withPrefix.endsWith("/")
+    ) {
+      return null;
+    }
+
+    return /^imgs\/[A-Za-z0-9._/-]+\.(png|jpe?g|gif|webp|svg|avif)$/i.test(withPrefix)
+      ? withPrefix
+      : null;
+  }
+
+  function imageRefFromPath(value) {
+    const normalized = normalizeImagePath(value);
+    return normalized ? normalized.replace(/^imgs\//, "") : "";
+  }
+
   function normalizeHashValue(hash) {
     if (!hash || typeof hash !== "string") {
       return null;
@@ -156,6 +197,10 @@
     getContentRepoConfig,
     getContentRepoBranch,
     normalizeSectionId,
+    getSectionPath,
+    sectionIdFromPath,
+    normalizeImagePath,
+    imageRefFromPath,
     normalizeHashValue,
     replaceUrlState,
     getInternalHashFromLink,
