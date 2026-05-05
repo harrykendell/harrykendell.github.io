@@ -3,12 +3,21 @@
   const CONTENT_REPO_OWNER = "harrykendell";
   const CONTENT_REPO_NAME = "harrykendell.github.io";
   const CONTENT_REPO_BRANCH = "main";
+  const DEV_CONTENT_REPO_BRANCH = "dev";
+  const DEV_HOSTNAME = "dev.kendell.uk";
+
+  function getContentRepoBranch() {
+    const hostname = String(global.location && global.location.hostname || "").toLowerCase();
+    return hostname === DEV_HOSTNAME
+      ? DEV_CONTENT_REPO_BRANCH
+      : CONTENT_REPO_BRANCH;
+  }
 
   function getContentRepoConfig() {
     return {
       owner: CONTENT_REPO_OWNER,
       name: CONTENT_REPO_NAME,
-      baseBranch: CONTENT_REPO_BRANCH,
+      baseBranch: getContentRepoBranch(),
     };
   }
 
@@ -34,7 +43,7 @@
     const config = options || {};
     const owner = encodeURIComponent(String(config.owner || CONTENT_REPO_OWNER));
     const repo = encodeURIComponent(String(config.repo || CONTENT_REPO_NAME));
-    const branch = encodeURIComponent(String(config.branch || CONTENT_REPO_BRANCH));
+    const branch = encodeURIComponent(String(config.branch || getContentRepoBranch()));
     const path = cleanPath
       .split("/")
       .map((segment) => encodeURIComponent(segment))
@@ -145,6 +154,7 @@
     escapeAttribute,
     getGitHubEditUrl,
     getContentRepoConfig,
+    getContentRepoBranch,
     normalizeSectionId,
     normalizeHashValue,
     replaceUrlState,

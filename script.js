@@ -32,6 +32,7 @@ if (
   || typeof window.AppUtils.escapeHtml !== "function"
   || typeof window.AppUtils.escapeAttribute !== "function"
   || typeof window.AppUtils.getGitHubEditUrl !== "function"
+  || typeof window.AppUtils.getContentRepoConfig !== "function"
   || typeof window.AppUtils.normalizeSectionId !== "function"
   || typeof window.AppUtils.normalizeHashValue !== "function"
   || typeof window.AppUtils.replaceUrlState !== "function"
@@ -44,12 +45,28 @@ const {
   escapeHtml,
   escapeAttribute,
   getGitHubEditUrl: appGetGitHubEditUrl,
+  getContentRepoConfig: appGetContentRepoConfig,
   normalizeSectionId: appNormalizeSectionId,
   normalizeHashValue: appNormalizeHashValue,
   replaceUrlState: appReplaceUrlState,
   getInternalHashFromLink: appGetInternalHashFromLink,
   normalizeInternalHashLinks: appNormalizeInternalHashLinks,
 } = window.AppUtils;
+
+function updateSidebarEnvironmentLabel() {
+  const repoConfig = appGetContentRepoConfig();
+  const baseBranch = repoConfig && typeof repoConfig.baseBranch === "string"
+    ? repoConfig.baseBranch
+    : "";
+  if (baseBranch !== "dev") {
+    return;
+  }
+
+  const contentsLink = document.querySelector(".toc-header h2 a");
+  if (contentsLink) {
+    contentsLink.textContent = "DEV";
+  }
+}
 
 function setupSearchBar() {
   window.SearchBarSetup();
@@ -801,6 +818,7 @@ function renderInitialSidebar() {
 }
 
 async function initApp() {
+  updateSidebarEnvironmentLabel();
   setupTocToggle();
   setupSearchBar();
 
