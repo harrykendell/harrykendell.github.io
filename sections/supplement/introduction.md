@@ -3,7 +3,6 @@
 This manual is for **day‑to‑day care** (cleaning, checks, adjustment) and **repairs** (structural and adhesive work) on rowing shells and related equipment.
 
 The content is split into:
-
 - **Maintenance** — routine care, inspection, troubleshooting, and part replacement.
 - **Repairs** — structural composite work, adhesive rebuilds, and electronics harness rebuilds.
 - **Supplement** — quick reference and the tools/consumables you need to execute the procedures.
