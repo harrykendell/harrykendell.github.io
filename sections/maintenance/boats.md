@@ -1,5 +1,21 @@
 # Boats
 
+<!-- Content
+
+Cleaning
+- soap
+- rinse
+- dry
+- opening hatches
+
+Pre-post outing checks
+- Hatches
+- Components
+- Bowball
+- Steering
+- Damage
+ -->
+
 ![Where damage hides and where leaks start. Most mystery problems come from three zones: buoyancy covers and seals, rigger/seat track attachments, and fin box/rudder. Inspect these first, especially after transport or any impact.](overviews/boat_inspection_zones.svg){size=1}
 
 ## Routine care & cleaning

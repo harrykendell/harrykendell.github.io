@@ -2,7 +2,7 @@
 let hashUpdateEnabled = false;
 const SECTION_ORDER_PATH = "sections/section-order.md";
 const EDITOR_MARKDOWN_DRAFTS_STORAGE_KEY = "editor-markdown-drafts-v1";
-const PREFACE_PATH = "sections/supplement/introduction.md";
+const PREFACE_PATH = "sections/introduction.md";
 let sectionFiles = [];
 
 let sidebarLinksCache = [];

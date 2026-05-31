@@ -1,5 +1,9 @@
 # Boat composite repairs
 
+<!-- Content
+
+ -->
+ 
 ## How to use this section
 
 This section is for hull/deck composite repairs on rowing shells. It aims to be safe and repeatable for **small** in‑house repairs and to clearly flag when to escalate.

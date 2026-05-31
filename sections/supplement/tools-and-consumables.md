@@ -1,5 +1,9 @@
 # Tools and consumables
 
+<!-- Content
+
+ -->
+ 
 This page lists the minimum tools and consumables needed to execute the procedures in this manual. It is written to support a club workshop: consistent kit, consistent results.
 
 > [!WARNING] Safety

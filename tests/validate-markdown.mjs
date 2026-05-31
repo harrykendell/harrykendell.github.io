@@ -96,7 +96,7 @@ async function main() {
   const orderedSectionSet = new Set(orderedSectionIds);
   for (const filePath of sectionFiles) {
     const sectionId = toSectionId(filePath);
-    if (!sectionId || sectionId === "supplement/introduction") {
+    if (!sectionId || sectionId === "introduction") {
       continue;
     }
     if (!orderedSectionSet.has(sectionId)) {
@@ -159,7 +159,7 @@ function normalizeSectionId(value) {
     .replace(/\.md$/i, "")
     .trim();
 
-  if (!normalized || normalized === "supplement/introduction") {
+  if (!normalized || normalized === "introduction") {
     return null;
   }
 

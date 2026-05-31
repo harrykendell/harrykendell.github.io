@@ -1,5 +1,9 @@
 # Hardware
 
+<!-- Content
+
+ -->
+ 
 ![Washer rule against composite. Split/spring washers can crush paint and bruise laminate. Always use a flat washer against the hull.](overviews/hardware_washer_stack.svg){size=0.5 float=right}
 
 We buy generic hardware from [Westfield Fasteners](https://www.westfieldfasteners.co.uk/). Rowing-specific parts are typically from:

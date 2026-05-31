@@ -67,7 +67,7 @@
       .replace(/\.md$/i, "")
       .trim();
 
-    if (!normalized || normalized === "supplement/introduction") {
+    if (!normalized || normalized === "introduction") {
       return null;
     }
 

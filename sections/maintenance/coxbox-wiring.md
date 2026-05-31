@@ -1,4 +1,14 @@
-# Coxbox Wiring
+# Wiring
+
+<!-- Content
+
+Troubleshooting
+- Continuity checks?
+Speaker layouts
+Impellers
+Speedcoaches
+Coxbox user manual
+ -->
 
 ![Cox box plug front view. Use the keyway to orient the connector. Do not assume pin functions: verify with a multimeter and a known-good device.](wiring/coxbox_plug.jpg){size=0.5 float=right}
 

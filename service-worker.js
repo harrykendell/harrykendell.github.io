@@ -12,7 +12,7 @@ const APP_SHELL_URLS = [
   "/editor.css?v=9",
   "/editor.js?v=27",
   "/sections/section-order.md",
-  "/sections/supplement/introduction.md",
+  "/sections/introduction.md",
   "/favicon/site.webmanifest",
   "/favicon/favicon.svg",
   "/favicon/favicon.ico",

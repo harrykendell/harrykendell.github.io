@@ -1,5 +1,12 @@
 # Oars
 
+<!-- Content
+
+Blade identification
+cleaning
+handle replacement
+ -->
+
 ![Oar terminology: handle, sleeve, collar, spoon. Most mistakes in oar care are simple: scraping tips, using the spoon to push off, and storing them insecurely. Most mistakes in oar rigging are geometric: collar/inboard mismatches and sleeve pitch errors.](overviews/oar_parts.svg){size=1}
 
 Nearly all new blades are Skinny, with older ones generally being Ultralight or Low I, and a range of blade shapes. Standardising over time improves mix‑and‑match and reduces spares complexity.

@@ -1,5 +1,16 @@
 # Seats
 
+<!-- Content
+
+Diagram
+- Axle
+No oil
+Wheel replacement
+Track fastening + washers etc
+When to replace
+Removing + attching on
+ -->
+
 ![Seats fail from grit and looseness. The two common causes of rough seats are grit embedded in wheels/tracks and track fasteners loosening until inserts strip. Clean often; fix looseness immediately.](overviews/seats_tracks.svg){size=1}
 
 ## Routine cleaning

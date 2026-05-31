@@ -1915,7 +1915,7 @@ function toSectionIdFromPath(value) {
     }
 
     const sectionId = value.slice("sections/".length, -".md".length);
-    if (!sectionId || sectionId === "section-order" || sectionId === "supplement/introduction") {
+    if (!sectionId || sectionId === "section-order" || sectionId === "introduction") {
         return null;
     }
 

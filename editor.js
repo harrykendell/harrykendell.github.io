@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const INTRO_PATH = "sections/supplement/introduction.md";
+  const INTRO_PATH = "sections/introduction.md";
   const PROCEDURE_LEVELS = ["beginner", "intermediate", "advanced"];
   const PROCEDURE_LABELS = {
     beginner: "Beginner",
