@@ -123,4 +123,4 @@ Adjust gate height by changing the washer stack above/below the gate, then verif
 ## Related
 
 - See **[Rigging overview](/#maintenance/rigging)** for the full audit workflow.
-- See **[Hardware](/#maintenance/hardware)** for washer and nyloc standards.
+- See **[Hardware](/#supplement/hardware)** for washer and nyloc standards.

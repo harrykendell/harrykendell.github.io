@@ -59,7 +59,7 @@ Stop-use and escalate immediately if any of the following are true:
 - Gate disassembly / gate height / pitch: **[Gates](/#maintenance/gates)**
 - Oar collar (inboard) check and reset: **[Oars → Collar inspection and re-set](/#maintenance/oars/sleeves)**
 - Footplate setup + steering: **[Footplates and steering](/#maintenance/footplates)**
-- Hardware standards + audit (washers, nylocs, seized fasteners): **[Hardware](/#maintenance/hardware)**
+- Hardware standards + audit (washers, nylocs, seized fasteners): **[Hardware](/#supplement/hardware)**
 
 ## Daily “rigging sanity check”
 

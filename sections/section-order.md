@@ -1,8 +1,8 @@
 # Section Order
 
-## Repairs
+## Maintenance
 
-- repairs/painting-oars
+- maintenance/painting-oars
 
 ## Supplement
 
