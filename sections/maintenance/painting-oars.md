@@ -11,68 +11,47 @@ Blade painting
 - green main colour
 - white diagonal stripe
  -->
+![The official Bristol blade design](uploads/bristolblade.png){size=0.33 float=right}
 
-![Target finish: green blade with one centred white diagonal stripe. Use the diagram to check the direction, stripe position, and clean edge standard before painting a set.](repairs/blade_painting_green_white_diagonal.svg){size=0.55 float=right}
+This guide is for repainting  club blades, as a complete process this will take more than a day to complete as the paint must be allowed to dry between steps, you should should ensure captains are aware the blades are being painted. 
 
-This guide is for repainting rowing blades with the club blade pattern: **green main colour with one white diagonal stripe down the middle**. It assumes no previous painting experience and is written as a checklist: do the steps in order, do not rush drying, and stop if the surface or safety setup is not right.
+The club blades should be painted: **A club green (#00491E) blade with a centred white diagonal stripe on both sides. The stripe should be a uniform thickness when viewed from the front, extending from the loom to the bottom corner.**
 
-The method is based on the Riverside blade-painting workflow of **prepare → paint base colour → dry → tape design → paint second colour → cure**, but adapted for our paint, materials, and design.
+The guide is based on the [Riverside blade-painting website](https://www.riversideboatclub.com/blade-painting), but adapted for our paint, materials, and design. It assumes no previous painting experience: do the steps in order, do not rush drying, and ask for help if needed.
 
 > [!DANGER] 2K aerosol safety
-> We use **2K ADC aerosol paint**, not ordinary craft spray paint. Spray only in a controlled, well-ventilated outdoor/workshop spray area away from other people, flames, heaters, chargers, and engines. Wear gloves, eye protection, coveralls/old clothing, and respiratory protection suitable for paint aerosols and organic vapour. If you cannot meet those conditions, do not spray.
+> We use **2K ADC aerosol paint**, not ordinary craft spray paint. It is therefore critical that you take proper safety precautions.
+>
+> Spray only in a controlled, well-ventilated  area away from other people or ignition sources and always read the [Safety Data Sheet](https://www.yourspraypaints.com/wp-content/uploads/2023/10/sds-sc601-2k-adc-safety-data-sheet-your-spray-paints.pdf). Wear gloves, eye protection, and a mask  suitable for paint aerosols. If you cannot meet those conditions, do not spray.
 
 > [!WARNING] Do not paint damaged blades
-> Do not paint over cracks, soft spots, spoon delamination, loose sleeves, or exposed fibres. Tag the oar out and escalate first. Paint hides damage; it does not repair it.
+> Do not paint over cracks, soft spots, or spoon delamination. Paint hides damage; it does not repair it, report the damage so it may be fixed first.
 
 ## Finish standard
 
-The finished blade should look deliberate and consistent across the whole set:
+The finished blade should look clean and consistent across the whole set, they represent the club, so we should make an effort to present ourselves positively:
 
-- The **main colour is green** on both faces and around the blade edges.
+- The **main colour is club green** on both faces and around the blade edges.
 - There is **one white diagonal stripe** across the centre of each blade.
-- The stripe is straight, the same width on every blade, and in the same direction on every blade.
-- The shaft, sleeve, collar, grip, and any separate Vortex/wear edge are not painted.
-- There are no runs, dry dusty patches, fingerprints, tape tears, or loose edges.
-
-> [!INFO] No primer for this paint system
-> For this club process, do **not** add primer. Our 2K ADC aerosol paint is used directly on a correctly sanded and cleaned existing blade finish. Sanding and cleaning are not optional: the paint needs a dull, keyed surface.
+- The stripe is straight, the same consistent width on every blade.
+- The shaft, sleeve, collar, grip, and if present Vortex edge are not painted.
+- There should be no runs, dry dusty patches, fingerprints, tape tears, or loose edges.
 
 ## Materials
+- 2k ADC aerosol (Traffic white + Pearl Green)
+- 240 grit wet-and-dry sandpaper
+- Isopropyl Alcohol
+- Masking/painters tape
+- Blue cloth or cloths
+- Mask and eye protection
 
-| Item | Where / notes |
-|---|---|
-| 2K ADC aerosol, **white** | Used first to create the stripe base. |
-| 2K ADC aerosol, **green** | Used second for the main blade colour. |
-| 240 grit wet-and-dry sandpaper | Long roll. Use by hand; do not dig through the blade finish. |
-| IPA | Spray bottle in the fuel cabinet. |
-| Masking / painter's tape | Fuel cabinet. Use fresh tape with a clean edge. |
-| Clean cloths / blue roll | For sanding dust and IPA wipe-down. |
-| Nitrile gloves, eye protection, suitable respirator, coveralls/old clothes | Required for spraying; gloves also required for IPA cleaning. |
-| Cardboard / drop sheet and blade supports | Keep the blade stable and flat while painting and curing. |
-| Pencil, ruler or straight edge | For marking the stripe lightly before taping. |
+> [!INFO] No primer
+> For this paint system we do **not** add primer. Our 2K ADC aerosol paint is used directly on a correctly sanded and cleaned blade. Sanding and cleaning are not optional: the paint needs a dull, keyed surface to adhere to.
+
 
 ## Before you start
 
-Read the whole page before opening paint.
-
-The paint supplier's current guidance describes 2K ADC as a non-isocyanate 2K system and lists it as weather, petrol, and oil resistant when fully cured. Their drying-time page lists **Acrylic 2K ADC** at 20°C as approximately **10 minutes dust dry**, **45 minutes touch dry**, and **3–5 days hard dry**. Treat those as planning values only: temperature, humidity, coat thickness, and the exact can label matter.
-
-> [!WARNING] Drying time is not curing time
-> A blade can feel dry long before the coating is hard. Do not tape, flip, stack, bag, row with, or transport a blade until the relevant coat can tolerate that handling.
-
-## Layout convention
-
-Use the same layout for every blade in the set.
-
-1. Place the blade face-up with the **shaft pointing to the right** and the **tip of the spoon to the left**.
-2. The white stripe should run diagonally through the centre of the spoon from the **upper-left/tip side** toward the **lower-right/shaft side**.
-3. Put the stripe through the visual middle of the blade, not tucked against the tip or shoulder.
-4. Flip the blade and repeat the same layout convention on the second face.
-
-![Masking layout for the white stripe. Paint a broad white band first, mask the final stripe over it, then spray the exposed blade green.](repairs/blade_painting_masking_layout.svg){size=1}
-
-> [!INFO] Match the set, not just one blade
-> The cleanest single blade is not good enough if the set does not match. Lay the set out together before spraying green and check stripe direction, width, and position.
+Read the whole page before starting.
 
 ## Procedures
 
@@ -189,7 +168,7 @@ Let the coating harden properly before the oars are used.
 | Fuzzy stripe edge | Tape edge not pressed down or paint applied too heavily at the edge | Let cure, mask just outside the fault, lightly sand, and repaint. |
 | Dry dusty finish | Sprayed too far away, too fast, or in wind | Let cure, lightly sand dull, clean, and apply a controlled light coat. |
 | Fingerprints | Handled before dry enough | Let cure, sand flat, clean, and repaint. |
-| Mismatched stripe direction | Blades were taped individually without comparing the set | Stop before spraying green if possible. If already painted, escalate before repainting the whole set. |
+
 
 > [!WARNING] Do not keep correcting wet paint
 > Repeatedly touching or re-spraying a wet fault usually makes it worse. Let the paint harden, then sand and repair the defect deliberately.
@@ -199,7 +178,7 @@ Let the coating harden properly before the oars are used.
 - Clear overspray waste and used masking tape after the final coat is safe to leave.
 - Keep aerosols capped, clean the nozzle as directed by the can label, and store aerosols according to the product label/SDS.
 - Return IPA and masking/painter's tape to the fuel cabinet.
-- Dispose of empty or part-used aerosol cans as hazardous aerosol waste according to local club procedure. Do not pierce, crush, or flatten aerosol cans.
+- Dispose of empty or part-used aerosol cans as hazardous aerosol waste. Do not pierce, crush, or flatten aerosol cans.
 
 ## References
 
@@ -208,8 +187,3 @@ Let the coating harden properly before the oars are used.
 - [Your Spray Paints: guidance on working with 2K paints](https://www.yourspraypaints.com/guidance-on-working-with-2-pack-or-2k-paints/)
 - [Your Spray Paints: 2K ADC drying times](https://www.yourspraypaints.com/aerosol-spray-paint-drying-times/)
 - [Your Spray Paints: aerosol storage and disposal](https://www.yourspraypaints.com/aerosol-spray-paint-storage/)
-
-## Related
-
-- See **[Oars](/#maintenance/oars)** for routine oar care, blade types, and stop-use checks.
-- See **[Oar repairs](/#repairs/oars)** for delamination, sleeve, and handle repair escalation.
