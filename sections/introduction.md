@@ -7,10 +7,8 @@ The content is split into:
 - **Repairs** — structural composite work, adhesive rebuilds, and electronics harness rebuilds.
 - **Supplement** — quick reference and the tools/consumables you need to execute the procedures.
 
-## How to use this manual
-
-1. **Prioritise Safety.** Take precautions with your health, every section also includes *stop‑use* criteria. If you trigger one, tag the equipment out and report it
-2. **Follow the procedure blocks.** Work inside the procedure block is written so someone of the targeted experience level can execute them end‑to‑end
+## Remember:
+**Prioritise Safety.** Take precautions with your health, you should use any suggested PPE, and only undertake work you feel comfortable with, ask for help fif you need it. As a guide we have suggested experience levels for work in this manual.
 
 <div class="intro-skill-levels">
  <div class="intro-skill-level">
@@ -26,18 +24,3 @@ The content is split into:
   <span class="skill-desc">Experienced with hazardous or structural repairs where safety is critical.</span>
  </div>
 </div>
-
-3. **Record what you changed.** If you change the setup, replace parts, or make a repair, note it on the maintenance log
-
-### Callouts
-
-Keep any eye out for callouts throughout the manual, they come in three flavours:
-
-> [!DANGER] Stop‑use
-> Safety‑critical: do not disregard.
-
-> [!WARNING] WARNING
-> Non‑critical context or a safety reminder.
-
-> [!INFO] INFO
-> A shortcut or a best‑practice that prevents common mistakes.
