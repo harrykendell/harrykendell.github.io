@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+  <rect width="900" height="520" fill="white"/>
+  <style>
+    .title{font:700 28px sans-serif;fill:#111}
+    .label{font:20px sans-serif;fill:#111}
+    .small{font:16px sans-serif;fill:#111}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .blade{fill:#0b6b3a;stroke:#111;stroke-width:4}
+    .stripe{fill:none;stroke:#fff;stroke-width:54;stroke-linecap:round}
+    .stripe-edge{fill:none;stroke:#111;stroke-width:2;stroke-linecap:round;opacity:.55}
+    .shaft{fill:none;stroke:#111;stroke-width:18;stroke-linecap:round}
+  </style>
+  <text x="40" y="50" class="title">Target blade finish</text>
+  <text x="40" y="86" class="small">Green main colour with one centred white diagonal stripe. Keep the same stripe direction across the set.</text>
+
+  <g transform="translate(70 120)">
+    <path class="shaft" d="M560 178 L735 178"/>
+    <path class="blade" d="M110 178 C110 92 195 42 320 54 C444 66 540 115 574 178 C540 241 444 290 320 302 C195 314 110 264 110 178 Z"/>
+    <line class="stripe" x1="170" y1="72" x2="508" y2="272"/>
+    <line class="stripe-edge" x1="170" y1="42" x2="508" y2="242"/>
+    <line class="stripe-edge" x1="170" y1="102" x2="508" y2="302"/>
+    <line class="dash" x1="115" y1="178" x2="574" y2="178"/>
+    <text x="235" y="360" class="label">blade / spoon</text>
+    <line class="thin" x1="355" y1="336" x2="355" y2="300"/>
+    <text x="595" y="175" class="label">shaft</text>
+    <text x="175" y="36" class="label">upper-left tip side</text>
+    <line class="thin" x1="255" y1="44" x2="205" y2="78"/>
+    <text x="452" y="324" class="label">lower-right shaft side</text>
+    <line class="thin" x1="480" y1="304" x2="496" y2="268"/>
+  </g>
+</svg>
