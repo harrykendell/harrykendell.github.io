@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560">
+  <rect width="1000" height="560" fill="white"/>
+  <style>
+    .title{font:700 28px sans-serif;fill:#111}
+    .label{font:20px sans-serif;fill:#111}
+    .small{font:16px sans-serif;fill:#111}
+    .tiny{font:14px sans-serif;fill:#111}
+    .thin{fill:none;stroke:#111;stroke-width:2}
+    .dash{fill:none;stroke:#111;stroke-width:2;stroke-dasharray:8 6}
+    .blade-outline{fill:#f7f7f7;stroke:#111;stroke-width:4}
+    .white-band{fill:none;stroke:#fff;stroke-width:110;stroke-linecap:round}
+    .white-band-edge{fill:none;stroke:#d0d0d0;stroke-width:2;stroke-linecap:round}
+    .tape{fill:none;stroke:#f3c552;stroke-width:54;stroke-linecap:round}
+    .tape-edge{fill:none;stroke:#111;stroke-width:2;stroke-linecap:round;opacity:.6}
+    .green{fill:#0b6b3a;stroke:#111;stroke-width:4}
+    .stripe{fill:none;stroke:#fff;stroke-width:54;stroke-linecap:round}
+    .shaft{fill:none;stroke:#111;stroke-width:16;stroke-linecap:round}
+  </style>
+  <text x="40" y="48" class="title">Masking sequence</text>
+  <text x="40" y="82" class="small">Paint the white band first, protect the final stripe with tape, then spray the exposed blade green.</text>
+
+  <g transform="translate(25 120)">
+    <text x="70" y="0" class="label">1. Broad white band</text>
+    <path class="shaft" d="M330 135 L430 135"/>
+    <path class="blade-outline" d="M55 135 C55 72 115 35 205 44 C294 53 362 88 386 135 C362 182 294 217 205 226 C115 235 55 198 55 135 Z"/>
+    <line class="white-band" x1="90" y1="58" x2="345" y2="210"/>
+    <line class="white-band-edge" x1="90" y1="3" x2="345" y2="155"/>
+    <line class="white-band-edge" x1="90" y1="113" x2="345" y2="265"/>
+    <text x="62" y="285" class="tiny">Spray wider than the final stripe.</text>
+  </g>
+
+  <g transform="translate(355 120)">
+    <text x="70" y="0" class="label">2. Tape final stripe</text>
+    <path class="shaft" d="M330 135 L430 135"/>
+    <path class="blade-outline" d="M55 135 C55 72 115 35 205 44 C294 53 362 88 386 135 C362 182 294 217 205 226 C115 235 55 198 55 135 Z"/>
+    <line class="white-band" x1="90" y1="58" x2="345" y2="210"/>
+    <line class="tape" x1="102" y1="65" x2="333" y2="203"/>
+    <line class="tape-edge" x1="102" y1="38" x2="333" y2="176"/>
+    <line class="tape-edge" x1="102" y1="92" x2="333" y2="230"/>
+    <text x="52" y="285" class="tiny">Press tape edges down cleanly.</text>
+  </g>
+
+  <g transform="translate(685 120)">
+    <text x="70" y="0" class="label">3. Spray green, peel tape</text>
+    <path class="shaft" d="M330 135 L430 135"/>
+    <path class="green" d="M55 135 C55 72 115 35 205 44 C294 53 362 88 386 135 C362 182 294 217 205 226 C115 235 55 198 55 135 Z"/>
+    <line class="stripe" x1="102" y1="65" x2="333" y2="203"/>
+    <line class="tape-edge" x1="102" y1="38" x2="333" y2="176"/>
+    <line class="tape-edge" x1="102" y1="92" x2="333" y2="230"/>
+    <text x="34" y="285" class="tiny">Peel slowly at a low angle.</text>
+  </g>
+
+  <line class="thin" x1="317" y1="250" x2="366" y2="250"/>
+  <polygon points="366,250 352,242 352,258" fill="#111"/>
+  <line class="thin" x1="647" y1="250" x2="696" y2="250"/>
+  <polygon points="696,250 682,242 682,258" fill="#111"/>
+
+  <text x="40" y="505" class="small">For every blade: shaft points right, stripe runs from upper-left tip side to lower-right shaft side.</text>
+</svg>
