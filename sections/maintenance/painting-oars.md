@@ -1,19 +1,8 @@
 # Painting Oars
 
-# Painting oars
-
-<!-- Content
-
-Blade painting
-- safety
-- surface preparation
-- masking
-- green main colour
-- white diagonal stripe
- -->
-![The official Bristol blade design](uploads/bristolblade.png){size=0.33 float=right}
-
 This guide is for repainting  club blades, as a complete process this will take more than a day to complete as the paint must be allowed to dry between steps, you should should ensure captains are aware the blades are being painted. 
+
+![The official Bristol blade design](uploads/bristolblade.png){size=0.3 float=left}
 
 The club blades should be painted: **A club green (#00491E) blade with a centred white diagonal stripe on both sides. The stripe should be a uniform thickness when viewed from the front, extending from the loom to the bottom corner.**
 
@@ -27,16 +16,6 @@ The guide is based on the [Riverside blade-painting website](https://www.riversi
 > [!WARNING] Do not paint damaged blades
 > Do not paint over cracks, soft spots, or spoon delamination. Paint hides damage; it does not repair it, report the damage so it may be fixed first.
 
-## Finish standard
-
-The finished blade should look clean and consistent across the whole set, they represent the club, so we should make an effort to present ourselves positively:
-
-- The **main colour is club green** on both faces and around the blade edges.
-- There is **one white diagonal stripe** across the centre of each blade.
-- The stripe is straight, the same consistent width on every blade.
-- The shaft, sleeve, collar, grip, and if present Vortex edge are not painted.
-- There should be no runs, dry dusty patches, fingerprints, tape tears, or loose edges.
-
 ## Materials
 - 2k ADC aerosol (Traffic white + Pearl Green)
 - 240 grit wet-and-dry sandpaper
@@ -47,13 +26,7 @@ The finished blade should look clean and consistent across the whole set, they r
 
 > [!INFO] No primer
 > For this paint system we do **not** add primer. Our 2K ADC aerosol paint is used directly on a correctly sanded and cleaned blade. Sanding and cleaning are not optional: the paint needs a dull, keyed surface to adhere to.
-
-
-## Before you start
-
-Read the whole page before starting.
-
-## Procedures
+## Procedure
 
 [!PROCEDURE:Beginner] Prepare the blade for paint
 Prepare the blade surface so the new paint can key properly.
@@ -172,13 +145,6 @@ Let the coating harden properly before the oars are used.
 
 > [!WARNING] Do not keep correcting wet paint
 > Repeatedly touching or re-spraying a wet fault usually makes it worse. Let the paint harden, then sand and repair the defect deliberately.
-
-## Clean-up and storage
-
-- Clear overspray waste and used masking tape after the final coat is safe to leave.
-- Keep aerosols capped, clean the nozzle as directed by the can label, and store aerosols according to the product label/SDS.
-- Return IPA and masking/painter's tape to the fuel cabinet.
-- Dispose of empty or part-used aerosol cans as hazardous aerosol waste. Do not pierce, crush, or flatten aerosol cans.
 
 ## References
 
