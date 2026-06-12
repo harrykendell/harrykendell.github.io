@@ -8,7 +8,7 @@ const APP_SHELL_URLS = [
   "/pwa.js?v=3",
   "/script.js?v=44",
   "/sidebar.js?v=2",
-  "/markdown-to-section.js?v=32",
+  "/markdown-to-section.js?v=43",
   "/editor.css?v=9",
   "/editor.js?v=27",
   "/sections/section-order.md",

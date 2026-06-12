@@ -403,7 +403,7 @@ function resolveImageSources(rootEl) {
         }
         const normalized = markdownNormalizeImagePath(src);
         if (normalized) {
-            image.setAttribute("src", normalized);
+            image.setAttribute("src", `/${normalized}`);
         }
     });
 }
