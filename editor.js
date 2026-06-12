@@ -544,6 +544,10 @@
     elements.modalDiffSummary.classList.toggle("error", !!isError);
   }
 
+  function isCompareDisabled() {
+    return state.compareBaselineRef === "none";
+  }
+
   function ensureDiffEngine() {
     if (state.diffEngine) {
       return Promise.resolve(state.diffEngine);
@@ -645,6 +649,15 @@
   }
 
   function buildDiffDecorations(currentText, modules) {
+    if (isCompareDisabled()) {
+      state.editorDiffStats = {
+        inserted: 0,
+        deleted: 0,
+        disabled: true,
+      };
+      return modules.Decoration.set([]);
+    }
+
     const engine = state.diffEngine;
     if (!engine) {
       state.editorDiffStats = null;
@@ -735,7 +748,9 @@
     let summaryText = "";
     let summaryError = false;
 
-    if (!stats) {
+    if (isCompareDisabled() || (stats && stats.disabled)) {
+      summaryText = "Compare: None";
+    } else if (!stats) {
       summaryText = "Live diff unavailable";
       summaryError = true;
     } else if (stats.inserted === 0 && stats.deleted === 0 && !titleChanged) {
@@ -2051,19 +2066,26 @@
     return age ? `${sha} | ${age}` : sha;
   }
 
-  function resetCompareSelectToCurrent(path, label) {
+  function resetCompareSelectToCurrent(path, label, options) {
     if (!elements.modalCompareSelect) {
       return;
     }
 
+    const opts = options || {};
     const currentLabel = label || "Current commit";
     elements.modalCompareSelect.innerHTML = "";
+    const noneOption = document.createElement("option");
+    noneOption.value = "none";
+    noneOption.textContent = "None";
+    noneOption.title = "Turn off inline diff highlighting";
+    elements.modalCompareSelect.appendChild(noneOption);
+
     const currentOption = document.createElement("option");
     currentOption.value = "current";
     currentOption.textContent = currentLabel;
     elements.modalCompareSelect.appendChild(currentOption);
     elements.modalCompareSelect.value = "current";
-    if (path) {
+    if (path && opts.persist !== false) {
       state.compareSelectionByPath.set(path, "current");
     }
   }
@@ -2077,7 +2099,7 @@
     const previousSelection = state.compareSelectionByPath.get(path) || "current";
     const headCommit = historyPayload && historyPayload.head ? historyPayload.head : null;
     const currentLabel = buildCommitOptionLabel(headCommit, "Current commit");
-    resetCompareSelectToCurrent(path, currentLabel);
+    resetCompareSelectToCurrent(path, currentLabel, { persist: false });
 
     const commits = historyPayload && Array.isArray(historyPayload.commits)
       ? historyPayload.commits
@@ -2196,6 +2218,17 @@
     state.compareSelectionByPath.set(path, selectedValue);
 
     const baselineToken = ++state.compareBaselineToken;
+    if (selectedValue === "none") {
+      state.compareBaselinePath = path;
+      state.compareBaselineRef = "none";
+      state.compareBaselineLabel = "None";
+      state.compareBaselineText = "";
+      state.compareBaselineTitle = getTitleInputValue(state.currentTitleFallback);
+      setCompareStatus("");
+      refreshEditorBaseline();
+      return;
+    }
+
     if (selectedValue === "current") {
       try {
         const sourceMarkdown = await getSourceMarkdown(path);
@@ -2302,6 +2335,7 @@
       return;
     }
 
+    const storedSelection = state.compareSelectionByPath.get(path) || "current";
     const baselineMarkdown = state.sourceMarkdown.get(path) || String(initialMarkdown || "");
     const baselineSplit = splitMarkdownTitle(baselineMarkdown);
     state.compareBaselinePath = path;
@@ -2309,7 +2343,15 @@
     state.compareBaselineLabel = "Current commit";
     state.compareBaselineText = baselineSplit.body;
     state.compareBaselineTitle = baselineSplit.title;
-    resetCompareSelectToCurrent(path, "Current commit");
+    resetCompareSelectToCurrent(path, "Current commit", { persist: false });
+    if (storedSelection === "none") {
+      elements.modalCompareSelect.value = "none";
+      state.compareBaselineRef = "none";
+      state.compareBaselineLabel = "None";
+      state.compareBaselineText = "";
+      state.compareBaselineTitle = getTitleInputValue(state.currentTitleFallback);
+      state.compareSelectionByPath.set(path, "none");
+    }
     refreshEditorBaseline();
 
     const historyToken = ++state.compareHistoryToken;
@@ -2324,11 +2366,12 @@
       updateCompareSelect(path, historyPayload);
       elements.modalCompareSelect.disabled = false;
       await applyCompareSelection(path);
+      const compareDisabled = elements.modalCompareSelect.value === "none";
       const commitCount = historyPayload && Array.isArray(historyPayload.commits)
         ? historyPayload.commits.length
         : 0;
       const hasCompareError = state.compareStatusIsError;
-      if (!hasCompareError) {
+      if (!hasCompareError && !compareDisabled) {
         if (commitCount === 0 && state.currentPath === path) {
           setCompareStatus("No previous commits for this section.");
         } else if (state.currentPath === path) {
@@ -2339,7 +2382,10 @@
       if (historyToken !== state.compareHistoryToken || state.currentPath !== path) {
         return;
       }
-      resetCompareSelectToCurrent(path, "Current commit");
+      resetCompareSelectToCurrent(path, "Current commit", { persist: false });
+      if (storedSelection === "none") {
+        elements.modalCompareSelect.value = "none";
+      }
       elements.modalCompareSelect.disabled = false;
       setCompareStatus(error.message || "Could not load commit history.", true);
       await applyCompareSelection(path);

@@ -1043,9 +1043,9 @@ function findMarkdownValidationCheckRun(checkRuns) {
             const name = String(checkRun && checkRun.name ? checkRun.name : "").toLowerCase();
             const title = String(
                 checkRun
-                && checkRun.output
-                && typeof checkRun.output === "object"
-                && checkRun.output.title
+                    && checkRun.output
+                    && typeof checkRun.output === "object"
+                    && checkRun.output.title
                     ? checkRun.output.title
                     : "",
             ).toLowerCase();
@@ -1287,9 +1287,9 @@ function isCloudflarePagesCheckRun(run) {
     const name = String(run && run.name ? run.name : "").toLowerCase();
     const app = String(
         run
-        && run.app
-        && typeof run.app === "object"
-        && run.app.name
+            && run.app
+            && typeof run.app === "object"
+            && run.app.name
             ? run.app.name
             : "",
     ).toLowerCase();
@@ -1304,9 +1304,9 @@ function isGenericPagesCheckRun(run) {
     const name = String(run && run.name ? run.name : "").toLowerCase();
     const app = String(
         run
-        && run.app
-        && typeof run.app === "object"
-        && run.app.name
+            && run.app
+            && typeof run.app === "object"
+            && run.app.name
             ? run.app.name
             : "",
     ).toLowerCase();
@@ -1420,13 +1420,28 @@ async function createCommitOnBranch(options) {
             type: "blob",
             content: files[path],
         }));
-        const binaryEntries = Object.keys(binaryFiles || {}).map((path) => ({
-            path,
-            mode: "100644",
-            type: "blob",
-            content: binaryFiles[path].contentBase64,
-            encoding: "base64",
-        }));
+        const binaryEntries = await Promise.all(
+            Object.keys(binaryFiles || {}).map(async (path) => {
+                const blob = await githubApiRequest(
+                    `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/blobs`,
+                    {
+                        method: "POST",
+                        token,
+                        body: {
+                            content: binaryFiles[path].contentBase64,
+                            encoding: "base64",
+                        },
+                    },
+                );
+
+                return {
+                    path,
+                    mode: "100644",
+                    type: "blob",
+                    sha: blob.sha,
+                };
+            }),
+        );
         const treeEntries = markdownEntries
             .concat(binaryEntries)
             .sort((left, right) => left.path.localeCompare(right.path));
