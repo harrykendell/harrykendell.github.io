@@ -1,7 +1,7 @@
 (function (global) {
   "use strict";
   const CONTENT_REPO_OWNER = "harrykendell";
-  const CONTENT_REPO_NAME = "harrykendell.github.io";
+  const CONTENT_REPO_NAME = "repairs";
   const CONTENT_REPO_BRANCH = "main";
   const DEV_CONTENT_REPO_BRANCH = "dev";
   const DEV_HOSTNAME = "dev.kendell.uk";
